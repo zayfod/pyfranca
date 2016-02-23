@@ -1,0 +1,7 @@
+
+.idea/
+
+*.pyc
+
+pyfranca/parser.out
+pyfranca/parsetab.py
