@@ -1,6 +1,7 @@
 
 import ply.yacc as yacc
 from pyfranca import franca_lexer
+from pyfranca import ast
 
 
 class Parser(object):
@@ -10,12 +11,20 @@ class Parser(object):
 
     # noinspection PyUnusedLocal,PyIncorrectDocstring
     @staticmethod
-    def p_fidl(p):
+    def p_fidl_1(p):
         """
         fidl : fidl def
-             | def
         """
-        pass
+        p[0] = p[1]
+        p[0].append(p[2])
+
+    # noinspection PyUnusedLocal,PyIncorrectDocstring
+    @staticmethod
+    def p_fidl_2(p):
+        """
+        fidl : def
+        """
+        p[0] = [p[1]]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -23,7 +32,6 @@ class Parser(object):
         """
         def : PACKAGE namespace
         """
-        print "pd:", p[2]
         p[0] = p[2]
 
     # noinspection PyIncorrectDocstring
@@ -57,56 +65,58 @@ class Parser(object):
         """
         def : IMPORT namespace FROM FILE_NAME
         """
-        print "import:", p[2], p[4]
+        p[0] = ast.Import(p[4], p[2][1:-1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_type_collection(p):
+    def p_type_collection_1(p):
+        """
+        def : TYPECOLLECTION ID '{' version_def type_collection_members '}'
+        """
+        p[0] = ast.TypeCollection(p[2], p[4], p[5])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_type_collection_2(p):
         """
         def : TYPECOLLECTION ID '{' type_collection_members '}'
         """
-        print "tc:", p[2]
+        p[0] = ast.TypeCollection(p[2], None, p[4])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_type_collection_members(p):
+    def p_type_collection_members_1(p):
         """
         type_collection_members : type_collection_members type_collection_member
-                                | type_collection_member
+        """
+        p[0] = p[1]
+        p[0].append(p[2])
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_type_collection_members_2(p):
+        """
+        type_collection_members : type_collection_member
+        """
+        p[0] = [p[1]]
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_type_collection_members_3(p):
+        """
+        type_collection_members : empty
         """
         pass
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_type_collection_member_1(p):
-        """
-        type_collection_member : version_def
-        """
-        print "tc version:", p[1]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_type_collection_member_2(p):
         """
         type_collection_member : type_def
+                               | enumeration_def
+                               | struct_def
         """
-        print "tc type:", p[1]
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_type_collection_member_3(p):
-        """
-        type_collection_member : enumeration_def
-        """
-        print "tc enumeration:", p[1]
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_type_collection_member_4(p):
-        """
-        type_collection_member : struct_def
-        """
-        print "tc struct:", p[1]
+        p[0] = p[1]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -114,7 +124,7 @@ class Parser(object):
         """
         version_def : VERSION '{' MAJOR INTEGER MINOR INTEGER '}'
         """
-        p[0] = (p[4], p[6])
+        p[0] = ast.Version(p[4], p[6])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -122,7 +132,8 @@ class Parser(object):
         """
         type_def : TYPEDEF ID IS ID
         """
-        p[0] = (p[2], p[4])
+        base_type = ast.CustomType(p[4])
+        p[0] = ast.Typedef(p[2], base_type)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -130,7 +141,7 @@ class Parser(object):
         """
         type_def : TYPEDEF ID IS type
         """
-        p[0] = (p[2], p[4])
+        p[0] = ast.Typedef(p[2], p[4])
 
     # noinspection PyIncorrectDocstring
     # TODO: support for "extends"
@@ -146,15 +157,30 @@ class Parser(object):
                 enumeration_defs \
               '}'
         """
-        print "i:", p[2]
+        p[0] = ast.Interface(p[2], p[4], p[5], p[6], p[7])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_attribute_defs(p):
+    def p_attribute_defs_1(p):
         """
         attribute_defs : attribute_defs attribute_def
-                       | attribute_def
-                       | empty
+        """
+        p[0] = p[1]
+        p[0].append(p[2])
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_attribute_defs_2(p):
+        """
+        attribute_defs : attribute_def
+        """
+        p[0] = [p[1]]
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_attribute_defs_3(p):
+        """
+        attribute_defs : empty
         """
         pass
 
@@ -164,8 +190,7 @@ class Parser(object):
         """
         attribute_def : ATTRIBUTE type ID
         """
-        p[0] = (p[2], p[3])
-        print "i attr1:", p[0]
+        p[0] = ast.Attribute(p[3], p[2])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -173,16 +198,31 @@ class Parser(object):
         """
         attribute_def : ATTRIBUTE ID ID
         """
-        p[0] = (p[2], p[3])
-        print "i attr2:", p[0]
+        attr_type = ast.CustomType(p[3])
+        p[0] = ast.Attribute(p[3], attr_type)
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_method_defs(p):
+    def p_method_defs_1(p):
         """
         method_defs : method_defs method_def
-                    | method_def
-                    | empty
+        """
+        p[0] = p[1]
+        p[0].append(p[2])
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_method_defs_2(p):
+        """
+        method_defs : method_def
+        """
+        p[0] = [p[1]]
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_method_defs_3(p):
+        """
+        method_defs : empty
         """
         pass
 
@@ -192,46 +232,61 @@ class Parser(object):
         """
         method_def : METHOD ID '{' '}'
         """
-        print "method1:", p[2], [], []
+        p[0] = ast.Method(p[2])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_method_def_2(p):
         """
         method_def : METHOD ID '{' \
-                        IN '{' var_defs '}' \
+                        IN '{' arg_defs '}' \
                      '}'
         """
-        print "method2:", p[2], p[6], []
+        p[0] = ast.Method(p[2], p[6])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_method_def_3(p):
         """
         method_def : METHOD ID '{' \
-                        OUT '{' var_defs '}' \
+                        OUT '{' arg_defs '}' \
                      '}'
         """
-        print "method3:", p[2], [], p[6]
+        p[0] = ast.Method(p[2], [], p[6])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_method_def_4(p):
         """
         method_def : METHOD ID '{' \
-                        IN '{' var_defs '}' \
-                        OUT '{' var_defs '}' \
+                        IN '{' arg_defs '}' \
+                        OUT '{' arg_defs '}' \
                      '}'
         """
-        print "method4:", p[2], p[6], p[10]
+        p[0] = ast.Method(p[2], p[6], p[10])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_broadcast_defs(p):
+    def p_broadcast_defs_1(p):
         """
         broadcast_defs : broadcast_defs broadcast_def
-                       | broadcast_def
-                       | empty
+        """
+        p[0] = p[1]
+        p[0].append(p[2])
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_broadcast_defs_2(p):
+        """
+        broadcast_defs : broadcast_def
+        """
+        p[0] = [p[1]]
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_broadcast_defs_3(p):
+        """
+        broadcast_defs : empty
         """
         pass
 
@@ -240,159 +295,186 @@ class Parser(object):
     def p_broadcast_def(p):
         """
         broadcast_def : BROADCAST ID '{' \
-                            OUT '{' var_defs '}' \
+                            OUT '{' arg_defs '}' \
                         '}'
         """
-        print "boardcast:", p[2], p[6]
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
-    @staticmethod
-    def p_enumeration_defs(p):
-        """
-        enumeration_defs : enumeration_defs enumeration_def
-                         | enumeration_def
-                         | empty
-        """
-        pass
+        p[0] = ast.Broadcast(p[2], p[6])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_var_defs_1(p):
+    def p_arg_defs_1(p):
         """
-        var_defs : var_defs var_def
+        arg_defs : arg_defs arg_def
         """
         p[0] = p[1]
         p[0].append(p[2])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_var_defs_2(p):
+    def p_arg_defs_2(p):
         """
-        var_defs : var_def
+        arg_defs : arg_def
         """
         p[0] = [p[1]]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_var_def_1(p):
+    def p_arg_def_1(p):
         """
-        var_def : type ID
+        arg_def : type ID
         """
-        p[0] = (p[1], p[2])
+        p[0] = ast.Argument(p[2], p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_var_def_2(p):
+    def p_arg_def_2(p):
         """
-        var_def : ID ID
+        arg_def : ID ID
         """
-        p[0] = (p[1], p[2])
+        arg_type = ast.CustomType(p[1])
+        p[0] = ast.Argument(p[2], arg_type)
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_enumeration_defs_1(p):
+        """
+        enumeration_defs : enumeration_defs enumeration_def
+        """
+        p[0] = p[1]
+        p[0].append(p[2])
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_enumeration_defs_2(p):
+        """
+        enumeration_defs : enumeration_def
+        """
+        p[0] = [p[1]]
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_enumeration_defs_3(p):
+        """
+        enumeration_defs : empty
+        """
+        pass
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
     def p_enumeration_def_1(p):
         """
-        enumeration_def : ENUMERATION ID '{' enumeration_members '}'
+        enumeration_def : ENUMERATION ID '{' enumerators '}'
         """
-        p[0] = (p[2], None, p[4])
+        # TODO: Enumberator values
+        p[0] = ast.Enumeration(p[2], p[4])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
     def p_enumeration_def_2(p):
         """
-        enumeration_def : ENUMERATION ID EXTENDS ID '{' enumeration_members '}'
+        enumeration_def : ENUMERATION ID EXTENDS ID '{' enumerators '}'
         """
-        p[0] = (p[2], p[4], p[6])
+        # TODO: Enumberator values
+        p[0] = ast.Enumeration(p[2], p[6], p[4])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_enumeration_members_1(p):
+    def p_enumerators_1(p):
         """
-        enumeration_members : enumeration_members enumeration_member
+        enumerators : enumerators enumerator
         """
         p[0] = p[1]
         p[0].append(p[2])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_enumeration_members_2(p):
+    def p_enumerators_2(p):
         """
-        enumeration_members : enumeration_member
+        enumerators : enumerator
         """
         p[0] = [p[1]]
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_enumeration_members_3(p):
+    def p_enumerators_3(p):
         """
-        enumeration_members : empty
+        enumerators : empty
         """
         pass
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_enumeration_member_1(p):
+    def p_enumerator_1(p):
         """
-        enumeration_member : ID
+        enumerator : ID
         """
-        p[0] = (p[1], None)
+        p[0] = ast.Enumerator(p[1], None)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_enumeration_member_2(p):
+    def p_enumerator_2(p):
         """
-        enumeration_member : ID '=' INTEGER
+        enumerator : ID '=' INTEGER
         """
-        p[0] = (p[1], p[3])
+        p[0] = ast.Enumerator(p[1], p[3])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_struct_def(p):
+    def p_struct_def_1(p):
         """
-        struct_def : STRUCT ID '{' struct_members '}'
+        struct_def : STRUCT ID '{' struct_fields '}'
         """
-        p[0] = (p[2], p[4])
+        p[0] = ast.Struct(p[2], p[4])
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_struct_def_2(p):
+        """
+        struct_def : STRUCT ID EXTENDS ID '{' struct_fields '}'
+        """
+        p[0] = ast.Struct(p[2], p[6], p[4])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_struct_members_1(p):
+    def p_struct_fields_1(p):
         """
-        struct_members : struct_members struct_member
+        struct_fields : struct_fields struct_field
         """
         p[0] = p[1]
         p[0].append(p[2])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_struct_members_2(p):
+    def p_struct_fields_2(p):
         """
-        struct_members : struct_member
+        struct_fields : struct_field
         """
         p[0] = [p[1]]
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_struct_members_3(p):
+    def p_struct_fields_3(p):
         """
-        struct_members : empty
+        struct_fields : empty
         """
         pass
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_struct_member_1(p):
+    def p_struct_field_1(p):
         """
-        struct_member : type ID
+        struct_field : type ID
         """
-        p[0] = (p[1], p[2])
+        p[0] = ast.StructField(p[2], p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_struct_member_2(p):
+    def p_struct_field_2(p):
         """
-        struct_member : ID ID
+        struct_field : ID ID
         """
-        p[0] = (p[1], p[2])
+        filed_type = ast.CustomType(p[1])
+        p[0] = ast.StructField(p[2], filed_type)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -412,7 +494,8 @@ class Parser(object):
              | STRING
              | BYTEBUFFER
         """
-        p[0] = p[1]
+        type_class = getattr(ast, p[1])
+        p[0] = type_class()
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
@@ -425,6 +508,7 @@ class Parser(object):
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_error(p):
+        # TODO: How to handle errors?
         print("Syntax error at '%s'".format(p.value))
 
     def __init__(self, the_lexer=None, **kwargs):

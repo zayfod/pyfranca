@@ -5,7 +5,8 @@ from pyfranca import franca_parser
 
 
 def main():
-    fname = "examples/Calculator.fidl"
+    #fname = "examples/Calculator.fidl"
+    fname = "examples/CommonTypes.fidl"
     with open(fname, "r") as f:
         s = f.read()
 
