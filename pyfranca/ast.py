@@ -23,8 +23,8 @@ class Package(object):
 
 class Import(object):
 
-    def __init__(self, file, namespace=None):
-        self.file = file
+    def __init__(self, file_name, namespace=None):
+        self.file = file_name
         self.namespace = namespace
 
 

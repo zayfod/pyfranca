@@ -65,7 +65,7 @@ class Parser(object):
         """
         def : IMPORT namespace FROM FILE_NAME
         """
-        p[0] = ast.Import(p[4], p[2][1:-1])
+        p[0] = ast.Import(p[4], p[2])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -509,7 +509,7 @@ class Parser(object):
     @staticmethod
     def p_error(p):
         # TODO: How to handle errors?
-        print("Syntax error at '%s'".format(p.value))
+        print("Syntax error at line {} near '{}'".format(p.lineno, p.value))
 
     def __init__(self, the_lexer=None, **kwargs):
         """

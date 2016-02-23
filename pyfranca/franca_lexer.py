@@ -29,10 +29,17 @@ class Lexer(object):
         "struct",
 
         # Types
-        "Int8", "Int16", "Int32", "Int64",
-        "UInt8", "UInt16", "UInt32", "UInt64",
+        "Int8",
+        "Int16",
+        "Int32",
+        "Int64",
+        "UInt8",
+        "UInt16",
+        "UInt32",
+        "UInt64",
         "Boolean",
-        "Float", "Double",
+        "Float",
+        "Double",
         "String",
         "ByteBuffer",
     ]
@@ -50,12 +57,6 @@ class Lexer(object):
     # Literals
     literals = [".", "{", "}", "*", "="]
 
-    # Line comments
-    t_ignore_LINE_COMMENT = r"\/\/[^\r\n]*"
-
-    # File names
-    t_FILE_NAME = r"\"([^\n]|\.)*?\""
-
     # Identifiers and keywords
     _keyword_map = {}
     for keyword in keywords:
@@ -69,13 +70,21 @@ class Lexer(object):
         r"\n+"
         t.lexer.lineno += t.value.count("\n")
 
+    # Line comments
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_LINE_COMMENT(t):
+        # noinspection PySingleQuotedDocstring
+        r"\/\/[^\r\n]*"
+        t.lexer.lineno += t.value.count("\n")
+
     # Block comments
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod
     def t_BLOCK_COMMENT(t):
         # noinspection PySingleQuotedDocstring
         r"/\*(.|\n)*?\*/"
-        t.lineno += t.value.count("\n")
+        t.lexer.lineno += t.value.count("\n")
 
     # Structured comments
     # noinspection PyPep8Naming,PyIncorrectDocstring
@@ -83,14 +92,24 @@ class Lexer(object):
     def t_STRUCTURED_COMMENT(t):
         # noinspection PySingleQuotedDocstring
         r"<\*\*(.|\n)*?\*\*>"
-        t.lineno += t.value.count("\n")
+        t.lexer.lineno += t.value.count("\n")
 
+    # Identifier
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod
     def t_ID(t):
         # noinspection PySingleQuotedDocstring
         r"[A-Za-z][A-Za-z0-9_]*"
         t.type = Lexer._keyword_map.get(t.value, "ID")
+        return t
+
+    # File name (quoted)
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_FILE_NAME(t):
+        # noinspection PySingleQuotedDocstring
+        r"\"([^\n]|\.)*?\""
+        t.value = t.value[1:-1]
         return t
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
@@ -101,17 +120,10 @@ class Lexer(object):
         t.value = int(t.value)
         return t
 
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def t_newline(t):
-        # noinspection PySingleQuotedDocstring
-        r"\n+"
-        t.lexer.lineno += t.value.count("\n")
-
     @staticmethod
     def t_error(t):
         # TODO: How to handle errors?
-        print("Illegal character '%s'".format(t.value[0]))
+        print("Illegal character at line {}: '{}'".format(t.lineno, t.value[0]))
         t.lexer.skip(1)
 
     def __init__(self, **kwargs):
