@@ -197,16 +197,7 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_type_def_1(p):
-        """
-        type_def : TYPEDEF ID IS ID
-        """
-        base_type = ast.CustomType(p[4])
-        p[0] = ast.Typedef(p[2], base_type)
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_type_def_2(p):
+    def p_type_def(p):
         """
         type_def : TYPEDEF ID IS type
         """
@@ -294,21 +285,12 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_attribute_def_1(p):
+    def p_attribute_def(p):
         """
         attribute_def : ATTRIBUTE type ID
         """
         # TODO: Support for flags.
         p[0] = ast.Attribute(p[3], p[2])
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_attribute_def_2(p):
-        """
-        attribute_def : ATTRIBUTE ID ID
-        """
-        attr_type = ast.CustomType(p[3])
-        p[0] = ast.Attribute(p[3], attr_type)
 
     @staticmethod
     def _method_def(arg_groups):
@@ -483,20 +465,11 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_arg_def_1(p):
+    def p_arg_def(p):
         """
         arg_def : type ID
         """
         p[0] = ast.Argument(p[2], p[1])
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_arg_def_2(p):
-        """
-        arg_def : ID ID
-        """
-        arg_type = ast.CustomType(p[1])
-        p[0] = ast.Argument(p[2], arg_type)
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
@@ -604,31 +577,13 @@ class Parser(object):
         """
         p[0] = ast.StructField(p[2], p[1])
 
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_struct_field_2(p):
-        """
-        struct_field : ID ID
-        """
-        filed_type = ast.CustomType(p[1])
-        p[0] = ast.StructField(p[2], filed_type)
-
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_array_def_1(p):
+    def p_array_def(p):
         """
         array_def : ARRAY ID OF type
         """
         p[0] = ast.Array(p[2], p[4])
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
-    @staticmethod
-    def p_array_def_2(p):
-        """
-        array_def : ARRAY ID OF ID
-        """
-        element_type = ast.CustomType(p[4])
-        p[0] = ast.Array(p[2], element_type)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -671,6 +626,23 @@ class Parser(object):
         """
         type_class = getattr(ast, p[1])
         p[0] = ast.Array(None, type_class())
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_type_3(p):
+        """
+        type : ID
+        """
+        p[0] = ast.CustomType(p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_type_4(p):
+        """
+        type : ID '[' ']'
+        """
+        element_type = ast.CustomType(p[1])
+        p[0] = ast.Array(None, element_type)
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
