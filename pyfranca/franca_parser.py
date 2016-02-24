@@ -184,6 +184,7 @@ class Parser(object):
                               | enumeration_def
                               | struct_def
                               | array_def
+                              | map_def
         """
         p[0] = p[1]
 
@@ -280,6 +281,7 @@ class Parser(object):
                          | enumeration_def
                          | struct_def
                          | array_def
+                         | map_def
         """
         p[0] = p[1]
 
@@ -584,6 +586,14 @@ class Parser(object):
         array_def : ARRAY ID OF type
         """
         p[0] = ast.Array(p[2], p[4])
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_map_def(p):
+        """
+        map_def : MAP ID '{' type TO type '}'
+        """
+        p[0] = ast.Map(p[2], p[4], p[6])
 
     # noinspection PyIncorrectDocstring
     @staticmethod

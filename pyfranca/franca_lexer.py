@@ -35,6 +35,8 @@ class Lexer(object):
         "polymorphic",
         "array",
         "of",
+        "map",
+        "to",
 
         # Types
         "Int8",

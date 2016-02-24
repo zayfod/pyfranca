@@ -155,7 +155,11 @@ class Array(ComplexType):
 
 
 class Map(ComplexType):
-    pass
+
+    def __init__(self, name, key_type, value_type):
+        self.name = name
+        self.key_type = key_type
+        self.value_type = value_type
 
 
 class Interface(object):
