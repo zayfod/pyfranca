@@ -20,13 +20,18 @@ class Lexer(object):
         "is",
         "interface",
         "attribute",
+        "noSubscriptions",
         "method",
+        "fireAndForget",
         "in",
         "out",
+        "error",
         "broadcast",
+        "selective",
         "enumeration",
         "extends",
         "struct",
+        "polymorphic",
 
         # Types
         "Int8",

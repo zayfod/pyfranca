@@ -1,7 +1,28 @@
 
+from abc import ABCMeta
 import ply.yacc as yacc
 from pyfranca import franca_lexer
 from pyfranca import ast
+
+
+class ArgumentGroup(object):
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self, arguments=None):
+        self.arguments = arguments if arguments else []
+
+
+class InArgumentGroup(ArgumentGroup):
+    pass
+
+
+class OutArgumentGroup(ArgumentGroup):
+    pass
+
+
+class ErrorArgumentGroup(ArgumentGroup):
+    pass
 
 
 class Parser(object):
@@ -73,6 +94,7 @@ class Parser(object):
         """
         def : TYPECOLLECTION ID '{' version_def type_collection_members '}'
         """
+        # TODO: Version should be optional
         p[0] = ast.TypeCollection(p[2], p[4], p[5])
 
     # noinspection PyIncorrectDocstring
@@ -157,6 +179,8 @@ class Parser(object):
                 enumeration_defs \
               '}'
         """
+        # TODO: Version should be optional
+        # TODO: Support for all types
         p[0] = ast.Interface(p[2], p[4], p[5], p[6], p[7])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
@@ -190,6 +214,7 @@ class Parser(object):
         """
         attribute_def : ATTRIBUTE type ID
         """
+        # TODO: Support for flags.
         p[0] = ast.Attribute(p[3], p[2])
 
     # noinspection PyIncorrectDocstring
@@ -226,44 +251,136 @@ class Parser(object):
         """
         pass
 
+    @staticmethod
+    def _method_def(arg_groups):
+        in_args = None
+        out_args = None
+        errors = None
+        if arg_groups:
+            for arg_group in arg_groups:
+                if isinstance(arg_group, InArgumentGroup):
+                    if not in_args:
+                        in_args = arg_group.arguments
+                    else:
+                        raise SyntaxError
+                elif isinstance(arg_group, OutArgumentGroup):
+                    if not out_args:
+                        out_args = arg_group.arguments
+                    else:
+                        raise SyntaxError
+                elif isinstance(arg_group, ErrorArgumentGroup):
+                    if not errors:
+                        errors = arg_group.arguments
+                    else:
+                        raise SyntaxError
+                else:
+                    raise SyntaxError
+        return in_args, out_args, errors
+
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_method_def_1(p):
         """
-        method_def : METHOD ID '{' '}'
+        method_def : METHOD ID flag_defs '{' arg_group_defs '}'
         """
-        p[0] = ast.Method(p[2])
+        in_args, out_args, errors = Parser._method_def(p[5])
+        p[0] = ast.Method(p[2], flags=p[3],
+                          in_args=in_args, out_args=out_args, errors=errors)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_method_def_2(p):
         """
-        method_def : METHOD ID '{' \
-                        IN '{' arg_defs '}' \
-                     '}'
+        method_def : METHOD ID '{' arg_group_defs '}'
         """
-        p[0] = ast.Method(p[2], p[6])
+        in_args, out_args, errors = Parser._method_def(p[4])
+        p[0] = ast.Method(p[2], flags=None,
+                          in_args=in_args, out_args=out_args, errors=errors)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_method_def_3(p):
+    def p_flag_defs_1(p):
         """
-        method_def : METHOD ID '{' \
-                        OUT '{' arg_defs '}' \
-                     '}'
+        flag_defs : flag_defs flag_def
         """
-        p[0] = ast.Method(p[2], [], p[6])
+        p[0] = p[1]
+        p[0].append(p[2])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_method_def_4(p):
+    def p_flag_defs_2(p):
         """
-        method_def : METHOD ID '{' \
-                        IN '{' arg_defs '}' \
-                        OUT '{' arg_defs '}' \
-                     '}'
+        flag_defs : flag_def
         """
-        p[0] = ast.Method(p[2], p[6], p[10])
+        p[0] = [p[1]]
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_flag_defs_3(p):
+        """
+        flag_defs : empty
+        """
+        pass
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_flag_def(p):
+        """
+        flag_def : SELECTIVE
+                 | FIREANDFORGET
+                 | POLYMORPHIC
+                 | NOSUBSCRIPTIONS
+        """
+        p[0] = p[1]
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_arg_group_defs_1(p):
+        """
+        arg_group_defs : arg_group_defs arg_group_def
+        """
+        p[0] = p[1]
+        p[0].append(p[2])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_arg_group_defs_2(p):
+        """
+        arg_group_defs : arg_group_def
+        """
+        p[0] = [p[1]]
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_arg_froup_defs_3(p):
+        """
+        arg_group_defs : empty
+        """
+        pass
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_arg_group_def_1(p):
+        """
+        arg_group_def : IN '{' arg_defs '}'
+        """
+        p[0] = InArgumentGroup(p[3])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_arg_group_def_2(p):
+        """
+        arg_group_def : OUT '{' arg_defs '}'
+        """
+        p[0] = OutArgumentGroup(p[3])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_arg_group_def_3(p):
+        """
+        arg_group_def : ERROR '{' enumerators '}'
+        """
+        p[0] = ErrorArgumentGroup(p[3])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
@@ -292,13 +409,25 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_broadcast_def(p):
+    def p_broadcast_def_1(p):
         """
-        broadcast_def : BROADCAST ID '{' \
-                            OUT '{' arg_defs '}' \
-                        '}'
+        broadcast_def : BROADCAST ID flag_defs '{' arg_group_defs '}'
         """
-        p[0] = ast.Broadcast(p[2], p[6])
+        in_args, out_args, errors = Parser._method_def(p[5])
+        if in_args or errors:
+            raise SyntaxError
+        p[0] = ast.Broadcast(p[2], flags=p[3], out_args=out_args)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_broadcast_def_2(p):
+        """
+        broadcast_def : BROADCAST ID '{' arg_group_defs '}'
+        """
+        in_args, out_args, errors = Parser._method_def(p[4])
+        if in_args or errors:
+            raise SyntaxError
+        p[0] = ast.Broadcast(p[2], flags=None, out_args=out_args)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -365,7 +494,7 @@ class Parser(object):
         """
         enumeration_def : ENUMERATION ID '{' enumerators '}'
         """
-        # TODO: Enumberator values
+        # TODO: Enumerator values
         p[0] = ast.Enumeration(p[2], p[4])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
@@ -533,6 +662,6 @@ class Parser(object):
         Parse input text
 
         :param data: Input text to parse.
-        :return:
+        :return: AST representation of the input.
         """
         return self._parser.parse(data)

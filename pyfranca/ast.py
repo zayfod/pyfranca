@@ -30,10 +30,11 @@ class Import(object):
 
 class TypeCollection(object):
 
-    def __init__(self, name, ver=None, members=None):
+    def __init__(self, name, flags=None, version=None, typedefs=None):
         self.name = name
-        self.ver = ver
-        self.members = members if members else []
+        self.flags = flags if flags else []         # Unused
+        self.version = version
+        self.typedefs = typedefs if typedefs else []
 
 
 class Typedef(object):
@@ -111,10 +112,11 @@ class ComplexType(Type):
 
 class Enumeration(ComplexType):
 
-    def __init__(self, name, enumerators=None, extends=None):
+    def __init__(self, name, enumerators=None, extends=None, flags=None):
         self.name = name
         self.enumerators = enumerators if enumerators else []
         self.extends = extends
+        self.flags = flags if flags else []         # Unused
 
 
 class Enumerator(object):
@@ -126,10 +128,11 @@ class Enumerator(object):
 
 class Struct(ComplexType):
 
-    def __init__(self, name, fields=None, extends=None):
+    def __init__(self, name, fields=None, extends=None, flags=None):
         self.name = name
         self.fields = fields if fields else []
         self.extends = extends
+        self.flags = flags if flags else []
 
 
 class StructField(object):
@@ -149,15 +152,22 @@ class Map(ComplexType):
 
 class Interface(object):
 
-    def __init__(self, name, ver=None, attributes=None,
-                 methods=None, broadcasts=None, extends=None):
+    def __init__(self, name, version=None, attributes=None,
+                 methods=None, broadcasts=None, extends=None, flags=None):
         self.package = None
         self.name = name
-        self.version = ver
+        self.version = version
         self.attributes = attributes if attributes else []
         self.methods = methods if methods else []
         self.broadcasts = broadcasts if broadcasts else []
         self.extends = extends
+        self.flags = flags if flags else []         # Unused
+
+        self.typedefs = []
+        self.enumerations = []
+        self.structs = []
+        self.arrays = []
+        self.maps = []
 
 
 class Version(object):
@@ -169,23 +179,28 @@ class Version(object):
 
 class Attribute(object):
 
-    def __init__(self, name, attr_type):
+    def __init__(self, name, attr_type, flags=None):
         self.name = name
         self.type = attr_type
+        self.flags = flags if flags else []
 
 
 class Method(object):
 
-    def __init__(self, name, in_args=None, out_args=None):
+    def __init__(self, name, flags=None,
+                 in_args=None, out_args=None, errors=None):
         self.name = name
+        self.flags = flags if flags else []
         self.in_args = in_args if in_args else []
         self.out_args = out_args if out_args else []
+        self.errors = errors if errors else []
 
 
 class Broadcast(object):
 
-    def __init__(self, name, out_args=None):
+    def __init__(self, name, flags=None, out_args=None):
         self.name = name
+        self.flags = flags if flags else []
         self.out_args = out_args if out_args else []
 
 
