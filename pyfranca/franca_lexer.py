@@ -20,6 +20,7 @@ class Lexer(object):
         "is",
         "interface",
         "attribute",
+        "readonly",
         "noSubscriptions",
         "method",
         "fireAndForget",
@@ -121,7 +122,7 @@ class Lexer(object):
     @staticmethod
     def t_INTEGER(t):
         # noinspection PySingleQuotedDocstring
-        r"\d+"
+        r"[+-]?\d+"
         t.value = int(t.value)
         return t
 

@@ -30,11 +30,16 @@ class Import(object):
 
 class TypeCollection(object):
 
-    def __init__(self, name, flags=None, version=None, typedefs=None):
+    def __init__(self, name, flags=None, version=None, typedefs=None, enumerations=None,
+                 structs=None, arrays=None, maps=None):
         self.name = name
         self.flags = flags if flags else []         # Unused
         self.version = version
         self.typedefs = typedefs if typedefs else []
+        self.enumerations = enumerations if enumerations else []
+        self.structs = structs if structs else []
+        self.arrays = arrays if arrays else []
+        self.maps = maps if maps else []
 
 
 class Typedef(object):
@@ -152,16 +157,16 @@ class Map(ComplexType):
 
 class Interface(object):
 
-    def __init__(self, name, version=None, attributes=None,
-                 methods=None, broadcasts=None, extends=None, flags=None):
+    def __init__(self, name, flags=None, version=None, attributes=None,
+                 methods=None, broadcasts=None, extends=None):
         self.package = None
         self.name = name
+        self.flags = flags if flags else []         # Unused
         self.version = version
         self.attributes = attributes if attributes else []
         self.methods = methods if methods else []
         self.broadcasts = broadcasts if broadcasts else []
         self.extends = extends
-        self.flags = flags if flags else []         # Unused
 
         self.typedefs = []
         self.enumerations = []

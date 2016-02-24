@@ -88,55 +88,101 @@ class Parser(object):
         """
         p[0] = ast.Import(p[4], p[2])
 
-    # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_type_collection_1(p):
-        """
-        def : TYPECOLLECTION ID '{' version_def type_collection_members '}'
-        """
-        # TODO: Version should be optional
-        p[0] = ast.TypeCollection(p[2], p[4], p[5])
+    def _interface_def(members):
+        res = {
+            "version": None,
+            "attributes": [],
+            "methods": [],
+            "broadcasts": [],
+            "typedefs": [],
+            "enumerations": [],
+            "structs": [],
+            "arrays": [],
+            "maps": [],
+        }
+        if members:
+            for member in members:
+                if isinstance(member, ast.Version):
+                    if not res["version"]:
+                        res["version"] = member
+                    else:
+                        raise SyntaxError
+                elif isinstance(member, ast.Attribute):
+                    res["attributes"].append(member)
+                elif isinstance(member, ast.Method):
+                    res["methods"].append(member)
+                elif isinstance(member, ast.Broadcast):
+                    res["broadcasts"].append(member)
+                elif isinstance(member, ast.Typedef):
+                    res["typedefs"].append(member)
+                elif isinstance(member, ast.Enumeration):
+                    res["enumerations"].append(member)
+                elif isinstance(member, ast.Struct):
+                    res["structs"].append(member)
+                elif isinstance(member, ast.Array):
+                    res["arrays"].append(member)
+                elif isinstance(member, ast.Map):
+                    res["maps"].append(member)
+                else:
+                    raise SyntaxError
+        return res
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_type_collection_2(p):
+    def p_typecollection(p):
         """
-        def : TYPECOLLECTION ID '{' type_collection_members '}'
+        def : TYPECOLLECTION ID '{' typecollection_members '}'
         """
-        p[0] = ast.TypeCollection(p[2], None, p[4])
+        members = Parser._interface_def(p[4])
+        if members["attributes"]:
+            raise SyntaxError
+        if members["methods"]:
+            raise SyntaxError
+        if members["broadcasts"]:
+            raise SyntaxError
+        p[0] = ast.TypeCollection(name=p[2],
+                                  flags=None,
+                                  version=members["version"],
+                                  typedefs=members["typedefs"],
+                                  enumerations=members["enumerations"],
+                                  structs=members["structs"],
+                                  arrays=members["arrays"],
+                                  maps=members["maps"])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_type_collection_members_1(p):
+    def p_typecollection_members_1(p):
         """
-        type_collection_members : type_collection_members type_collection_member
+        typecollection_members : typecollection_members typecollection_member
         """
         p[0] = p[1]
         p[0].append(p[2])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_type_collection_members_2(p):
+    def p_typecollection_members_2(p):
         """
-        type_collection_members : type_collection_member
+        typecollection_members : typecollection_member
         """
         p[0] = [p[1]]
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_type_collection_members_3(p):
+    def p_typecollection_members_3(p):
         """
-        type_collection_members : empty
+        typecollection_members : empty
         """
         pass
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_type_collection_member_2(p):
+    def p_typecollection_member(p):
         """
-        type_collection_member : type_def
-                               | enumeration_def
-                               | struct_def
+        typecollection_member : version_def
+                              | type_def
+                              | enumeration_def
+                              | struct_def
         """
         p[0] = p[1]
 
@@ -166,47 +212,83 @@ class Parser(object):
         p[0] = ast.Typedef(p[2], p[4])
 
     # noinspection PyIncorrectDocstring
-    # TODO: support for "extends"
-    # TODO: "interface elements can be arranged freely"
     @staticmethod
-    def p_interface(p):
+    def p_interface_1(p):
         """
-        def : INTERFACE ID '{' \
-                version_def \
-                attribute_defs \
-                method_defs \
-                broadcast_defs \
-                enumeration_defs \
-              '}'
+        def : INTERFACE ID '{' interface_members '}'
         """
-        # TODO: Version should be optional
-        # TODO: Support for all types
-        p[0] = ast.Interface(p[2], p[4], p[5], p[6], p[7])
+        members = Parser._interface_def(p[4])
+        p[0] = ast.Interface(name=p[2],
+                             flags=None,
+                             version=members["version"],
+                             attributes=members["attributes"],
+                             methods=members["methods"],
+                             broadcasts=members["broadcasts"],
+                             extends=None)
+        p[0].typedefs = members["typedefs"],
+        p[0].enumerations = members["enumerations"],
+        p[0].structs = members["structs"],
+        p[0].arrays = members["arrays"],
+        p[0].maps = members["maps"]
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_interface_2(p):
+        """
+        def : INTERFACE ID EXTENDS ID '{' interface_members '}'
+        """
+        members = Parser._interface_def(p[6])
+        p[0] = ast.Interface(name=p[2],
+                             flags=None,
+                             version=members["version"],
+                             attributes=members["attributes"],
+                             methods=members["methods"],
+                             broadcasts=members["broadcasts"],
+                             extends=p[4])
+        p[0].typedefs = members["typedefs"],
+        p[0].enumerations = members["enumerations"],
+        p[0].structs = members["structs"],
+        p[0].arrays = members["arrays"],
+        p[0].maps = members["maps"]
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_attribute_defs_1(p):
+    def p_interface_members_1(p):
         """
-        attribute_defs : attribute_defs attribute_def
+        interface_members : interface_members interface_member
         """
         p[0] = p[1]
         p[0].append(p[2])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_attribute_defs_2(p):
+    def p_interface_members_2(p):
         """
-        attribute_defs : attribute_def
+        interface_members : interface_member
         """
         p[0] = [p[1]]
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_attribute_defs_3(p):
+    def p_interface_members_3(p):
         """
-        attribute_defs : empty
+        interface_members : empty
         """
         pass
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_interface_member(p):
+        """
+        interface_member : version_def
+                         | attribute_def
+                         | method_def
+                         | broadcast_def
+                         | type_def
+                         | enumeration_def
+                         | struct_def
+        """
+        p[0] = p[1]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -225,31 +307,6 @@ class Parser(object):
         """
         attr_type = ast.CustomType(p[3])
         p[0] = ast.Attribute(p[3], attr_type)
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
-    @staticmethod
-    def p_method_defs_1(p):
-        """
-        method_defs : method_defs method_def
-        """
-        p[0] = p[1]
-        p[0].append(p[2])
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
-    @staticmethod
-    def p_method_defs_2(p):
-        """
-        method_defs : method_def
-        """
-        p[0] = [p[1]]
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
-    @staticmethod
-    def p_method_defs_3(p):
-        """
-        method_defs : empty
-        """
-        pass
 
     @staticmethod
     def _method_def(arg_groups):
@@ -330,6 +387,7 @@ class Parser(object):
                  | FIREANDFORGET
                  | POLYMORPHIC
                  | NOSUBSCRIPTIONS
+                 | READONLY
         """
         p[0] = p[1]
 
@@ -381,31 +439,6 @@ class Parser(object):
         arg_group_def : ERROR '{' enumerators '}'
         """
         p[0] = ErrorArgumentGroup(p[3])
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
-    @staticmethod
-    def p_broadcast_defs_1(p):
-        """
-        broadcast_defs : broadcast_defs broadcast_def
-        """
-        p[0] = p[1]
-        p[0].append(p[2])
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
-    @staticmethod
-    def p_broadcast_defs_2(p):
-        """
-        broadcast_defs : broadcast_def
-        """
-        p[0] = [p[1]]
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
-    @staticmethod
-    def p_broadcast_defs_3(p):
-        """
-        broadcast_defs : empty
-        """
-        pass
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -465,36 +498,10 @@ class Parser(object):
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
-    def p_enumeration_defs_1(p):
-        """
-        enumeration_defs : enumeration_defs enumeration_def
-        """
-        p[0] = p[1]
-        p[0].append(p[2])
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
-    @staticmethod
-    def p_enumeration_defs_2(p):
-        """
-        enumeration_defs : enumeration_def
-        """
-        p[0] = [p[1]]
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
-    @staticmethod
-    def p_enumeration_defs_3(p):
-        """
-        enumeration_defs : empty
-        """
-        pass
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
-    @staticmethod
     def p_enumeration_def_1(p):
         """
         enumeration_def : ENUMERATION ID '{' enumerators '}'
         """
-        # TODO: Enumerator values
         p[0] = ast.Enumeration(p[2], p[4])
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
@@ -503,7 +510,6 @@ class Parser(object):
         """
         enumeration_def : ENUMERATION ID EXTENDS ID '{' enumerators '}'
         """
-        # TODO: Enumberator values
         p[0] = ast.Enumeration(p[2], p[6], p[4])
 
     # noinspection PyIncorrectDocstring
