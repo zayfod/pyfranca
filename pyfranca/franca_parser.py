@@ -100,13 +100,20 @@ class Parser(object):
         p[0] = p[1]
 
     # noinspection PyIncorrectDocstring
-    # TODO: Support for "import model"
     @staticmethod
-    def p_import_def(p):
+    def p_import_def_1(p):
         """
         def : IMPORT namespace FROM FILE_NAME
         """
-        p[0] = ast.Import(p[4], p[2])
+        p[0] = ast.Import(file_name=p[4], namespace=p[2])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_import_def_2(p):
+        """
+        def : IMPORT MODEL FILE_NAME
+        """
+        p[0] = ast.Import(file_name=p[3])
 
     @staticmethod
     def _interface_def(members):
@@ -309,10 +316,9 @@ class Parser(object):
     @staticmethod
     def p_attribute_def(p):
         """
-        attribute_def : ATTRIBUTE type ID
+        attribute_def : ATTRIBUTE type ID flag_defs
         """
-        # TODO: Support for flags.
-        p[0] = ast.Attribute(p[3], p[2])
+        p[0] = ast.Attribute(name=p[3], attr_type=p[2], flags=p[4])
 
     @staticmethod
     def _method_def(arg_groups):
@@ -342,22 +348,12 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_method_def_1(p):
+    def p_method_def(p):
         """
         method_def : METHOD ID flag_defs '{' arg_group_defs '}'
         """
         in_args, out_args, errors = Parser._method_def(p[5])
         p[0] = ast.Method(p[2], flags=p[3],
-                          in_args=in_args, out_args=out_args, errors=errors)
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_method_def_2(p):
-        """
-        method_def : METHOD ID '{' arg_group_defs '}'
-        """
-        in_args, out_args, errors = Parser._method_def(p[4])
-        p[0] = ast.Method(p[2], flags=None,
                           in_args=in_args, out_args=out_args, errors=errors)
 
     # noinspection PyIncorrectDocstring
@@ -448,7 +444,7 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_broadcast_def_1(p):
+    def p_broadcast_def(p):
         """
         broadcast_def : BROADCAST ID flag_defs '{' arg_group_defs '}'
         """
@@ -456,17 +452,6 @@ class Parser(object):
         if in_args or errors:
             raise SyntaxError
         p[0] = ast.Broadcast(p[2], flags=p[3], out_args=out_args)
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_broadcast_def_2(p):
-        """
-        broadcast_def : BROADCAST ID '{' arg_group_defs '}'
-        """
-        in_args, out_args, errors = Parser._method_def(p[4])
-        if in_args or errors:
-            raise SyntaxError
-        p[0] = ast.Broadcast(p[2], flags=None, out_args=out_args)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -554,9 +539,9 @@ class Parser(object):
     @staticmethod
     def p_struct_def_1(p):
         """
-        struct_def : STRUCT ID '{' struct_fields '}'
+        struct_def : STRUCT ID flag_defs '{' struct_fields '}'
         """
-        p[0] = ast.Struct(p[2], p[4])
+        p[0] = ast.Struct(p[2], p[4], flags=p[3])
 
     # noinspection PyIncorrectDocstring
     @staticmethod

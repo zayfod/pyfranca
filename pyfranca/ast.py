@@ -27,7 +27,7 @@ class Import(object):
 
     def __init__(self, file_name, namespace=None):
         self.file = file_name
-        self.namespace = namespace
+        self.namespace = namespace          # None for "import model"
 
 
 class TypeCollection(object):

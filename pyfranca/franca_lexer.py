@@ -12,6 +12,7 @@ class Lexer(object):
         "package",
         "import",
         "from",
+        "model",
         "typeCollection",
         "version",
         "major",
