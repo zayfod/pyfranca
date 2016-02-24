@@ -632,7 +632,7 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_type(p):
+    def p_type_1(p):
         """
         type : INT8
              | INT16
@@ -650,6 +650,27 @@ class Parser(object):
         """
         type_class = getattr(ast, p[1])
         p[0] = type_class()
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_type_2(p):
+        """
+        type : INT8 '[' ']'
+             | INT16 '[' ']'
+             | INT32 '[' ']'
+             | INT64 '[' ']'
+             | UINT8 '[' ']'
+             | UINT16 '[' ']'
+             | UINT32 '[' ']'
+             | UINT64 '[' ']'
+             | BOOLEAN '[' ']'
+             | FLOAT '[' ']'
+             | DOUBLE '[' ']'
+             | STRING '[' ']'
+             | BYTEBUFFER '[' ']'
+        """
+        type_class = getattr(ast, p[1])
+        p[0] = ast.Array(None, type_class())
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod

@@ -150,7 +150,7 @@ class StructField(object):
 class Array(ComplexType):
 
     def __init__(self, name, element_type):
-        self.name = name
+        self.name = name            # None for implicit arrays.
         self.type = element_type
 
 
