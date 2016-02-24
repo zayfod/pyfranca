@@ -30,30 +30,50 @@ class Parser(object):
     Franca IDL PLY parser.
     """
 
-    # noinspection PyUnusedLocal,PyIncorrectDocstring
     @staticmethod
-    def p_fidl_1(p):
-        """
-        fidl : fidl def
-        """
-        p[0] = p[1]
-        p[0].append(p[2])
-
-    # noinspection PyUnusedLocal,PyIncorrectDocstring
-    @staticmethod
-    def p_fidl_2(p):
-        """
-        fidl : def
-        """
-        p[0] = [p[1]]
+    def _package_def(members):
+        imports = []
+        interfaces = []
+        typecollections = []
+        if members:
+            for member in members:
+                if isinstance(member, ast.Import):
+                    imports.append(member)
+                elif isinstance(member, ast.Interface):
+                    interfaces.append(member)
+                elif isinstance(member, ast.TypeCollection):
+                    imports.append(member)
+                else:
+                    raise SyntaxError
+        return imports, interfaces, typecollections
 
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_package_def(p):
         """
-        def : PACKAGE namespace
+        package_def : PACKAGE namespace defs
         """
-        p[0] = p[2]
+        imports, interfaces, typecollections = Parser._package_def(p[3])
+        p[0] = ast.Package(name=p[2], imports=imports,
+                           interfaces=interfaces,
+                           typecollections=typecollections)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_defs_1(p):
+        """
+        defs : defs def
+        """
+        p[0] = p[1]
+        p[0].append(p[2])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_defs_2(p):
+        """
+        defs : def
+        """
+        p[0] = [p[1]]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -150,7 +170,7 @@ class Parser(object):
                                   arrays=members["arrays"],
                                   maps=members["maps"])
 
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    # noinspection PyIncorrectDocstring
     @staticmethod
     def p_typecollection_members_1(p):
         """
@@ -159,7 +179,7 @@ class Parser(object):
         p[0] = p[1]
         p[0].append(p[2])
 
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    # noinspection PyIncorrectDocstring
     @staticmethod
     def p_typecollection_members_2(p):
         """
@@ -244,7 +264,7 @@ class Parser(object):
         p[0].arrays = members["arrays"],
         p[0].maps = members["maps"]
 
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    # noinspection PyIncorrectDocstring
     @staticmethod
     def p_interface_members_1(p):
         """
@@ -253,7 +273,7 @@ class Parser(object):
         p[0] = p[1]
         p[0].append(p[2])
 
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    # noinspection PyIncorrectDocstring
     @staticmethod
     def p_interface_members_2(p):
         """
@@ -473,7 +493,7 @@ class Parser(object):
         """
         p[0] = ast.Argument(p[2], p[1])
 
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    # noinspection PyIncorrectDocstring
     @staticmethod
     def p_enumeration_def_1(p):
         """
@@ -481,7 +501,7 @@ class Parser(object):
         """
         p[0] = ast.Enumeration(p[2], p[4])
 
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    # noinspection PyIncorrectDocstring
     @staticmethod
     def p_enumeration_def_2(p):
         """
@@ -530,7 +550,7 @@ class Parser(object):
         """
         p[0] = ast.Enumerator(p[1], p[3])
 
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    # noinspection PyIncorrectDocstring
     @staticmethod
     def p_struct_def_1(p):
         """
@@ -538,7 +558,7 @@ class Parser(object):
         """
         p[0] = ast.Struct(p[2], p[4])
 
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    # noinspection PyIncorrectDocstring
     @staticmethod
     def p_struct_def_2(p):
         """
@@ -579,7 +599,7 @@ class Parser(object):
         """
         p[0] = ast.StructField(p[2], p[1])
 
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    # noinspection PyIncorrectDocstring
     @staticmethod
     def p_array_def(p):
         """
@@ -587,7 +607,7 @@ class Parser(object):
         """
         p[0] = ast.Array(p[2], p[4])
 
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    # noinspection PyIncorrectDocstring
     @staticmethod
     def p_map_def(p):
         """

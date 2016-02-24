@@ -7,18 +7,20 @@ class Package(object):
     AST representation of a Franca package.
     """
 
-    def __init__(self, name=None, interfaces=None):
+    def __init__(self, name, imports=None,
+                 interfaces=None, typecollections=None):
         """
         Constructs a new Package.
         """
-        if interfaces is None:
-            interfaces = {}
-
         self.name = name
-        self.interfaces = interfaces
+        self.imports = imports if imports else []
+        self.interfaces = interfaces if interfaces else []
+        self.typecollections = typecollections if typecollections else []
 
-        for interface in self.interfaces.values():
+        for interface in self.interfaces:
             interface.package = self
+        for typecollection in self.typecollections:
+            typecollection.package = self
 
 
 class Import(object):
@@ -32,6 +34,7 @@ class TypeCollection(object):
 
     def __init__(self, name, flags=None, version=None, typedefs=None, enumerations=None,
                  structs=None, arrays=None, maps=None):
+        self.package = None
         self.name = name
         self.flags = flags if flags else []         # Unused
         self.version = version
