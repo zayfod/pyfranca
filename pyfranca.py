@@ -5,18 +5,34 @@ from pyfranca import franca_parser
 
 
 def main():
-    #fname = "examples/Calculator.fidl"
-    fname = "examples/CommonTypes.fidl"
-    with open(fname, "r") as f:
-        s = f.read()
+    # fname = "examples/AppOnOff.fidl"
+    # fname = "examples/BasicTypes.fidl"
+    # fname = "examples/Calculator.fidl"
+    # fname = "examples/CommonTypes.fidl"
+    # fname = "examples/ComponentTrigger.fidl"
+    # fname = "examples/CompOnOff.fidl"
+    # fname = "examples/InternalClientConnect.fidl"
+    # fname = "examples/InternalConnect.fidl"
+    # fname = "examples/InternalGateway.fidl"
+    # fname = "examples/InternalServerConnect.fidl"
+    # fname = "examples/NodeBroker.fidl"
+    # fname = "examples/NodeOnOff.fidl"
+    # fname = "examples/Persistence.fidl"
+    # fname = "examples/RemoteControlGateway.fidl"
+    # fname = "examples/WatchdogMaster.fidl"
+    # fname = "examples/WatchdogVIPAdmin.fidl"
+    fname = "examples/Test.fidl"
 
     # lexer = franca_lexer.Lexer()
-    # lexer.tokenize(s)
+    # lexer.tokenize_file(fname)
 
     # parser = franca_parser.Parser()
     parser = franca_parser.Parser(write_tables=1, debug=True)
-    res = parser.parse(s)
-    print(res)
+    try:
+        res = parser.parse_file(fname)
+        print(res)
+    except (franca_lexer.LexerException, franca_parser.ParserException) as e:
+        print("ERROR: {}".format(e))
 
 
 if __name__ == "__main__":

@@ -32,8 +32,8 @@ class Import(object):
 
 class TypeCollection(object):
 
-    def __init__(self, name, flags=None, version=None, typedefs=None, enumerations=None,
-                 structs=None, arrays=None, maps=None):
+    def __init__(self, name, flags=None, version=None, typedefs=None,
+                 enumerations=None, structs=None, arrays=None, maps=None):
         self.package = None
         self.name = name
         self.flags = flags if flags else []         # Unused

@@ -25,6 +25,15 @@ class ErrorArgumentGroup(ArgumentGroup):
     pass
 
 
+class ParserException(Exception):
+
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
 class Parser(object):
     """
     Franca IDL PLY parser.
@@ -44,7 +53,7 @@ class Parser(object):
                 elif isinstance(member, ast.TypeCollection):
                     imports.append(member)
                 else:
-                    raise SyntaxError
+                    raise ParserException("Unexpected package member type.")
         return imports, interfaces, typecollections
 
     # noinspection PyIncorrectDocstring
@@ -134,7 +143,7 @@ class Parser(object):
                     if not res["version"]:
                         res["version"] = member
                     else:
-                        raise SyntaxError
+                        raise ParserException("Multiple version definitions.")
                 elif isinstance(member, ast.Attribute):
                     res["attributes"].append(member)
                 elif isinstance(member, ast.Method):
@@ -152,7 +161,7 @@ class Parser(object):
                 elif isinstance(member, ast.Map):
                     res["maps"].append(member)
                 else:
-                    raise SyntaxError
+                    raise ParserException("Unexpected interface member type.")
         return res
 
     # noinspection PyIncorrectDocstring
@@ -163,11 +172,12 @@ class Parser(object):
         """
         members = Parser._interface_def(p[4])
         if members["attributes"]:
-            raise SyntaxError
+            raise ParserException("Attributes cannot be part of type "
+                                  "collections.")
         if members["methods"]:
-            raise SyntaxError
+            raise ParserException("Methods cannot be part of type collections.")
         if members["broadcasts"]:
-            raise SyntaxError
+            raise ParserException("Broadcasts be part of type collections.")
         p[0] = ast.TypeCollection(name=p[2],
                                   flags=None,
                                   version=members["version"],
@@ -331,19 +341,23 @@ class Parser(object):
                     if not in_args:
                         in_args = arg_group.arguments
                     else:
-                        raise SyntaxError
+                        raise ParserException("Multiple in argument definitions"
+                                              "for a method.")
                 elif isinstance(arg_group, OutArgumentGroup):
                     if not out_args:
                         out_args = arg_group.arguments
                     else:
-                        raise SyntaxError
+                        raise ParserException("Multiple out argument "
+                                              "definitions for a method.")
                 elif isinstance(arg_group, ErrorArgumentGroup):
                     if not errors:
                         errors = arg_group.arguments
                     else:
-                        raise SyntaxError
+                        raise ParserException("Multiple error definitions "
+                                              "for a method.")
                 else:
-                    raise SyntaxError
+                    raise ParserException("Unexpected method definition "
+                                          "member.")
         return in_args, out_args, errors
 
     # noinspection PyIncorrectDocstring
@@ -450,7 +464,8 @@ class Parser(object):
         """
         in_args, out_args, errors = Parser._method_def(p[5])
         if in_args or errors:
-            raise SyntaxError
+            raise ParserException("In arguments and errors cannot be part of a "
+                                  "broadcast definition.")
         p[0] = ast.Broadcast(name=p[2], flags=p[3], out_args=out_args)
 
     # noinspection PyIncorrectDocstring
@@ -670,8 +685,8 @@ class Parser(object):
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_error(p):
-        # TODO: How to handle errors?
-        print("Syntax error at line {} near '{}'".format(p.lineno, p.value))
+        raise ParserException("Syntax error at line {} near '{}'".format(
+                              p.lineno, p.value))
 
     def __init__(self, the_lexer=None, **kwargs):
         """
@@ -698,3 +713,14 @@ class Parser(object):
         :return: AST representation of the input.
         """
         return self._parser.parse(data)
+
+    def parse_file(self, fspec):
+        """
+        Parse input file
+
+        :param fspec: Specification of a fil to parse.
+        :return: AST representation of the input.
+        """
+        with open(fspec, "r") as f:
+            data = f.read()
+        return self.parse(data)

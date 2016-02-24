@@ -2,6 +2,15 @@
 import ply.lex as lex
 
 
+class LexerException(Exception):
+
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
 class Lexer(object):
     """
     Franca IDL PLY lexer.
@@ -133,9 +142,8 @@ class Lexer(object):
 
     @staticmethod
     def t_error(t):
-        # TODO: How to handle errors?
-        print("Illegal character at line {}: '{}'".format(t.lineno, t.value[0]))
-        t.lexer.skip(1)
+        raise LexerException("Illegal character '{}' at line {}.".format(
+                             t.value[0], t.lineno))
 
     def __init__(self, **kwargs):
         """
@@ -155,3 +163,13 @@ class Lexer(object):
             if not tok:
                 break
             print(tok)
+
+    def tokenize_file(self, fspec):
+        """
+        Tokenize input file to stdout for testing purposes.
+
+        :param fspec: Input file to parse.
+        """
+        with open(fspec, "r") as f:
+            data = f.read()
+        return self.tokenize(data)
