@@ -221,7 +221,7 @@ class Parser(object):
         """
         version_def : VERSION '{' MAJOR INTEGER MINOR INTEGER '}'
         """
-        p[0] = ast.Version(p[4], p[6])
+        p[0] = ast.Version(major=p[4], minor=p[6])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -229,7 +229,7 @@ class Parser(object):
         """
         type_def : TYPEDEF ID IS type
         """
-        p[0] = ast.Typedef(p[2], p[4])
+        p[0] = ast.Typedef(name=[2], base_type=p[4])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -353,7 +353,7 @@ class Parser(object):
         method_def : METHOD ID flag_defs '{' arg_group_defs '}'
         """
         in_args, out_args, errors = Parser._method_def(p[5])
-        p[0] = ast.Method(p[2], flags=p[3],
+        p[0] = ast.Method(name=p[2], flags=p[3],
                           in_args=in_args, out_args=out_args, errors=errors)
 
     # noinspection PyIncorrectDocstring
@@ -451,7 +451,7 @@ class Parser(object):
         in_args, out_args, errors = Parser._method_def(p[5])
         if in_args or errors:
             raise SyntaxError
-        p[0] = ast.Broadcast(p[2], flags=p[3], out_args=out_args)
+        p[0] = ast.Broadcast(name=p[2], flags=p[3], out_args=out_args)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -476,7 +476,7 @@ class Parser(object):
         """
         arg_def : type ID
         """
-        p[0] = ast.Argument(p[2], p[1])
+        p[0] = ast.Argument(name=p[2], arg_type=p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -484,7 +484,7 @@ class Parser(object):
         """
         enumeration_def : ENUMERATION ID '{' enumerators '}'
         """
-        p[0] = ast.Enumeration(p[2], p[4])
+        p[0] = ast.Enumeration(name=p[2], enumerators=p[4])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -492,7 +492,7 @@ class Parser(object):
         """
         enumeration_def : ENUMERATION ID EXTENDS ID '{' enumerators '}'
         """
-        p[0] = ast.Enumeration(p[2], p[6], p[4])
+        p[0] = ast.Enumeration(name=p[2], enumerators=p[6], extends=p[4])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -525,7 +525,7 @@ class Parser(object):
         """
         enumerator : ID
         """
-        p[0] = ast.Enumerator(p[1], None)
+        p[0] = ast.Enumerator(name=p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -533,7 +533,7 @@ class Parser(object):
         """
         enumerator : ID '=' INTEGER
         """
-        p[0] = ast.Enumerator(p[1], p[3])
+        p[0] = ast.Enumerator(name=p[1], value=p[3])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -541,7 +541,7 @@ class Parser(object):
         """
         struct_def : STRUCT ID flag_defs '{' struct_fields '}'
         """
-        p[0] = ast.Struct(p[2], p[4], flags=p[3])
+        p[0] = ast.Struct(name=p[2], fields=p[4], flags=p[3])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -549,7 +549,7 @@ class Parser(object):
         """
         struct_def : STRUCT ID EXTENDS ID '{' struct_fields '}'
         """
-        p[0] = ast.Struct(p[2], p[6], p[4])
+        p[0] = ast.Struct(name=p[2], fields=p[6], extends=p[4])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -582,7 +582,7 @@ class Parser(object):
         """
         struct_field : type ID
         """
-        p[0] = ast.StructField(p[2], p[1])
+        p[0] = ast.StructField(name=p[2], field_type=p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -590,7 +590,7 @@ class Parser(object):
         """
         array_def : ARRAY ID OF type
         """
-        p[0] = ast.Array(p[2], p[4])
+        p[0] = ast.Array(name=p[2], element_type=p[4])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -598,7 +598,7 @@ class Parser(object):
         """
         map_def : MAP ID '{' type TO type '}'
         """
-        p[0] = ast.Map(p[2], p[4], p[6])
+        p[0] = ast.Map(name=p[2], key_type=p[4], value_type=p[6])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -640,7 +640,7 @@ class Parser(object):
              | BYTEBUFFER '[' ']'
         """
         type_class = getattr(ast, p[1])
-        p[0] = ast.Array(None, type_class())
+        p[0] = ast.Array(name=None, element_type=type_class())
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -648,7 +648,7 @@ class Parser(object):
         """
         type : ID
         """
-        p[0] = ast.CustomType(p[1])
+        p[0] = ast.CustomType(name=p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -656,8 +656,8 @@ class Parser(object):
         """
         type : ID '[' ']'
         """
-        element_type = ast.CustomType(p[1])
-        p[0] = ast.Array(None, element_type)
+        element_type = ast.CustomType(name=p[1])
+        p[0] = ast.Array(name=None, element_type=element_type)
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
