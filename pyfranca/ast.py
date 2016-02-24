@@ -148,7 +148,10 @@ class StructField(object):
 
 
 class Array(ComplexType):
-    pass
+
+    def __init__(self, name, element_type):
+        self.name = name
+        self.type = element_type
 
 
 class Map(ComplexType):

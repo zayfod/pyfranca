@@ -183,6 +183,7 @@ class Parser(object):
                               | type_def
                               | enumeration_def
                               | struct_def
+                              | array_def
         """
         p[0] = p[1]
 
@@ -287,6 +288,7 @@ class Parser(object):
                          | type_def
                          | enumeration_def
                          | struct_def
+                         | array_def
         """
         p[0] = p[1]
 
@@ -610,6 +612,23 @@ class Parser(object):
         """
         filed_type = ast.CustomType(p[1])
         p[0] = ast.StructField(p[2], filed_type)
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_array_def_1(p):
+        """
+        array_def : ARRAY ID OF type
+        """
+        p[0] = ast.Array(p[2], p[4])
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_array_def_2(p):
+        """
+        array_def : ARRAY ID OF ID
+        """
+        element_type = ast.CustomType(p[4])
+        p[0] = ast.Array(p[2], element_type)
 
     # noinspection PyIncorrectDocstring
     @staticmethod

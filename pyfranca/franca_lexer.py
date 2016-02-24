@@ -33,6 +33,8 @@ class Lexer(object):
         "extends",
         "struct",
         "polymorphic",
+        "array",
+        "of",
 
         # Types
         "Int8",
