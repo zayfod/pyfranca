@@ -51,7 +51,7 @@ class Parser(object):
                 elif isinstance(member, ast.Interface):
                     interfaces.append(member)
                 elif isinstance(member, ast.TypeCollection):
-                    imports.append(member)
+                    typecollections.append(member)
                 else:
                     raise ParserException("Unexpected package member type.")
         return imports, interfaces, typecollections
@@ -63,7 +63,7 @@ class Parser(object):
         package_def : PACKAGE namespace defs
         """
         imports, interfaces, typecollections = Parser._package_def(p[3])
-        p[0] = ast.Package(name=p[2], imports=imports,
+        p[0] = ast.Package(name=p[2], file=None, imports=imports,
                            interfaces=interfaces,
                            typecollections=typecollections)
 
@@ -239,7 +239,7 @@ class Parser(object):
         """
         type_def : TYPEDEF ID IS type
         """
-        p[0] = ast.Typedef(name=[2], base_type=p[4])
+        p[0] = ast.Typedef(name=p[2], base_type=p[4])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -255,10 +255,10 @@ class Parser(object):
                              methods=members["methods"],
                              broadcasts=members["broadcasts"],
                              extends=None)
-        p[0].typedefs = members["typedefs"],
-        p[0].enumerations = members["enumerations"],
-        p[0].structs = members["structs"],
-        p[0].arrays = members["arrays"],
+        p[0].typedefs = members["typedefs"]
+        p[0].enumerations = members["enumerations"]
+        p[0].structs = members["structs"]
+        p[0].arrays = members["arrays"]
         p[0].maps = members["maps"]
 
     # noinspection PyIncorrectDocstring
@@ -275,10 +275,10 @@ class Parser(object):
                              methods=members["methods"],
                              broadcasts=members["broadcasts"],
                              extends=p[4])
-        p[0].typedefs = members["typedefs"],
-        p[0].enumerations = members["enumerations"],
-        p[0].structs = members["structs"],
-        p[0].arrays = members["arrays"],
+        p[0].typedefs = members["typedefs"]
+        p[0].enumerations = members["enumerations"]
+        p[0].structs = members["structs"]
+        p[0].arrays = members["arrays"]
         p[0].maps = members["maps"]
 
     # noinspection PyIncorrectDocstring
@@ -723,4 +723,7 @@ class Parser(object):
         """
         with open(fspec, "r") as f:
             data = f.read()
-        return self.parse(data)
+        package = self.parse(data)
+        if package:
+            package.file = fspec
+        return package

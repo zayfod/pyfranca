@@ -7,12 +7,13 @@ class Package(object):
     AST representation of a Franca package.
     """
 
-    def __init__(self, name, imports=None,
+    def __init__(self, name, file=None, imports=None,
                  interfaces=None, typecollections=None):
         """
         Constructs a new Package.
         """
         self.name = name
+        self.file = file
         self.imports = imports if imports else []
         self.interfaces = interfaces if interfaces else []
         self.typecollections = typecollections if typecollections else []
@@ -30,7 +31,9 @@ class Import(object):
         self.namespace = namespace          # None for "import model"
 
 
-class TypeCollection(object):
+class Namespace(object):
+
+    __metaclass__ = ABCMeta
 
     def __init__(self, name, flags=None, version=None, typedefs=None,
                  enumerations=None, structs=None, arrays=None, maps=None):
@@ -45,6 +48,17 @@ class TypeCollection(object):
         self.maps = maps if maps else []
 
 
+class TypeCollection(Namespace):
+
+    def __init__(self, name, flags=None, version=None, typedefs=None,
+                 enumerations=None, structs=None, arrays=None, maps=None):
+        super(TypeCollection, self).__init__(name, flags=flags, version=version,
+                                             typedefs=typedefs,
+                                             enumerations=enumerations,
+                                             structs=structs, arrays=arrays,
+                                             maps=maps)
+
+
 class Typedef(object):
 
     def __init__(self, name, base_type):
@@ -53,74 +67,111 @@ class Typedef(object):
 
 
 class Type(object):
+
     __metaclass__ = ABCMeta
 
-
-class Int8(Type):
-    pass
-
-
-class Int16(Type):
-    pass
+    def __init__(self):
+        self.name = self.__class__.__name__
 
 
-class Int32(Type):
-    pass
+class PrimitiveType(Type):
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self):
+        super(PrimitiveType, self).__init__()
 
 
-class Int64(Type):
-    pass
+class Int8(PrimitiveType):
+
+    def __init__(self):
+        super(Int8, self).__init__()
 
 
-class UInt8(Type):
-    pass
+class Int16(PrimitiveType):
+
+    def __init__(self):
+        super(Int16, self).__init__()
 
 
-class UInt16(Type):
-    pass
+class Int32(PrimitiveType):
+
+    def __init__(self):
+        super(Int32, self).__init__()
 
 
-class UInt32(Type):
-    pass
+class Int64(PrimitiveType):
+
+    def __init__(self):
+        super(Int64, self).__init__()
 
 
-class UInt64(Type):
-    pass
+class UInt8(PrimitiveType):
+
+    def __init__(self):
+        super(UInt8, self).__init__()
 
 
-class Boolean(Type):
-    pass
+class UInt16(PrimitiveType):
+
+    def __init__(self):
+        super(UInt16, self).__init__()
 
 
-class Float(Type):
-    pass
+class UInt32(PrimitiveType):
+
+    def __init__(self):
+        super(UInt32, self).__init__()
 
 
-class Double(Type):
-    pass
+class UInt64(PrimitiveType):
+
+    def __init__(self):
+        super(UInt64, self).__init__()
 
 
-class String(Type):
-    pass
+class Boolean(PrimitiveType):
+
+    def __init__(self):
+        super(Boolean, self).__init__()
 
 
-class ByteBuffer(Type):
-    pass
+class Float(PrimitiveType):
+
+    def __init__(self):
+        super(Float, self).__init__()
 
 
-class CustomType(Type):
+class Double(PrimitiveType):
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self):
+        super(Double, self).__init__()
+
+
+class String(PrimitiveType):
+
+    def __init__(self):
+        super(String, self).__init__()
+
+
+class ByteBuffer(PrimitiveType):
+
+    def __init__(self):
+        super(ByteBuffer, self).__init__()
 
 
 class ComplexType(Type):
+
     __metaclass__ = ABCMeta
+
+    def __init__(self):
+        super(ComplexType, self).__init__()
 
 
 class Enumeration(ComplexType):
 
     def __init__(self, name, enumerators=None, extends=None, flags=None):
+        super(Enumeration, self).__init__()
         self.name = name
         self.enumerators = enumerators if enumerators else []
         self.extends = extends
@@ -137,6 +188,7 @@ class Enumerator(object):
 class Struct(ComplexType):
 
     def __init__(self, name, fields=None, extends=None, flags=None):
+        super(Struct, self).__init__()
         self.name = name
         self.fields = fields if fields else []
         self.extends = extends
@@ -153,6 +205,7 @@ class StructField(object):
 class Array(ComplexType):
 
     def __init__(self, name, element_type):
+        super(Array, self).__init__()
         self.name = name            # None for implicit arrays.
         self.type = element_type
 
@@ -160,29 +213,28 @@ class Array(ComplexType):
 class Map(ComplexType):
 
     def __init__(self, name, key_type, value_type):
+        super(Map, self).__init__()
         self.name = name
         self.key_type = key_type
         self.value_type = value_type
 
 
-class Interface(object):
+class CustomType(Type):
+
+    def __init__(self, name):
+        super(CustomType, self).__init__()
+        self.name = name
+
+
+class Interface(Namespace):
 
     def __init__(self, name, flags=None, version=None, attributes=None,
                  methods=None, broadcasts=None, extends=None):
-        self.package = None
-        self.name = name
-        self.flags = flags if flags else []         # Unused
-        self.version = version
+        super(Interface, self).__init__(name=name, flags=flags, version=version)
         self.attributes = attributes if attributes else []
         self.methods = methods if methods else []
         self.broadcasts = broadcasts if broadcasts else []
         self.extends = extends
-
-        self.typedefs = []
-        self.enumerations = []
-        self.structs = []
-        self.arrays = []
-        self.maps = []
 
 
 class Version(object):
