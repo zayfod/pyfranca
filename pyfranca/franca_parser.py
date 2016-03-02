@@ -695,8 +695,11 @@ class Parser(object):
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_error(p):
-        raise ParserException("Syntax error at line {} near '{}'".format(
-                              p.lineno, p.value))
+        if p:
+            raise ParserException("Syntax error at line {} near '{}'.".format(
+                                  p.lineno, p.value))
+        else:
+            raise ParserException("Reached unexpected end of file.")
 
     def __init__(self, the_lexer=None, **kwargs):
         """

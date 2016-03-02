@@ -1,6 +1,8 @@
 
 import unittest
-from pyfranca.franca_parser import Parser
+
+from pyfranca.franca_parser import Parser, ParserException
+from pyfranca.franca_lexer import LexerException
 from pyfranca.ast import Package
 
 
@@ -21,8 +23,22 @@ class BaseTestCase(unittest.TestCase):
         self.assertIsNone(package)
 
 
-class TestParserNormal(BaseTestCase):
-    """Test normal usage of Parser."""
+class TestParserTopLevel(BaseTestCase):
+    """Test parsing top-level Franca elements."""
+
+    def test_empty(self):
+        """A package statement is expected as a minimum."""
+        with self.assertRaises(ParserException) as context:
+            self._assertDoesNotParse("")
+        self.assertEqual(str(context.exception),
+                         "Reached unexpected end of file.")
+
+    def test_garbage(self):
+        """Invalid input."""
+        with self.assertRaises(LexerException) as context:
+            self._assertDoesNotParse("%!@#")
+        self.assertEqual(str(context.exception),
+                         "Illegal character '%' at line 1.")
 
     def test_empty_package(self):
         package = self._assertParse("package P")
@@ -186,17 +202,3 @@ class TestParserNormal(BaseTestCase):
         self.assertEqual(len(interface.attributes), 0)
         self.assertEqual(len(interface.methods), 0)
         self.assertEqual(len(interface.broadcasts), 0)
-
-
-class TestParserError(BaseTestCase):
-    """Test passing invalid input to Parser."""
-
-    @unittest.skip("Bug in syntax error handling?")
-    def test_empty(self):
-        """A package statement is expected as a minimum."""
-        self._assertDoesNotParse("")
-
-    @unittest.skip("Bug in syntax error handling?")
-    def test_garbage(self):
-        """Invalid input."""
-        self._assertDoesNotParse("%!@#")
