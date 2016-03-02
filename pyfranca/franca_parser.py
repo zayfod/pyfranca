@@ -1,4 +1,5 @@
 
+from collections import OrderedDict
 from abc import ABCMeta
 import ply.yacc as yacc
 from pyfranca import franca_lexer
@@ -10,7 +11,7 @@ class ArgumentGroup(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, arguments=None):
-        self.arguments = arguments if arguments else []
+        self.arguments = arguments if arguments else OrderedDict()
 
 
 class InArgumentGroup(ArgumentGroup):
@@ -42,16 +43,16 @@ class Parser(object):
     @staticmethod
     def _package_def(members):
         imports = []
-        interfaces = []
-        typecollections = []
+        interfaces = OrderedDict()
+        typecollections = OrderedDict()
         if members:
             for member in members:
                 if isinstance(member, ast.Import):
                     imports.append(member)
                 elif isinstance(member, ast.Interface):
-                    interfaces.append(member)
+                    interfaces[member.name] = member
                 elif isinstance(member, ast.TypeCollection):
-                    typecollections.append(member)
+                    typecollections[member.name] = member
                 else:
                     raise ParserException("Unexpected package member type.")
         return imports, interfaces, typecollections
@@ -63,7 +64,7 @@ class Parser(object):
         package_def : PACKAGE namespace defs
         """
         imports, interfaces, typecollections = Parser._package_def(p[3])
-        p[0] = ast.Package(name=p[2], file=None, imports=imports,
+        p[0] = ast.Package(name=p[2], file_name=None, imports=imports,
                            interfaces=interfaces,
                            typecollections=typecollections)
 
@@ -128,14 +129,14 @@ class Parser(object):
     def _interface_def(members):
         res = {
             "version": None,
-            "attributes": [],
-            "methods": [],
-            "broadcasts": [],
-            "typedefs": [],
-            "enumerations": [],
-            "structs": [],
-            "arrays": [],
-            "maps": [],
+            "attributes": OrderedDict(),
+            "methods": OrderedDict(),
+            "broadcasts": OrderedDict(),
+            "typedefs": OrderedDict(),
+            "enumerations": OrderedDict(),
+            "structs": OrderedDict(),
+            "arrays": OrderedDict(),
+            "maps": OrderedDict(),
         }
         if members:
             for member in members:
@@ -145,21 +146,21 @@ class Parser(object):
                     else:
                         raise ParserException("Multiple version definitions.")
                 elif isinstance(member, ast.Attribute):
-                    res["attributes"].append(member)
+                    res["attributes"][member.name] = member
                 elif isinstance(member, ast.Method):
-                    res["methods"].append(member)
+                    res["methods"][member.name] = member
                 elif isinstance(member, ast.Broadcast):
-                    res["broadcasts"].append(member)
+                    res["broadcasts"][member.name] = member
                 elif isinstance(member, ast.Typedef):
-                    res["typedefs"].append(member)
+                    res["typedefs"][member.name] = member
                 elif isinstance(member, ast.Enumeration):
-                    res["enumerations"].append(member)
+                    res["enumerations"][member.name] = member
                 elif isinstance(member, ast.Struct):
-                    res["structs"].append(member)
+                    res["structs"][member.name] = member
                 elif isinstance(member, ast.Array):
-                    res["arrays"].append(member)
+                    res["arrays"][member.name] = member
                 elif isinstance(member, ast.Map):
-                    res["maps"].append(member)
+                    res["maps"][member.name] = member
                 else:
                     raise ParserException("Unexpected interface member type.")
         return res
@@ -516,7 +517,7 @@ class Parser(object):
         enumerators : enumerators enumerator
         """
         p[0] = p[1]
-        p[0].append(p[2])
+        p[0][p[2].name] = p[2]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -524,7 +525,8 @@ class Parser(object):
         """
         enumerators : enumerator
         """
-        p[0] = [p[1]]
+        p[0] = OrderedDict()
+        p[0][p[1].name] = p[1]
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
@@ -573,7 +575,7 @@ class Parser(object):
         struct_fields : struct_fields struct_field
         """
         p[0] = p[1]
-        p[0].append(p[2])
+        p[0][p[2].name] = p[2]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -581,7 +583,8 @@ class Parser(object):
         """
         struct_fields : struct_field
         """
-        p[0] = [p[1]]
+        p[0] = OrderedDict()
+        p[0][p[1].name] = p[1]
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod

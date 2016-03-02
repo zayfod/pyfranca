@@ -1,5 +1,6 @@
 
 from abc import ABCMeta
+from collections import OrderedDict
 
 
 class Package(object):
@@ -7,21 +8,22 @@ class Package(object):
     AST representation of a Franca package.
     """
 
-    def __init__(self, name, file=None, imports=None,
+    def __init__(self, name, file_name=None, imports=None,
                  interfaces=None, typecollections=None):
         """
         Constructs a new Package.
         """
         self.name = name
-        self.file = file
+        self.file = file_name
         self.imports = imports if imports else []
-        self.interfaces = interfaces if interfaces else []
-        self.typecollections = typecollections if typecollections else []
+        self.interfaces = interfaces if interfaces else OrderedDict()
+        self.typecollections = typecollections if typecollections else \
+            OrderedDict()
 
-        for interface in self.interfaces:
-            interface.package = self
-        for typecollection in self.typecollections:
-            typecollection.package = self
+        for item in self.interfaces.values():
+            item.package = self
+        for item in self.typecollections.values():
+            item.package = self
 
 
 class Import(object):
@@ -41,22 +43,23 @@ class Namespace(object):
         self.name = name
         self.flags = flags if flags else []         # Unused
         self.version = version
-        self.typedefs = typedefs if typedefs else []
-        self.enumerations = enumerations if enumerations else []
-        self.structs = structs if structs else []
-        self.arrays = arrays if arrays else []
-        self.maps = maps if maps else []
+        self.typedefs = typedefs if typedefs else OrderedDict()
+        self.enumerations = enumerations if enumerations else OrderedDict()
+        self.structs = structs if structs else OrderedDict()
+        self.arrays = arrays if arrays else OrderedDict()
+        self.maps = maps if maps else OrderedDict()
 
-        for typedef in self.typedefs:
-            typedef.namespace = self
-        for enumeration in self.enumerations:
-            enumeration.namespace = self
-        for struct in self.structs:
-            struct.namespace = self
-        for array in self.arrays:
-            array.namespace = self
-        for map in self.maps:
-            map.namespace = self
+        for item in self.typedefs.values():
+            item.namespace = self
+        for item in self.enumerations.values():
+            item.namespace = self
+        for item in self.structs.values():
+            item.namespace = self
+        for item in self.arrays.values():
+            item.namespace = self
+        for item in self.maps.values():
+            item.namespace = self
+
 
 class TypeCollection(Namespace):
 
@@ -185,7 +188,7 @@ class Enumeration(ComplexType):
     def __init__(self, name, enumerators=None, extends=None, flags=None):
         super(Enumeration, self).__init__()
         self.name = name
-        self.enumerators = enumerators if enumerators else []
+        self.enumerators = enumerators if enumerators else OrderedDict()
         self.extends = extends
         self.flags = flags if flags else []         # Unused
 
@@ -202,7 +205,7 @@ class Struct(ComplexType):
     def __init__(self, name, fields=None, extends=None, flags=None):
         super(Struct, self).__init__()
         self.name = name
-        self.fields = fields if fields else []
+        self.fields = fields if fields else OrderedDict()
         self.extends = extends
         self.flags = flags if flags else []
 
@@ -244,17 +247,17 @@ class Interface(Namespace):
     def __init__(self, name, flags=None, version=None, attributes=None,
                  methods=None, broadcasts=None, extends=None):
         super(Interface, self).__init__(name=name, flags=flags, version=version)
-        self.attributes = attributes if attributes else []
-        self.methods = methods if methods else []
-        self.broadcasts = broadcasts if broadcasts else []
+        self.attributes = attributes if attributes else OrderedDict()
+        self.methods = methods if methods else OrderedDict()
+        self.broadcasts = broadcasts if broadcasts else OrderedDict()
         self.extends = extends
 
-        for attribute in self.attributes:
-            attribute.namespace = self
-        for method in self.methods:
-            method.namespace = self
-        for broadcast in self.broadcasts:
-            broadcast.namespace = self
+        for item in self.attributes.values():
+            item.namespace = self
+        for item in self.methods.values():
+            item.namespace = self
+        for item in self.broadcasts.values():
+            item.namespace = self
 
 
 class Version(object):
@@ -280,9 +283,9 @@ class Method(object):
         self.namespace = None
         self.name = name
         self.flags = flags if flags else []
-        self.in_args = in_args if in_args else []
-        self.out_args = out_args if out_args else []
-        self.errors = errors if errors else []
+        self.in_args = in_args if in_args else OrderedDict()
+        self.out_args = out_args if out_args else OrderedDict()
+        self.errors = errors if errors else OrderedDict()
 
 
 class Broadcast(object):
@@ -291,7 +294,7 @@ class Broadcast(object):
         self.namespace = None
         self.name = name
         self.flags = flags if flags else []
-        self.out_args = out_args if out_args else []
+        self.out_args = out_args if out_args else OrderedDict()
 
 
 class Argument(object):
