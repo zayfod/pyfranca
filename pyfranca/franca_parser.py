@@ -87,6 +87,13 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
+    def p_defs_3(p):
+        """
+        defs : empty
+        """
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
     def p_namespace_1(p):
         """
         namespace : ID '.' namespace
