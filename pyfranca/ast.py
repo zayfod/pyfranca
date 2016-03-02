@@ -47,6 +47,16 @@ class Namespace(object):
         self.arrays = arrays if arrays else []
         self.maps = maps if maps else []
 
+        for typedef in self.typedefs:
+            typedef.namespace = self
+        for enumeration in self.enumerations:
+            enumeration.namespace = self
+        for struct in self.structs:
+            struct.namespace = self
+        for array in self.arrays:
+            array.namespace = self
+        for map in self.maps:
+            map.namespace = self
 
 class TypeCollection(Namespace):
 
@@ -62,6 +72,7 @@ class TypeCollection(Namespace):
 class Typedef(object):
 
     def __init__(self, name, base_type):
+        self.namespace = None
         self.name = name
         self.type = base_type
 
@@ -166,6 +177,7 @@ class ComplexType(Type):
 
     def __init__(self):
         super(ComplexType, self).__init__()
+        self.namespace = None
 
 
 class Enumeration(ComplexType):
@@ -224,6 +236,7 @@ class CustomType(Type):
     def __init__(self, name):
         super(CustomType, self).__init__()
         self.name = name
+        self.reference = None
 
 
 class Interface(Namespace):
@@ -236,6 +249,13 @@ class Interface(Namespace):
         self.broadcasts = broadcasts if broadcasts else []
         self.extends = extends
 
+        for attribute in self.attributes:
+            attribute.namespace = self
+        for method in self.methods:
+            method.namespace = self
+        for broadcast in self.broadcasts:
+            broadcast.namespace = self
+
 
 class Version(object):
 
@@ -247,6 +267,7 @@ class Version(object):
 class Attribute(object):
 
     def __init__(self, name, attr_type, flags=None):
+        self.namespace = None
         self.name = name
         self.type = attr_type
         self.flags = flags if flags else []
@@ -256,6 +277,7 @@ class Method(object):
 
     def __init__(self, name, flags=None,
                  in_args=None, out_args=None, errors=None):
+        self.namespace = None
         self.name = name
         self.flags = flags if flags else []
         self.in_args = in_args if in_args else []
@@ -266,6 +288,7 @@ class Method(object):
 class Broadcast(object):
 
     def __init__(self, name, flags=None, out_args=None):
+        self.namespace = None
         self.name = name
         self.flags = flags if flags else []
         self.out_args = out_args if out_args else []
