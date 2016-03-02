@@ -23,22 +23,45 @@ class BaseTestCase(unittest.TestCase):
         self.assertIsNone(package)
 
 
-class TestParserTopLevel(BaseTestCase):
+class TestTopLevel(BaseTestCase):
     """Test parsing top-level Franca elements."""
 
     def test_empty(self):
         """A package statement is expected as a minimum."""
         with self.assertRaises(ParserException) as context:
-            self._assertDoesNotParse("")
+            self._parse("")
         self.assertEqual(str(context.exception),
                          "Reached unexpected end of file.")
 
     def test_garbage(self):
         """Invalid input."""
         with self.assertRaises(LexerException) as context:
-            self._assertDoesNotParse("%!@#")
+            self._parse("%!@#")
         self.assertEqual(str(context.exception),
                          "Illegal character '%' at line 1.")
+
+    def test_single_line_comments(self):
+        self._assertParse("""
+            // Package P
+            package P   // This is P
+            // EOF
+        """)
+
+    def test_multiline_comments(self):
+        self._assertParse("""
+            /* Package P
+            */
+            package P   /* This is P */
+            /* EOF
+            */
+        """)
+
+    def test_structured_comments(self):
+        self._assertParse("""
+            <** @description: Package P
+            **>
+            package P
+        """)
 
     def test_empty_package(self):
         package = self._assertParse("package P")
@@ -202,3 +225,98 @@ class TestParserTopLevel(BaseTestCase):
         self.assertEqual(len(interface.attributes), 0)
         self.assertEqual(len(interface.methods), 0)
         self.assertEqual(len(interface.broadcasts), 0)
+
+
+class TestFrancaUserManualExamples(BaseTestCase):
+    """Test parsing various examples from the Franca user manual."""
+
+    def test_calculator_api(self):
+        self._assertParse("""
+            package P
+            interface CalculatorAPI {
+                method add {
+                    in {
+                        Float a
+                        Float b
+                    }
+                    out {
+                        Float sum
+                    }
+                }
+            }
+        """)
+
+    def test_example_interface(self):
+        self._assertParse("""
+            package P
+            interface ExampleInterface {
+                attribute Double temperature readonly noSubscriptions
+                attribute Boolean overheated
+            }
+        """)
+
+    def test_calculator_divide(self):
+        """Method "error extends ..." statements are not supported."""
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+            package P
+            interface Calculator {
+                method divide {
+                    in {
+                        UInt32 dividend
+                        UInt32 divisor
+                    }
+                    out {
+                        UInt32 quotient
+                        UInt32 remainder
+                    }
+                    error extends GenericErrors {
+                        DIVISION_BY_ZERO
+                        OVERFLOW
+                        UNDERFLOW
+                    }
+                }
+                enumeration GenericErrors {
+                    INVALID_PARAMATERS
+                    // ...
+                }
+            }
+        """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 13 near 'extends'.")
+
+    def test_calculator_divide2(self):
+        self._assertParse("""
+            package P
+            interface Calculator {
+                method divide {
+                    in {
+                        UInt32 dividend
+                        UInt32 divisor
+                    }
+                    out {
+                        UInt32 quotient
+                        UInt32 remainder
+                    }
+                    error CalcErrors
+                }
+                enumeration CalcErrors {
+                    DIVISION_BY_ZERO
+                    OVERFLOW
+                    UNDERFLOW
+                }
+            }
+        """)
+
+    def test_broadcast(self):
+        self._assertParse("""
+            package P
+            interface ExampleInterface {
+                broadcast buttonClicked {
+                    out {
+                        ButtonId id
+                        Boolean isLongPress
+                    }
+                }
+            }
+        """)

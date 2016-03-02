@@ -285,6 +285,7 @@ class Method(object):
         self.flags = flags if flags else []
         self.in_args = in_args if in_args else OrderedDict()
         self.out_args = out_args if out_args else OrderedDict()
+        # Errors can be an OrderedDict() or a CustomType enumeration reference.
         self.errors = errors if errors else OrderedDict()
 
 

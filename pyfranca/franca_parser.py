@@ -178,22 +178,42 @@ class Parser(object):
         """
         def : TYPECOLLECTION ID '{' typecollection_members '}'
         """
-        members = Parser._interface_def(p[4])
-        if members["attributes"]:
-            raise ParserException("Attributes cannot be part of type "
-                                  "collections.")
-        if members["methods"]:
-            raise ParserException("Methods cannot be part of type collections.")
-        if members["broadcasts"]:
-            raise ParserException("Broadcasts be part of type collections.")
-        p[0] = ast.TypeCollection(name=p[2],
-                                  flags=None,
-                                  version=members["version"],
-                                  typedefs=members["typedefs"],
-                                  enumerations=members["enumerations"],
-                                  structs=members["structs"],
-                                  arrays=members["arrays"],
-                                  maps=members["maps"])
+        typecollection = ast.TypeCollection(name=p[2])
+        if p[4]:
+            for member in p[4]:
+                if isinstance(member, ast.Version):
+                    if not typecollection.version:
+                        typecollection.version = member
+                    else:
+                        raise ParserException("Multiple version definitions.")
+                elif isinstance(member, ast.Typedef):
+                    if member.name not in typecollection:
+                        typecollection.typedefs[member.name] = member
+                    else:
+                        raise ParserException("Duplicate namespace member \"{}\".".format(member.name))
+                elif isinstance(member, ast.Enumeration):
+                    if member.name not in typecollection:
+                        typecollection.enumerations[member.name] = member
+                    else:
+                        raise ParserException("Duplicate namespace member \"{}\".".format(member.name))
+                elif isinstance(member, ast.Struct):
+                    if member.name not in typecollection:
+                        typecollection.structs[member.name] = member
+                    else:
+                        raise ParserException("Duplicate namespace member \"{}\".".format(member.name))
+                elif isinstance(member, ast.Array):
+                    if member.name not in typecollection:
+                        typecollection.arrays[member.name] = member
+                    else:
+                        raise ParserException("Duplicate namespace member \"{}\".".format(member.name))
+                elif isinstance(member, ast.Map):
+                    if member.name not in typecollection:
+                        typecollection.maps[member.name] = member
+                    else:
+                        raise ParserException("Duplicate namespace member \"{}\".".format(member.name))
+                else:
+                    raise ParserException("Unexpected type collection member type.")
+        p[0] = typecollection
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -462,7 +482,17 @@ class Parser(object):
         """
         arg_group_def : ERROR '{' enumerators '}'
         """
+        # TODO: Support "extends".
         p[0] = ErrorArgumentGroup(p[3])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_arg_group_def_4(p):
+        """
+        arg_group_def : ERROR ID
+        """
+        custom_type = ast.CustomType(name=p[2])
+        p[0] = ErrorArgumentGroup(custom_type)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
