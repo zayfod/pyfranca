@@ -5,9 +5,11 @@ python:
   - "3.4"
   - "3.5"
 install:
-  - pip install ply pep8 pylint .
+  - pip install ply pep8 pylint coveralls .
 script:
   - pep8 pyfranca
   - pylint --errors-only pyfranca
-  - python -m unittest discover pyfranca/test
+  - coverage run --source=pyfranca setup.py test
   - python setup.py check
+after_success:
+  coveralls

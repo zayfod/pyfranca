@@ -3,9 +3,12 @@
 
 *.pyc
 
+pyfranca/parser.out
+pyfranca/parsetab.py
+
 build/
 dist/
 MANIFEST
+*.egg-info/
 
-pyfranca/parser.out
-pyfranca/parsetab.py
+.coverage

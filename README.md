@@ -2,6 +2,8 @@ PyFranca
 ========
 
 [![Build Status](https://travis-ci.org/zayfod/pyfranca.svg?branch=master)](https://travis-ci.org/zayfod/pyfranca)
+[![Coverage Status](https://coveralls.io/repos/github/zayfod/pyfranca/badge.svg?branch=master)](https://coveralls.io/github/zayfod/pyfranca?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/zayfod/pyfranca/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/zayfod/pyfranca/?branch=master)
 [![PyPI Version](http://img.shields.io/pypi/v/pyfranca.svg)](https://pypi.python.org/pypi/pyfranca)
 
 
