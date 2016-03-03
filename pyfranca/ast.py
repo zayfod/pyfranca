@@ -60,12 +60,21 @@ class Namespace(object):
         for item in self.maps.values():
             item.namespace = self
 
+    def __contains__(self, item):
+        res = item in self.typedefs or \
+              item in self.enumerations or \
+              item in self.structs or \
+              item in self.arrays or \
+              item in self.maps
+        return res
+
 
 class TypeCollection(Namespace):
 
     def __init__(self, name, flags=None, version=None, typedefs=None,
                  enumerations=None, structs=None, arrays=None, maps=None):
-        super(TypeCollection, self).__init__(name, flags=flags, version=version,
+        super(TypeCollection, self).__init__(name, flags=flags,
+                                             version=version,
                                              typedefs=typedefs,
                                              enumerations=enumerations,
                                              structs=structs, arrays=arrays,
@@ -246,7 +255,8 @@ class Interface(Namespace):
 
     def __init__(self, name, flags=None, version=None, attributes=None,
                  methods=None, broadcasts=None, extends=None):
-        super(Interface, self).__init__(name=name, flags=flags, version=version)
+        super(Interface, self).__init__(name=name, flags=flags,
+                                        version=version)
         self.attributes = attributes if attributes else OrderedDict()
         self.methods = methods if methods else OrderedDict()
         self.broadcasts = broadcasts if broadcasts else OrderedDict()
@@ -258,6 +268,13 @@ class Interface(Namespace):
             item.namespace = self
         for item in self.broadcasts.values():
             item.namespace = self
+
+    def __contains__(self, item):
+        res = super(Interface, self).__contains__(item) or \
+              item in self.attributes or \
+              item in self.methods or \
+              item in self.broadcasts
+        return res
 
 
 class Version(object):

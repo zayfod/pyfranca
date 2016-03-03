@@ -9,4 +9,5 @@ install:
 script:
   - pep8 pyfranca
   - pylint --errors-only pyfranca
+  - python -m unittest discover pyfranca/test
   - python setup.py check

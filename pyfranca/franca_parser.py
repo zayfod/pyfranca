@@ -190,29 +190,35 @@ class Parser(object):
                     if member.name not in typecollection:
                         typecollection.typedefs[member.name] = member
                     else:
-                        raise ParserException("Duplicate namespace member \"{}\".".format(member.name))
+                        raise ParserException("Duplicate namespace member "
+                                              "\"{}\".".format(member.name))
                 elif isinstance(member, ast.Enumeration):
                     if member.name not in typecollection:
                         typecollection.enumerations[member.name] = member
                     else:
-                        raise ParserException("Duplicate namespace member \"{}\".".format(member.name))
+                        raise ParserException("Duplicate namespace member "
+                                              "\"{}\".".format(member.name))
                 elif isinstance(member, ast.Struct):
                     if member.name not in typecollection:
                         typecollection.structs[member.name] = member
                     else:
-                        raise ParserException("Duplicate namespace member \"{}\".".format(member.name))
+                        raise ParserException("Duplicate namespace member "
+                                              "\"{}\".".format(member.name))
                 elif isinstance(member, ast.Array):
                     if member.name not in typecollection:
                         typecollection.arrays[member.name] = member
                     else:
-                        raise ParserException("Duplicate namespace member \"{}\".".format(member.name))
+                        raise ParserException("Duplicate namespace member "
+                                              "\"{}\".".format(member.name))
                 elif isinstance(member, ast.Map):
                     if member.name not in typecollection:
                         typecollection.maps[member.name] = member
                     else:
-                        raise ParserException("Duplicate namespace member \"{}\".".format(member.name))
+                        raise ParserException("Duplicate namespace member "
+                                              "\"{}\".".format(member.name))
                 else:
-                    raise ParserException("Unexpected type collection member type.")
+                    raise ParserException("Unexpected type collection "
+                                          "member type.")
         p[0] = typecollection
 
     # noinspection PyIncorrectDocstring
@@ -369,8 +375,8 @@ class Parser(object):
                     if not in_args:
                         in_args = arg_group.arguments
                     else:
-                        raise ParserException("Multiple in argument definitions"
-                                              "for a method.")
+                        raise ParserException("Multiple in argument "
+                                              "definitions for a method.")
                 elif isinstance(arg_group, OutArgumentGroup):
                     if not out_args:
                         out_args = arg_group.arguments
@@ -501,8 +507,8 @@ class Parser(object):
         """
         in_args, out_args, errors = Parser._method_def(p[5])
         if in_args or errors:
-            raise ParserException("In arguments and errors cannot be part of a "
-                                  "broadcast definition.")
+            raise ParserException("In arguments and errors cannot be part "
+                                  "of a broadcast definition.")
         p[0] = ast.Broadcast(name=p[2], flags=p[3], out_args=out_args)
 
     # noinspection PyIncorrectDocstring
