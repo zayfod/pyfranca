@@ -489,10 +489,9 @@ class Parser(object):
     @staticmethod
     def p_arg_group_def_4(p):
         """
-        arg_group_def : ERROR ID
+        arg_group_def : ERROR type
         """
-        custom_type = ast.CustomType(name=p[2])
-        p[0] = ErrorArgumentGroup(custom_type)
+        p[0] = ErrorArgumentGroup(p[2])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
