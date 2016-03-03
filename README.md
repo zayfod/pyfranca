@@ -1,5 +1,12 @@
+PyFranca
+========
+
+[![Build Status](https://travis-ci.org/zayfod/pyfranca.svg?branch=master)](https://travis-ci.org/zayfod/pyfranca)
+[![PyPI Version](http://img.shields.io/pypi/v/pyfranca.svg)](https://pypi.python.org/pypi/pyfranca)
+
+
 Introduction
-============
+------------
 
 `PyFranca` is a Python module and tools for working with [Franca interface definition language](https://github.com/franca/franca) (IDL) files (`.fidl`). It is entirely written in Python and intended to be used as a base for developing code generation and processing tools.
 
@@ -18,7 +25,7 @@ This project is a tool for exploring the capabilities of Franca. It is unstable 
 
 
 Usage
-=====
+-----
 
 Parsing Franca IDL:
 
@@ -50,7 +57,7 @@ Parsing a `.fidl` file:
     	
 
 Limitations
-===========
+-----------
 
 The following Franca features are not supported:
 
@@ -62,14 +69,14 @@ The following Franca features are not supported:
 
 
 Requirements
-============
+------------
 
 - Python 2.7 or 3
 - PLY
 
 
 Installation
-============
+------------
 
 Using pip:
 
@@ -83,7 +90,7 @@ From source:
 
 
 Bugs
-====
+----
 
 Bug reports and patches should be sent via GitHub:
 

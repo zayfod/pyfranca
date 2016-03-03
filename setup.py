@@ -10,7 +10,8 @@ setup(
     author = "Kaloyan Tenchov",
     author_email = "zayfod@gmail.com",
     url = "http://github.com/zayfod/pyfranca",
-    download_url = "http://github.com/zayfod/pyfranca/tarball/0.1.0",
+    license = "MIT",
+    platforms = "Python 2.6 and later.",
     keywords = ["franca", "idl", "fidl", "parser"],
-    requires = ["ply"]
+    requires = ["ply"],
 )

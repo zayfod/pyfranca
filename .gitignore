@@ -1,8 +1,11 @@
 
 .idea/
-build/
 
 *.pyc
+
+build/
+dist/
+MANIFEST
 
 pyfranca/parser.out
 pyfranca/parsetab.py
