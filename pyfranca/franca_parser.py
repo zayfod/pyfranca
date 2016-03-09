@@ -460,7 +460,7 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_arg_froup_defs_3(p):
+    def p_arg_group_defs_3(p):
         """
         arg_group_defs : empty
         """

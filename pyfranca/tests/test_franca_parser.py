@@ -18,10 +18,6 @@ class BaseTestCase(unittest.TestCase):
         self.assertIsInstance(package, Package)
         return package
 
-    def _assertDoesNotParse(self, data):
-        package = self._parse(data)
-        self.assertIsNone(package)
-
 
 class TestTopLevel(BaseTestCase):
     """Test parsing top-level Franca elements."""
@@ -70,6 +66,15 @@ class TestTopLevel(BaseTestCase):
         self.assertEqual(len(package.imports), 0)
         self.assertEqual(len(package.typecollections), 0)
         self.assertEqual(len(package.interfaces), 0)
+
+    def test_multiple_package_definitions(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                package P2
+            """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 3 near 'package'.")
 
     def test_import_namespace(self):
         package = self._assertParse("package P import NS from \"test.fidl\"")
@@ -318,5 +323,110 @@ class TestFrancaUserManualExamples(BaseTestCase):
                         Boolean isLongPress
                     }
                 }
+            }
+        """)
+
+class TestMisc(BaseTestCase):
+    """Test parsing various FIDL examples."""
+
+    def test_all_supported(self):
+        self._assertParse("""
+            package P
+
+            import m1.* from "m1.fidl"
+            import model "m2.fidl"
+
+            typeCollection TC {
+                version { major 1 minor 0 }
+
+                typedef MyInt8 is Int8
+                typedef MyInt16 is Int16
+                typedef MyInt32 is Int32
+                typedef MyInt64 is Int64
+                typedef MyUInt8 is UInt8
+                typedef MyUInt16 is UInt16
+                typedef MyUInt32 is UInt32
+                typedef MyUInt64 is UInt64
+                typedef MyBoolean is Boolean
+                typedef MyFloat is Float
+                typedef MyDouble is Double
+                typedef MyString is String
+                typedef MyByteBuffer is ByteBuffer
+
+                typedef MyInt32Array is Int32[]
+                typedef MyThis is MyThat
+
+                enumeration E {
+                    FALSE = 0
+                    TRUE
+                }
+                enumeration E2 extends E {}
+
+                struct S {
+                    Int32 a
+                    Int32[] b
+                }
+                struct S2 extends S {}
+                struct S3 polymorphic {}
+
+                array A of UInt8
+
+                map M {
+                    String to Int32
+                }
+                map M2 {
+                    Key to Value
+                }
+            }
+
+            interface I {
+                version { major 1 minor 0 }
+
+                attribute Int32 A
+                attribute Int32 A2 readonly
+                attribute Int32 A3 noSubscriptions
+
+                method M {
+                    in {
+                        Float a
+                        Float[] b
+                    }
+                    out {
+                        Float result
+                    }
+                    error {
+                        FAILURE = 0
+                        SUCCESS
+                    }
+                }
+                method M2 fireAndForget {}
+
+                broadcast B {
+                    out {
+                        Int32 x
+                    }
+                }
+                broadcast B2 selective {}
+
+                typedef ITD is String
+
+                enumeration IE {
+                    FALSE = 0
+                    TRUE
+                }
+
+                struct IS {
+                    Int32 a
+                    Int32[] b
+                }
+
+                array IA of UInt8
+
+                map IM {
+                    String to Int32
+                }
+            }
+
+            interface I2 extends I {
             }
         """)
