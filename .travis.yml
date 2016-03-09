@@ -9,7 +9,7 @@ install:
 script:
   - pep8 pyfranca
   - pylint --errors-only pyfranca
-  - coverage run --source=pyfranca setup.py test
   - python setup.py check
+  - coverage run --source=pyfranca setup.py test
 after_success:
   coveralls

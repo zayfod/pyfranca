@@ -326,6 +326,7 @@ class TestFrancaUserManualExamples(BaseTestCase):
             }
         """)
 
+
 class TestMisc(BaseTestCase):
     """Test parsing various FIDL examples."""
 
