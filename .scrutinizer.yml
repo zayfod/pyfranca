@@ -23,7 +23,7 @@ checks:
         basic_expression_not_assigned: true
         variables_global_statement: true
         variables_global_at_module_level: true
-		# Check that no FIXME or TODO comments are present
+        # Check that no FIXME or TODO comments are present
         miscellaneous_fixme: false
         imports_wildcard_import: true
         format_unnecessary_semicolon: true
@@ -45,7 +45,7 @@ checks:
         classes_bad_classmethod_argument: true
         classes_attribute_defined_outside_init: true
         basic_star_args: true
-		# Check that every module, function, class and method has a docstring 
+        # Check that every module, function, class and method has a docstring 
         basic_missing_docstring: false
         basic_empty_docstring: true
         basic_exec_used: true
