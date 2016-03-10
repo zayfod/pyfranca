@@ -23,7 +23,8 @@ checks:
         basic_expression_not_assigned: true
         variables_global_statement: true
         variables_global_at_module_level: true
-        miscellaneous_fixme: true
+		# Check that no FIXME or TODO comments are present
+        miscellaneous_fixme: false
         imports_wildcard_import: true
         format_unnecessary_semicolon: true
         format_trailing_whitespace: true
@@ -44,7 +45,8 @@ checks:
         classes_bad_classmethod_argument: true
         classes_attribute_defined_outside_init: true
         basic_star_args: true
-        basic_missing_docstring: true
+		# Check that every module, function, class and method has a docstring 
+        basic_missing_docstring: false
         basic_empty_docstring: true
         basic_exec_used: true
         basic_eval_used: true
@@ -141,6 +143,8 @@ checks:
 filter:
     excluded_paths:
         - '*/tests/*'
+before_commands:
+    - pip install ply
 build:
     tests:
         override:
