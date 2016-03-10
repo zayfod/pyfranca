@@ -14,6 +14,6 @@ setup(
     license="MIT",
     platforms="Python 2.6 and later.",
     keywords=["franca", "idl", "fidl", "parser"],
-    requires=["ply"],
+    install_requires=["ply"],
     test_suite="pyfranca.tests.get_suite",
 )
