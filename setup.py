@@ -1,10 +1,10 @@
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 setup(
     name="pyfranca",
-    packages=find_packages(),
+    packages=["pyfranca"],
     version="0.2.0",
     description="Python parser and tools for working with the Franca "
                 "interface definition language.",
@@ -15,5 +15,5 @@ setup(
     platforms="Python 2.6 and later.",
     keywords=["franca", "idl", "fidl", "parser"],
     requires=["ply"],
-    test_suite="pyfranca.tests",
+    test_suite="pyfranca.tests.get_suite",
 )
