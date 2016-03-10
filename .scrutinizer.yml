@@ -144,7 +144,7 @@ filter:
     excluded_paths:
         - '*/tests/*'
 before_commands:
-    - pip install ply
+    - pip install ply coveralls
 build:
     tests:
         override:
