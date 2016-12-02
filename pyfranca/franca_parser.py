@@ -601,7 +601,7 @@ class Parser(object):
         """
         struct_def : STRUCT ID flag_defs '{' struct_fields '}'
         """
-        p[0] = ast.Struct(name=p[2], fields=p[4], flags=p[3])
+        p[0] = ast.Struct(name=p[2], fields=p[5], flags=p[3])
 
     # noinspection PyIncorrectDocstring
     @staticmethod

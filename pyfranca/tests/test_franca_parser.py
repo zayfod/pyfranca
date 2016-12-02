@@ -3,7 +3,7 @@ import unittest
 
 from pyfranca.franca_parser import Parser, ParserException
 from pyfranca.franca_lexer import LexerException
-from pyfranca.ast import Package
+from pyfranca import ast
 
 
 class BaseTestCase(unittest.TestCase):
@@ -15,7 +15,7 @@ class BaseTestCase(unittest.TestCase):
 
     def _assertParse(self, data):
         package = self._parse(data)
-        self.assertIsInstance(package, Package)
+        self.assertIsInstance(package, ast.Package)
         return package
 
 
@@ -431,3 +431,65 @@ class TestMisc(BaseTestCase):
             interface I2 extends I {
             }
         """)
+
+
+class TestStruct(BaseTestCase):
+    """Test parsing structures."""
+
+    def test_(self):
+        package = self._assertParse("""
+            package P
+
+            typeCollection TC {
+                struct S {
+                    Int32 a
+                    String b
+                }
+                struct S2 extends S {}
+                struct S3 polymorphic {}
+            }
+
+            interface I {
+                struct S4 {
+                    Int32 a
+                    String b
+                }
+            }
+        """)
+        typecollection = package.typecollections["TC"]
+        self.assertEqual(len(typecollection.structs), 3)
+        s = typecollection.structs["S"]
+        self.assertEqual(s.name, "S")
+        self.assertIsNone(s.extends)
+        self.assertIsNone(s.namespace)
+        self.assertEqual(len(s.fields), 2)
+        self.assertEqual(s.fields["a"].name, "a")
+        self.assertIsInstance(s.fields["a"].type, ast.Int32)
+        self.assertEqual(s.fields["b"].name, "b")
+        self.assertIsInstance(s.fields["b"].type, ast.String)
+        self.assertEqual(len(s.flags), 0)
+        s2 = typecollection.structs["S2"]
+        self.assertEqual(s2.name, "S2")
+        self.assertEqual(s2.extends, "S")
+        self.assertEqual(len(s2.fields), 0)
+        self.assertIsNone(s2.namespace)
+        self.assertEqual(len(s2.flags), 0)
+        s3 = typecollection.structs["S3"]
+        self.assertEqual(s3.name, "S3")
+        self.assertIsNone(s3.extends)
+        self.assertIsNone(s3.namespace)
+        self.assertEqual(len(s3.fields), 0)
+        self.assertEqual(len(s3.flags), 1)
+        self.assertEqual(s3.flags[0], "polymorphic")
+        i = package.interfaces["I"]
+        self.assertEqual(len(i.structs), 1)
+        s4 = i.structs["S4"]
+        self.assertEqual(s4.name, "S4")
+        self.assertIsNone(s4.extends)
+        self.assertIsNone(s4.namespace)
+        self.assertEqual(len(s4.fields), 2)
+        self.assertEqual(s4.fields["a"].name, "a")
+        self.assertIsInstance(s4.fields["a"].type, ast.Int32)
+        self.assertEqual(s4.fields["b"].name, "b")
+        self.assertIsInstance(s4.fields["b"].type, ast.String)
+        self.assertEqual(len(s4.flags), 0)
