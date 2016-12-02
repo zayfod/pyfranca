@@ -1,14 +1,13 @@
 
 import unittest
 
-from pyfranca.franca_parser import Parser, ParserException
-from pyfranca.franca_lexer import LexerException
-from pyfranca import ast
+from pyfranca import LexerException, ParserException, Parser, ast
 
 
 class BaseTestCase(unittest.TestCase):
 
-    def _parse(self, data):
+    @staticmethod
+    def _parse(data):
         parser = Parser()
         package = parser.parse(data)
         return package

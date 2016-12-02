@@ -31,7 +31,7 @@ Usage
 
 Parsing Franca IDL:
 
-    from pyfranca.franca_parser import Parser
+    from pyfranca import Parser
 
     parser = Parser()
     package = parser.parse("""
@@ -45,9 +45,8 @@ Parsing Franca IDL:
 
 Parsing a `.fidl` file:
 
-    from pyfranca.franca_lexer import LexerException
-    from pyfranca.franca_parser import Parser, ParserException
-
+    from pyfranca import LexerException, ParserException, Parser
+    
     parser = Parser()
     try:
         package = parser.parse_file("examples/Calculator.fidl")
