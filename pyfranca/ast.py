@@ -3,6 +3,16 @@ from abc import ABCMeta
 from collections import OrderedDict
 
 
+class ASTException(Exception):
+
+    def __init__(self, message):
+        super(ASTException, self).__init__()
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
 class Package(object):
     """
     AST representation of a Franca package.
@@ -37,28 +47,19 @@ class Namespace(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, flags=None, version=None, typedefs=None,
-                 enumerations=None, structs=None, arrays=None, maps=None):
+    def __init__(self, name, flags=None, members=None):
         self.package = None
         self.name = name
         self.flags = flags if flags else []         # Unused
-        self.version = version
-        self.typedefs = typedefs if typedefs else OrderedDict()
-        self.enumerations = enumerations if enumerations else OrderedDict()
-        self.structs = structs if structs else OrderedDict()
-        self.arrays = arrays if arrays else OrderedDict()
-        self.maps = maps if maps else OrderedDict()
-
-        for item in self.typedefs.values():
-            item.namespace = self
-        for item in self.enumerations.values():
-            item.namespace = self
-        for item in self.structs.values():
-            item.namespace = self
-        for item in self.arrays.values():
-            item.namespace = self
-        for item in self.maps.values():
-            item.namespace = self
+        self.version = None
+        self.typedefs = OrderedDict()
+        self.enumerations = OrderedDict()
+        self.structs = OrderedDict()
+        self.arrays = OrderedDict()
+        self.maps = OrderedDict()
+        if members:
+            for member in members:
+                self._add_member(member)
 
     def __contains__(self, item):
         res = item in self.typedefs or \
@@ -68,33 +69,54 @@ class Namespace(object):
               item in self.maps
         return res
 
+    def _add_member(self, member):
+        if isinstance(member, Version):
+            if not self.version:
+                self.version = member
+            else:
+                raise ASTException("Multiple version definitions.")
+        elif isinstance(member, Type):
+            if member.name in self:
+                raise ASTException("Duplicate namespace member "
+                                   "\"{}\".".format(member.name))
+            if isinstance(member, Typedef):
+                self.typedefs[member.name] = member
+            elif isinstance(member, Enumeration):
+                self.enumerations[member.name] = member
+            elif isinstance(member, Struct):
+                self.structs[member.name] = member
+            elif isinstance(member, Array):
+                self.arrays[member.name] = member
+            elif isinstance(member, Map):
+                self.maps[member.name] = member
+            else:
+                raise ASTException("Unexpected namespace member type.")
+            member.namespace = self
+        else:
+            raise ValueError("Unexpected namespace member type.")
+
 
 class TypeCollection(Namespace):
 
-    def __init__(self, name, flags=None, version=None, typedefs=None,
-                 enumerations=None, structs=None, arrays=None, maps=None):
+    def __init__(self, name, flags=None, members=None):
         super(TypeCollection, self).__init__(name, flags=flags,
-                                             version=version,
-                                             typedefs=typedefs,
-                                             enumerations=enumerations,
-                                             structs=structs, arrays=arrays,
-                                             maps=maps)
-
-
-class Typedef(object):
-
-    def __init__(self, name, base_type):
-        self.namespace = None
-        self.name = name
-        self.type = base_type
+                                             members=members)
 
 
 class Type(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self):
-        self.name = self.__class__.__name__
+    def __init__(self, name=None):
+        self.namespace = None
+        self.name = name if name else self.__class__.__name__
+
+
+class Typedef(Type):
+
+    def __init__(self, name, base_type):
+        super(Typedef, self).__init__(name)
+        self.type = base_type
 
 
 class PrimitiveType(Type):
@@ -189,7 +211,6 @@ class ComplexType(Type):
 
     def __init__(self):
         super(ComplexType, self).__init__()
-        self.namespace = None
 
 
 class Enumeration(ComplexType):
@@ -253,21 +274,15 @@ class CustomType(Type):
 
 class Interface(Namespace):
 
-    def __init__(self, name, flags=None, version=None, attributes=None,
-                 methods=None, broadcasts=None, extends=None):
-        super(Interface, self).__init__(name=name, flags=flags,
-                                        version=version)
-        self.attributes = attributes if attributes else OrderedDict()
-        self.methods = methods if methods else OrderedDict()
-        self.broadcasts = broadcasts if broadcasts else OrderedDict()
+    def __init__(self, name, flags=None, members=None, extends=None):
+        super(Interface, self).__init__(name=name, flags=flags, members=None)
+        self.attributes = OrderedDict()
+        self.methods = OrderedDict()
+        self.broadcasts = OrderedDict()
         self.extends = extends
-
-        for item in self.attributes.values():
-            item.namespace = self
-        for item in self.methods.values():
-            item.namespace = self
-        for item in self.broadcasts.values():
-            item.namespace = self
+        if members:
+            for member in members:
+                self._add_member(member)
 
     def __contains__(self, item):
         res = super(Interface, self).__contains__(item) or \
@@ -276,6 +291,23 @@ class Interface(Namespace):
               item in self.broadcasts
         return res
 
+    def _add_member(self, member):
+        if isinstance(member, Type):
+            if member.name in self:
+                raise ASTException("Duplicate namespace member "
+                                   "\"{}\".".format(member.name))
+            if isinstance(member, Attribute):
+                self.attributes[member.name] = member
+            elif isinstance(member, Method):
+                self.methods[member.name] = member
+            elif isinstance(member, Broadcast):
+                self.broadcasts[member.name] = member
+            else:
+                super(Interface, self)._add_member(member)
+            member.namespace = self
+        else:
+            super(Interface, self)._add_member(member)
+
 
 class Version(object):
 
@@ -283,22 +315,23 @@ class Version(object):
         self.major = major
         self.minor = minor
 
+    def __str__(self):
+        return "{}.{}".format(self.major, self.minor)
 
-class Attribute(object):
+
+class Attribute(Type):
 
     def __init__(self, name, attr_type, flags=None):
-        self.namespace = None
-        self.name = name
+        super(Attribute, self).__init__(name)
         self.type = attr_type
         self.flags = flags if flags else []
 
 
-class Method(object):
+class Method(Type):
 
     def __init__(self, name, flags=None,
                  in_args=None, out_args=None, errors=None):
-        self.namespace = None
-        self.name = name
+        super(Method, self).__init__(name)
         self.flags = flags if flags else []
         self.in_args = in_args if in_args else OrderedDict()
         self.out_args = out_args if out_args else OrderedDict()
@@ -306,11 +339,10 @@ class Method(object):
         self.errors = errors if errors else OrderedDict()
 
 
-class Broadcast(object):
+class Broadcast(Type):
 
     def __init__(self, name, flags=None, out_args=None):
-        self.namespace = None
-        self.name = name
+        super(Broadcast, self).__init__(name)
         self.flags = flags if flags else []
         self.out_args = out_args if out_args else OrderedDict()
 

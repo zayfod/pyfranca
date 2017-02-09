@@ -432,13 +432,170 @@ class TestMisc(BaseTestCase):
         """)
 
 
-class TestStruct(BaseTestCase):
-    """Test parsing structures."""
+class TestTypeCollections(BaseTestCase):
+    """Test parsing type collections."""
 
-    def test_(self):
+    def test_normal(self):
         package = self._assertParse("""
             package P
+            typeCollection TC {
+                version { major 12 minor 34 }
+            }
+        """)
+        tc = package.typecollections["TC"]
+        self.assertEqual(tc.package, package)
+        self.assertEqual(tc.name, "TC")
+        self.assertEqual(tc.flags, [])
+        self.assertEqual(str(tc.version), "12.34")
+        self.assertEqual(len(tc.typedefs), 0)
+        self.assertEqual(len(tc.enumerations), 0)
+        self.assertEqual(len(tc.structs), 0)
+        self.assertEqual(len(tc.arrays), 0)
+        self.assertEqual(len(tc.maps), 0)
 
+    def test_multiple_versions(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                typeCollection TC {
+                    version { major 1 minor 0 }
+                    version { major 2 minor 0 }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Multiple version definitions.")
+
+    def test_duplicate_member(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                typeCollection TC {
+                    typedef X is MyThat
+                    array X of UInt8
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Duplicate namespace member \"X\".")
+
+
+class TestInterfaces(BaseTestCase):
+    """Test parsing interfaces."""
+
+    def test_normal(self):
+        package = self._assertParse("""
+            package P
+            interface I {
+                version { major 12 minor 34 }
+                method add {
+                    in {
+                        Float a
+                        Float b
+                    }
+                    out {
+                        Float sum
+                    }
+                }
+            }
+            interface I2 extends I {
+            }
+        """)
+        i = package.interfaces["I"]
+        self.assertEqual(i.package, package)
+        self.assertEqual(i.name, "I")
+        self.assertEqual(i.flags, [])
+        self.assertEqual(str(i.version), "12.34")
+        self.assertEqual(len(i.typedefs), 0)
+        self.assertEqual(len(i.enumerations), 0)
+        self.assertEqual(len(i.structs), 0)
+        self.assertEqual(len(i.arrays), 0)
+        self.assertEqual(len(i.maps), 0)
+        self.assertEqual(len(i.attributes), 0)
+        self.assertEqual(len(i.methods), 1)
+        self.assertEqual(len(i.broadcasts), 0)
+        self.assertIsNone(i.extends)
+        i2 = package.interfaces["I2"]
+        self.assertEqual(i2.package, package)
+        self.assertEqual(i2.name, "I2")
+        self.assertIsNone(i2.version)
+        self.assertEqual(i2.extends, "I")
+
+    def test_multiple_versions(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                interface I {
+                    version { major 1 minor 0 }
+                    version { major 2 minor 0 }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Multiple version definitions.")
+
+    def test_duplicate_member(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                interface I {
+                    typedef X is MyThat
+                    method X {}
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Duplicate namespace member \"X\".")
+
+
+class TestEnumerations(BaseTestCase):
+    """Test parsing enumerations."""
+
+    def test_normal(self):
+        package = self._assertParse("""
+            package P
+            typeCollection TC {
+                enumeration E {
+                    FALSE = 0
+                    TRUE
+                }
+                enumeration E2 extends E {}
+            }
+        """)
+        typecollection = package.typecollections["TC"]
+        e = typecollection.enumerations["E"]
+        self.assertEqual(e.namespace, typecollection)
+        self.assertEqual(e.name, "E")
+        self.assertIsNone(e.extends)
+        self.assertEqual(e.flags, [])
+        self.assertEqual(len(e.enumerators), 2)
+        ee = e.enumerators["FALSE"]
+        self.assertEqual(ee.name, "FALSE")
+        self.assertEqual(ee.value, 0)
+        ee = e.enumerators["TRUE"]
+        self.assertEqual(ee.name, "TRUE")
+        self.assertIsNone(ee.value)
+        e2 = typecollection.enumerations["E2"]
+        self.assertEqual(e2.namespace, typecollection)
+        self.assertEqual(e2.name, "E2")
+        self.assertEqual(e2.extends, "E")
+        self.assertEqual(e2.flags, [])
+        self.assertEqual(len(e2.enumerators), 0)
+
+    def test_duplicate_enumerator(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                typeCollection TC {
+                    enumeration E { a a }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Duplicate enumerator \"a\".")
+
+
+class TestStructs(BaseTestCase):
+    """Test parsing structures."""
+
+    def test_normal(self):
+        package = self._assertParse("""
+            package P
             typeCollection TC {
                 struct S {
                     Int32 a
@@ -447,7 +604,6 @@ class TestStruct(BaseTestCase):
                 struct S2 extends S {}
                 struct S3 polymorphic {}
             }
-
             interface I {
                 struct S4 {
                     Int32 a
@@ -456,11 +612,10 @@ class TestStruct(BaseTestCase):
             }
         """)
         typecollection = package.typecollections["TC"]
-        self.assertEqual(len(typecollection.structs), 3)
         s = typecollection.structs["S"]
         self.assertEqual(s.name, "S")
         self.assertIsNone(s.extends)
-        self.assertIsNone(s.namespace)
+        self.assertEqual(s.namespace, typecollection)
         self.assertEqual(len(s.fields), 2)
         self.assertEqual(s.fields["a"].name, "a")
         self.assertIsInstance(s.fields["a"].type, ast.Int32)
@@ -471,24 +626,78 @@ class TestStruct(BaseTestCase):
         self.assertEqual(s2.name, "S2")
         self.assertEqual(s2.extends, "S")
         self.assertEqual(len(s2.fields), 0)
-        self.assertIsNone(s2.namespace)
+        self.assertEqual(s2.namespace, typecollection)
         self.assertEqual(len(s2.flags), 0)
         s3 = typecollection.structs["S3"]
         self.assertEqual(s3.name, "S3")
         self.assertIsNone(s3.extends)
-        self.assertIsNone(s3.namespace)
+        self.assertEqual(s3.namespace, typecollection)
         self.assertEqual(len(s3.fields), 0)
         self.assertEqual(len(s3.flags), 1)
         self.assertEqual(s3.flags[0], "polymorphic")
-        i = package.interfaces["I"]
-        self.assertEqual(len(i.structs), 1)
-        s4 = i.structs["S4"]
+        interface = package.interfaces["I"]
+        self.assertEqual(len(interface.structs), 1)
+        s4 = interface.structs["S4"]
         self.assertEqual(s4.name, "S4")
         self.assertIsNone(s4.extends)
-        self.assertIsNone(s4.namespace)
+        self.assertEqual(s4.namespace, interface)
         self.assertEqual(len(s4.fields), 2)
         self.assertEqual(s4.fields["a"].name, "a")
         self.assertIsInstance(s4.fields["a"].type, ast.Int32)
         self.assertEqual(s4.fields["b"].name, "b")
         self.assertIsInstance(s4.fields["b"].type, ast.String)
         self.assertEqual(len(s4.flags), 0)
+
+    def test_duplicate_field(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                typeCollection TC {
+                    struct S {
+                        Int32 a
+                        String a
+                    }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Duplicate structure field \"a\".")
+
+
+class TestMethods(BaseTestCase):
+    """Test parsing methods."""
+
+    def test_duplicate_argument(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                interface I {
+                    method M {
+                        in {
+                            Float a
+                            Float a
+                        }
+                    }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Duplicate argument \"a\".")
+
+
+class TestBroadcasts(BaseTestCase):
+    """Test parsing broadcasts."""
+
+    def test_duplicate_argument(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                interface I {
+                    broadcast B {
+                        out {
+                            Float a
+                            Float a
+                        }
+                    }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Duplicate argument \"a\".")

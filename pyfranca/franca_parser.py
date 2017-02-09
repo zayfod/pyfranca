@@ -133,94 +133,16 @@ class Parser(object):
         """
         p[0] = ast.Import(file_name=p[3])
 
-    @staticmethod
-    def _interface_def(members):
-        res = {
-            "version": None,
-            "attributes": OrderedDict(),
-            "methods": OrderedDict(),
-            "broadcasts": OrderedDict(),
-            "typedefs": OrderedDict(),
-            "enumerations": OrderedDict(),
-            "structs": OrderedDict(),
-            "arrays": OrderedDict(),
-            "maps": OrderedDict(),
-        }
-        if members:
-            for member in members:
-                if isinstance(member, ast.Version):
-                    if not res["version"]:
-                        res["version"] = member
-                    else:
-                        raise ParserException("Multiple version definitions.")
-                elif isinstance(member, ast.Attribute):
-                    res["attributes"][member.name] = member
-                elif isinstance(member, ast.Method):
-                    res["methods"][member.name] = member
-                elif isinstance(member, ast.Broadcast):
-                    res["broadcasts"][member.name] = member
-                elif isinstance(member, ast.Typedef):
-                    res["typedefs"][member.name] = member
-                elif isinstance(member, ast.Enumeration):
-                    res["enumerations"][member.name] = member
-                elif isinstance(member, ast.Struct):
-                    res["structs"][member.name] = member
-                elif isinstance(member, ast.Array):
-                    res["arrays"][member.name] = member
-                elif isinstance(member, ast.Map):
-                    res["maps"][member.name] = member
-                else:
-                    raise ParserException("Unexpected interface member type.")
-        return res
-
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_typecollection(p):
         """
         def : TYPECOLLECTION ID '{' typecollection_members '}'
         """
-        typecollection = ast.TypeCollection(name=p[2])
-        if p[4]:
-            for member in p[4]:
-                if isinstance(member, ast.Version):
-                    if not typecollection.version:
-                        typecollection.version = member
-                    else:
-                        raise ParserException("Multiple version definitions.")
-                elif isinstance(member, ast.Typedef):
-                    if member.name not in typecollection:
-                        typecollection.typedefs[member.name] = member
-                    else:
-                        raise ParserException("Duplicate namespace member "
-                                              "\"{}\".".format(member.name))
-                elif isinstance(member, ast.Enumeration):
-                    if member.name not in typecollection:
-                        typecollection.enumerations[member.name] = member
-                    else:
-                        raise ParserException("Duplicate namespace member "
-                                              "\"{}\".".format(member.name))
-                elif isinstance(member, ast.Struct):
-                    if member.name not in typecollection:
-                        typecollection.structs[member.name] = member
-                    else:
-                        raise ParserException("Duplicate namespace member "
-                                              "\"{}\".".format(member.name))
-                elif isinstance(member, ast.Array):
-                    if member.name not in typecollection:
-                        typecollection.arrays[member.name] = member
-                    else:
-                        raise ParserException("Duplicate namespace member "
-                                              "\"{}\".".format(member.name))
-                elif isinstance(member, ast.Map):
-                    if member.name not in typecollection:
-                        typecollection.maps[member.name] = member
-                    else:
-                        raise ParserException("Duplicate namespace member "
-                                              "\"{}\".".format(member.name))
-                else:
-                    raise ParserException("Unexpected type collection "
-                                          "member type.")
-        p[0] = typecollection
+        try:
+            p[0] = ast.TypeCollection(name=p[2], flags=None, members=p[4])
+        except ast.ASTException as e:
+            raise ParserException(e.message)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -282,19 +204,11 @@ class Parser(object):
         """
         def : INTERFACE ID '{' interface_members '}'
         """
-        members = Parser._interface_def(p[4])
-        p[0] = ast.Interface(name=p[2],
-                             flags=None,
-                             version=members["version"],
-                             attributes=members["attributes"],
-                             methods=members["methods"],
-                             broadcasts=members["broadcasts"],
-                             extends=None)
-        p[0].typedefs = members["typedefs"]
-        p[0].enumerations = members["enumerations"]
-        p[0].structs = members["structs"]
-        p[0].arrays = members["arrays"]
-        p[0].maps = members["maps"]
+        try:
+            p[0] = ast.Interface(name=p[2], flags=None, members=p[4],
+                                 extends=None)
+        except ast.ASTException as e:
+            raise ParserException(e.message)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -302,19 +216,11 @@ class Parser(object):
         """
         def : INTERFACE ID EXTENDS ID '{' interface_members '}'
         """
-        members = Parser._interface_def(p[6])
-        p[0] = ast.Interface(name=p[2],
-                             flags=None,
-                             version=members["version"],
-                             attributes=members["attributes"],
-                             methods=members["methods"],
-                             broadcasts=members["broadcasts"],
-                             extends=p[4])
-        p[0].typedefs = members["typedefs"]
-        p[0].enumerations = members["enumerations"]
-        p[0].structs = members["structs"]
-        p[0].arrays = members["arrays"]
-        p[0].maps = members["maps"]
+        try:
+            p[0] = ast.Interface(name=p[2], flags=None, members=p[6],
+                                 extends=p[4])
+        except ast.ASTException as e:
+            raise ParserException(e.message)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -519,7 +425,11 @@ class Parser(object):
         arg_defs : arg_defs arg_def
         """
         p[0] = p[1]
-        p[0].append(p[2])
+        if p[2].name not in p[0]:
+            p[0][p[2].name] = p[2]
+        else:
+            raise ParserException("Duplicate argument "
+                                  "\"{}\".".format(p[2].name))
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -527,7 +437,8 @@ class Parser(object):
         """
         arg_defs : arg_def
         """
-        p[0] = [p[1]]
+        p[0] = OrderedDict()
+        p[0][p[1].name] = p[1]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -560,7 +471,11 @@ class Parser(object):
         enumerators : enumerators enumerator
         """
         p[0] = p[1]
-        p[0][p[2].name] = p[2]
+        if p[2].name not in p[0]:
+            p[0][p[2].name] = p[2]
+        else:
+            raise ParserException("Duplicate enumerator "
+                                  "\"{}\".".format(p[2].name))
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -618,7 +533,11 @@ class Parser(object):
         struct_fields : struct_fields struct_field
         """
         p[0] = p[1]
-        p[0][p[2].name] = p[2]
+        if p[2].name not in p[0]:
+            p[0][p[2].name] = p[2]
+        else:
+            raise ParserException("Duplicate structure field "
+                                  "\"{}\".".format(p[2].name))
 
     # noinspection PyIncorrectDocstring
     @staticmethod
