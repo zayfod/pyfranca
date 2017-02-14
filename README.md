@@ -62,10 +62,13 @@ Limitations
 
 The following Franca features are not supported:
 
-- structured comments are currently ignored
+- structured comments
+- packages in multiple files
+- dots in type collection and interface names
 - constants
 - expressions
 - unions
+- method overloading
 - contracts
 
 
