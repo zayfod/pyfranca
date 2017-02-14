@@ -264,10 +264,10 @@ class Map(ComplexType):
         self.value_type = value_type
 
 
-class CustomType(Type):
+class Reference(Type):
 
     def __init__(self, name):
-        super(CustomType, self).__init__()
+        super(Reference, self).__init__()
         self.name = name
         self.reference = None
 
@@ -335,7 +335,7 @@ class Method(Type):
         self.flags = flags if flags else []
         self.in_args = in_args if in_args else OrderedDict()
         self.out_args = out_args if out_args else OrderedDict()
-        # Errors can be an OrderedDict() or a CustomType enumeration reference.
+        # Errors can be an OrderedDict() or a Reference to an enumeration.
         self.errors = errors if errors else OrderedDict()
 
 

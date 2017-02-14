@@ -628,7 +628,7 @@ class Parser(object):
         """
         type : ID
         """
-        p[0] = ast.CustomType(name=p[1])
+        p[0] = ast.Reference(name=p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -636,7 +636,7 @@ class Parser(object):
         """
         type : ID '[' ']'
         """
-        element_type = ast.CustomType(name=p[1])
+        element_type = ast.Reference(name=p[1])
         p[0] = ast.Array(name=None, element_type=element_type)
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
