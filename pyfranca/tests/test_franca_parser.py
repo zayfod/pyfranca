@@ -100,8 +100,8 @@ class TestTopLevel(BaseTestCase):
     def test_import_two_namespaces(self):
         package = self._assertParse("""
             package P
-            import NS1 from \"test1.fidl\"
-            import NS2 from \"test2.fidl\"
+            import NS1 from "test1.fidl"
+            import NS2 from "test2.fidl"
         """)
         self.assertEqual(package.name, "P")
         self.assertIsNone(package.file)
@@ -229,6 +229,140 @@ class TestTopLevel(BaseTestCase):
         self.assertEqual(len(interface.attributes), 0)
         self.assertEqual(len(interface.methods), 0)
         self.assertEqual(len(interface.broadcasts), 0)
+
+
+class TestUnsupported(BaseTestCase):
+    """Test that unsupported Franca features fail appropriately."""
+
+    @unittest.skip("IDs and FQNs not differenciated at present.")
+    def test_dots_in_namespace_names(self):
+        """Franca 0.9.2, section 5.8.2"""
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package org.franca.examples
+                interface simple.ExampleInterface {
+                    // this interface can be globally accessed by the FQN
+                    // org.franca.examples.simple.ExampleInterface
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "fff")
+
+    def test_constants(self):
+        """Franca 0.9.2, section 5.2.1"""
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                typeCollection TC {
+                    const Boolean b1 = true
+                    const UInt32 MAX COUNT = 10000
+                    const String foo = "bar"
+                    const Double pi = 3.1415d
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 4 near 'const'.")
+
+    def test_expressions(self):
+        """Franca 0.9.2, section 5.2.1"""
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                typeCollection TC {
+                    const UInt32 twentyve = 55
+                    const Boolean b2 = MAX COUNT > 3
+                    const Boolean b3 = (a && b) jj foo=="bar"
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 4 near 'const'.")
+
+    def test_complex_constants(self):
+        """Franca 0.9.2, section 5.2.2"""
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                typeCollection TC {
+                    array Array1 of UInt16
+                    const Array1 empty = []
+                    const Array1 full = [ 1, 2, 2+3, 100100+100 ]
+
+                    struct Struct1 {
+                        Boolean e1
+                        UInt16 e2
+                        String e3
+                    }
+                    const Struct1 s1 = { e1: true, e2: 1, e3: "foo" }
+
+                    union Union1 {
+                        UInt16 e1
+                        Boolean e2
+                        String e3
+                    }
+                    const Union1 uni1 = { e1: 1 }
+                    const Union1 uni2 = { e3: "foo" }
+
+                    map Map1 { UInt16 to String }
+                    const Map1 m1 = [ 1 => "one", 2 => "two" ]
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 5 near 'const'.")
+
+    def test_unions(self):
+        """Franca 0.9.2, section 5.1.6"""
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                typeCollection TC {
+                    union ExampleUnion {
+                        UInt32 element1
+                        Float element2
+                    }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 4 near 'union'.")
+
+    def test_error_extending(self):
+        """Franca 0.9.2, section 5.5.3"""
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                interface I {
+                    method m {
+                        error extends GenericErrors {
+                            OVERFLOW
+                            UNDERFLOW
+                        }
+                    }
+                    enumeration GenericErrors {
+                        INVALID_PARAMATERS
+                    }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 5 near 'extends'.")
+
+    def test_contracts(self):
+        """Franca 0.9.2, section 5.5.3"""
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                contract {
+                    PSM {
+                        initial idle
+                        state idle {
+                            on call setActivePlayer -> working
+                        }
+                        state working {
+                            on signal attachOutput -> idle
+                        }
+                    }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 3 near 'contract'.")
 
 
 class TestFrancaUserManualExamples(BaseTestCase):
@@ -475,7 +609,7 @@ class TestTypeCollections(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Duplicate namespace member \"X\".")
+                         "Duplicate namespace member 'X'.")
 
 
 class TestInterfaces(BaseTestCase):
@@ -541,7 +675,7 @@ class TestInterfaces(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Duplicate namespace member \"X\".")
+                         "Duplicate namespace member 'X'.")
 
 
 class TestEnumerations(BaseTestCase):
@@ -587,7 +721,7 @@ class TestEnumerations(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Duplicate enumerator \"a\".")
+                         "Duplicate enumerator 'a'.")
 
 
 class TestStructs(BaseTestCase):
@@ -660,7 +794,7 @@ class TestStructs(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Duplicate structure field \"a\".")
+                         "Duplicate structure field 'a'.")
 
 
 class TestMethods(BaseTestCase):
@@ -680,7 +814,7 @@ class TestMethods(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Duplicate argument \"a\".")
+                         "Duplicate argument 'a'.")
 
 
 class TestBroadcasts(BaseTestCase):
@@ -699,5 +833,4 @@ class TestBroadcasts(BaseTestCase):
                     }
                 }
             """)
-        self.assertEqual(str(context.exception),
-                         "Duplicate argument \"a\".")
+        self.assertEqual(str(context.exception), "Duplicate argument 'a'.")

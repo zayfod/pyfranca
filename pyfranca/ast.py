@@ -110,8 +110,8 @@ class Namespace(object):
                 raise ASTException("Multiple version definitions.")
         elif isinstance(member, Type):
             if member.name in self:
-                raise ASTException("Duplicate namespace member "
-                                   "\"{}\".".format(member.name))
+                raise ASTException(
+                    "Duplicate namespace member '{}'.".format(member.name))
             if isinstance(member, Typedef):
                 self.typedefs[member.name] = member
             elif isinstance(member, Enumeration):
@@ -342,8 +342,8 @@ class Interface(Namespace):
     def _add_member(self, member):
         if isinstance(member, Type):
             if member.name in self:
-                raise ASTException("Duplicate namespace member "
-                                   "\"{}\".".format(member.name))
+                raise ASTException(
+                    "Duplicate namespace member '{}'.".format(member.name))
             if isinstance(member, Attribute):
                 self.attributes[member.name] = member
             elif isinstance(member, Method):

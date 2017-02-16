@@ -102,7 +102,7 @@ class Processor:
                         return typecollection[name]
         # Give up
         raise ProcessorException(
-            "Unresolved reference \"{}\".".format(name))
+            "Unresolved reference '{}'.".format(name))
 
     def _udpate_complextype_references(self, name):
         """
@@ -224,7 +224,7 @@ class Processor:
                     package_import.namespace_reference = namespace
                 else:
                     raise ProcessorException(
-                        "Namespace \"{}\" not found.".format(
+                        "Namespace '{}' not found.".format(
                             package_import.namespace))
             else:
                 # Model import
@@ -251,12 +251,12 @@ class Processor:
         # Check for circular package dependencies.
         if package.name in references:
             raise ProcessorException(
-                "Circular dependency for package \"{}\".".format(package.name))
+                "Circular dependency for package '{}'.".format(package.name))
         # Check whether package is already imported
         if package.name in self.packages:
             if fspec != self.packages[package.name].file:
                 raise ProcessorException(
-                    "Package \"{}\" defined in multiple files.".format(
+                    "Package '{}' defined in multiple files.".format(
                         package.name))
             else:
                 return
@@ -303,7 +303,7 @@ class Processor:
             if os.path.isabs(fspec):
                 # Absolute specification
                 raise ProcessorException(
-                    "Model \"{}\" not found.".format(fspec))
+                    "Model '{}' not found.".format(fspec))
             else:
                 # Relative specification - check in the package path list.
                 for path in self.package_paths:
@@ -313,7 +313,7 @@ class Processor:
                         break
                 else:
                     raise ProcessorException(
-                        "Model \"{}\" not found.".format(fspec))
+                        "Model '{}' not found.".format(fspec))
         # Parse the file.
         parser = franca_parser.Parser()
         package = parser.parse_file(fspec)

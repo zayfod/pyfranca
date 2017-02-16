@@ -40,19 +40,19 @@ class TestImports(BaseTestCase):
         with self.assertRaises(ProcessorException) as context:
             self.processor.import_string("test.fidl", """
                 package P
-                import model \"nosuch.fidl\"
+                import model "nosuch.fidl"
             """)
         self.assertEqual(str(context.exception),
-                         "Model \"nosuch.fidl\" not found.")
+                         "Model 'nosuch.fidl' not found.")
 
     def test_import_nonexistent_model2(self):
         with self.assertRaises(ProcessorException) as context:
             self.processor.import_string("test.fidl", """
                 package P
-                import P.Nonexistent.* from \"nosuch.fidl\"
+                import P.Nonexistent.* from "nosuch.fidl"
             """)
         self.assertEqual(str(context.exception),
-                         "Model \"nosuch.fidl\" not found.")
+                         "Model 'nosuch.fidl' not found.")
 
     def test_import_nonexistent_namespace(self):
         with self.assertRaises(ProcessorException) as context:
@@ -64,7 +64,7 @@ class TestImports(BaseTestCase):
                 import P.Nonexistent.* from "test.fidl"
             """)
         self.assertEqual(str(context.exception),
-                         "Namespace \"P.Nonexistent.*\" not found.")
+                         "Namespace 'P.Nonexistent.*' not found.")
 
     # TODO: Temporary file creation needed.
     # def test_circular_dependency(self):
@@ -92,7 +92,7 @@ class TestUnsupported(BaseTestCase):
                 package P
             """)
         self.assertEqual(str(context.exception),
-                         "Package \"P\" defined in multiple files.")
+                         "Package 'P' defined in multiple files.")
 
 
 class TestReferences(BaseTestCase):
@@ -192,7 +192,7 @@ class TestReferences(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Unresolved reference \"Unknown\".")
+                         "Unresolved reference 'Unknown'.")
 
     def test_unresolved_reference_in_struct(self):
         with self.assertRaises(ProcessorException) as context:
@@ -205,7 +205,7 @@ class TestReferences(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Unresolved reference \"Unknown\".")
+                         "Unresolved reference 'Unknown'.")
 
     def test_unresolved_reference_in_array(self):
         with self.assertRaises(ProcessorException) as context:
@@ -216,7 +216,7 @@ class TestReferences(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Unresolved reference \"Unknown\".")
+                         "Unresolved reference 'Unknown'.")
 
     def test_unresolved_reference_in_map(self):
         with self.assertRaises(ProcessorException) as context:
@@ -227,7 +227,7 @@ class TestReferences(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Unresolved reference \"Unknown\".")
+                         "Unresolved reference 'Unknown'.")
 
     def test_unresolved_reference_in_map2(self):
         with self.assertRaises(ProcessorException) as context:
@@ -238,7 +238,7 @@ class TestReferences(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Unresolved reference \"Unknown\".")
+                         "Unresolved reference 'Unknown'.")
 
     def test_unresolved_reference_in_attribute(self):
         with self.assertRaises(ProcessorException) as context:
@@ -249,7 +249,7 @@ class TestReferences(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Unresolved reference \"Unknown\".")
+                         "Unresolved reference 'Unknown'.")
 
     def test_unresolved_reference_in_method(self):
         with self.assertRaises(ProcessorException) as context:
@@ -260,7 +260,7 @@ class TestReferences(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Unresolved reference \"Unknown\".")
+                         "Unresolved reference 'Unknown'.")
 
     def test_unresolved_reference_in_method2(self):
         with self.assertRaises(ProcessorException) as context:
@@ -271,7 +271,7 @@ class TestReferences(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Unresolved reference \"Unknown\".")
+                         "Unresolved reference 'Unknown'.")
 
     def test_unresolved_reference_in_method3(self):
         with self.assertRaises(ProcessorException) as context:
@@ -282,7 +282,7 @@ class TestReferences(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Unresolved reference \"Unknown\".")
+                         "Unresolved reference 'Unknown'.")
 
     def test_unresolved_reference_in_broadcast(self):
         with self.assertRaises(ProcessorException) as context:
@@ -293,4 +293,4 @@ class TestReferences(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Unresolved reference \"Unknown\".")
+                         "Unresolved reference 'Unknown'.")

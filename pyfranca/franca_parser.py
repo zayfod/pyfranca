@@ -395,7 +395,6 @@ class Parser(object):
         """
         arg_group_def : ERROR '{' enumerators '}'
         """
-        # TODO: Support "extends".
         p[0] = ErrorArgumentGroup(p[3])
 
     # noinspection PyIncorrectDocstring
@@ -428,8 +427,7 @@ class Parser(object):
         if p[2].name not in p[0]:
             p[0][p[2].name] = p[2]
         else:
-            raise ParserException("Duplicate argument "
-                                  "\"{}\".".format(p[2].name))
+            raise ParserException("Duplicate argument '{}'.".format(p[2].name))
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -474,8 +472,8 @@ class Parser(object):
         if p[2].name not in p[0]:
             p[0][p[2].name] = p[2]
         else:
-            raise ParserException("Duplicate enumerator "
-                                  "\"{}\".".format(p[2].name))
+            raise ParserException(
+                "Duplicate enumerator '{}'.".format(p[2].name))
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -536,8 +534,8 @@ class Parser(object):
         if p[2].name not in p[0]:
             p[0][p[2].name] = p[2]
         else:
-            raise ParserException("Duplicate structure field "
-                                  "\"{}\".".format(p[2].name))
+            raise ParserException(
+                "Duplicate structure field '{}'.".format(p[2].name))
 
     # noinspection PyIncorrectDocstring
     @staticmethod

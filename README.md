@@ -69,6 +69,7 @@ The following Franca features are not supported:
 - expressions
 - unions
 - method overloading
+- method error extending
 - contracts
 
 
