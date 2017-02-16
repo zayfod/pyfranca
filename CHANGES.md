@@ -2,6 +2,12 @@
 Revision History
 ================
 
+0.2.0
+--------------------
+- Processor class.
+- More unit tests.
+- Fixed support for FQN IDs in the lexer.
+
 v0.1.1 (Dec 1, 2016)
 --------------------
 - Fix for structure field parsing (thanks to jay-o-stotch).

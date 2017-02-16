@@ -35,12 +35,29 @@ class Package(object):
         for item in self.typecollections.values():
             item.package = self
 
+    def __contains__(self, namespace):
+        res = namespace in self.typecollections or \
+              namespace in self.interfaces
+        return res
+
+    def __getitem__(self, namespace):
+        if not isinstance(namespace, str):
+            raise TypeError
+        elif namespace in self.typecollections:
+            return self.typecollections[namespace]
+        elif namespace in self.interfaces:
+            return self.interfaces[namespace]
+        else:
+            raise KeyError
+
 
 class Import(object):
 
     def __init__(self, file_name, namespace=None):
         self.file = file_name
         self.namespace = namespace          # None for "import model"
+        self.package_reference = None
+        self.namespace_reference = None
 
 
 class Namespace(object):
@@ -61,13 +78,29 @@ class Namespace(object):
             for member in members:
                 self._add_member(member)
 
-    def __contains__(self, item):
-        res = item in self.typedefs or \
-              item in self.enumerations or \
-              item in self.structs or \
-              item in self.arrays or \
-              item in self.maps
+    def __contains__(self, name):
+        res = name in self.typedefs or \
+              name in self.enumerations or \
+              name in self.structs or \
+              name in self.arrays or \
+              name in self.maps
         return res
+
+    def __getitem__(self, name):
+        if not isinstance(name, str):
+            raise TypeError
+        elif name in self.typedefs:
+            return self.typedefs[name]
+        elif name in self.enumerations:
+            return self.enumerations[name]
+        elif name in self.structs:
+            return self.structs[name]
+        elif name in self.arrays:
+            return self.arrays[name]
+        elif name in self.maps:
+            return self.maps[name]
+        else:
+            raise KeyError
 
     def _add_member(self, member):
         if isinstance(member, Version):
@@ -220,6 +253,7 @@ class Enumeration(ComplexType):
         self.name = name
         self.enumerators = enumerators if enumerators else OrderedDict()
         self.extends = extends
+        self.reference = None
         self.flags = flags if flags else []         # Unused
 
 
@@ -237,6 +271,7 @@ class Struct(ComplexType):
         self.name = name
         self.fields = fields if fields else OrderedDict()
         self.extends = extends
+        self.reference = None
         self.flags = flags if flags else []
 
 
@@ -280,16 +315,29 @@ class Interface(Namespace):
         self.methods = OrderedDict()
         self.broadcasts = OrderedDict()
         self.extends = extends
+        self.reference = None
         if members:
             for member in members:
                 self._add_member(member)
 
-    def __contains__(self, item):
-        res = super(Interface, self).__contains__(item) or \
-              item in self.attributes or \
-              item in self.methods or \
-              item in self.broadcasts
+    def __contains__(self, name):
+        res = super(Interface, self).__contains__(name) or \
+              name in self.attributes or \
+              name in self.methods or \
+              name in self.broadcasts
         return res
+
+    def __getitem__(self, name):
+        if not isinstance(name, str):
+            raise TypeError
+        elif name in self.attributes:
+            return self.attributes[name]
+        elif name in self.methods:
+            return self.methods[name]
+        elif name in self.broadcasts:
+            return self.broadcasts[name]
+        else:
+            return super(Interface, self).__getitem__(name)
 
     def _add_member(self, member):
         if isinstance(member, Type):

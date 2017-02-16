@@ -673,25 +673,26 @@ class Parser(object):
             kwargs["write_tables"] = False
         self._parser = yacc.yacc(module=self, **kwargs)
 
-    def parse(self, data):
+    def parse(self, fidl):
         """
         Parse input text
 
-        :param data: Input text to parse.
+        :param fidl: Input text to parse.
         :return: AST representation of the input.
         """
-        return self._parser.parse(data)
+        package = self._parser.parse(fidl)
+        return package
 
     def parse_file(self, fspec):
         """
         Parse input file
 
-        :param fspec: Specification of a fil to parse.
+        :param fspec: Specification of a fidl to parse.
         :return: AST representation of the input.
         """
         with open(fspec, "r") as f:
-            data = f.read()
-        package = self.parse(data)
+            fidl = f.read()
+        package = self.parse(fidl)
         if package:
             package.file = fspec
         return package
