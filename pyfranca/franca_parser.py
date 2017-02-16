@@ -62,7 +62,7 @@ class Parser(object):
     @staticmethod
     def p_package_def(p):
         """
-        package_def : PACKAGE namespace defs
+        package_def : PACKAGE fqn defs
         """
         imports, interfaces, typecollections = Parser._package_def(p[3])
         p[0] = ast.Package(name=p[2], file_name=None, imports=imports,
@@ -95,25 +95,25 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_namespace_1(p):
+    def p_fqn_1(p):
         """
-        namespace : ID '.' namespace
+        fqn : ID '.' fqn
         """
         p[0] = "{}.{}".format(p[1], p[3])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_namespace_2(p):
+    def p_fqn_2(p):
         """
-        namespace : ID
+        fqn : ID
         """
         p[0] = p[1]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_namespace_3(p):
+    def p_fqn_3(p):
         """
-        namespace : '*'
+        fqn : '*'
         """
         p[0] = p[1]
 
@@ -121,7 +121,7 @@ class Parser(object):
     @staticmethod
     def p_import_def_1(p):
         """
-        def : IMPORT namespace FROM FILE_NAME
+        def : IMPORT fqn FROM FILE_NAME
         """
         p[0] = ast.Import(file_name=p[4], namespace=p[2])
 
@@ -214,7 +214,7 @@ class Parser(object):
     @staticmethod
     def p_interface_2(p):
         """
-        def : INTERFACE ID EXTENDS ID '{' interface_members '}'
+        def : INTERFACE ID EXTENDS fqn '{' interface_members '}'
         """
         try:
             p[0] = ast.Interface(name=p[2], flags=None, members=p[6],
@@ -458,7 +458,7 @@ class Parser(object):
     @staticmethod
     def p_enumeration_def_2(p):
         """
-        enumeration_def : ENUMERATION ID EXTENDS ID '{' enumerators '}'
+        enumeration_def : ENUMERATION ID EXTENDS fqn '{' enumerators '}'
         """
         p[0] = ast.Enumeration(name=p[2], enumerators=p[6], extends=p[4])
 
@@ -520,7 +520,7 @@ class Parser(object):
     @staticmethod
     def p_struct_def_2(p):
         """
-        struct_def : STRUCT ID EXTENDS ID '{' struct_fields '}'
+        struct_def : STRUCT ID EXTENDS fqn '{' struct_fields '}'
         """
         p[0] = ast.Struct(name=p[2], fields=p[6], extends=p[4])
 
@@ -624,7 +624,7 @@ class Parser(object):
     @staticmethod
     def p_type_3(p):
         """
-        type : ID
+        type : fqn
         """
         p[0] = ast.Reference(name=p[1])
 
@@ -632,7 +632,7 @@ class Parser(object):
     @staticmethod
     def p_type_4(p):
         """
-        type : ID '[' ']'
+        type : fqn '[' ']'
         """
         element_type = ast.Reference(name=p[1])
         p[0] = ast.Array(name=None, element_type=element_type)

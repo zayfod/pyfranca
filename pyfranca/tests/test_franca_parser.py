@@ -234,7 +234,6 @@ class TestTopLevel(BaseTestCase):
 class TestUnsupported(BaseTestCase):
     """Test that unsupported Franca features fail appropriately."""
 
-    @unittest.skip("IDs and FQNs not differenciated at present.")
     def test_dots_in_namespace_names(self):
         """Franca 0.9.2, section 5.8.2"""
         with self.assertRaises(ParserException) as context:
@@ -246,7 +245,7 @@ class TestUnsupported(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "fff")
+                         "Syntax error at line 3 near '.'.")
 
     def test_constants(self):
         """Franca 0.9.2, section 5.2.1"""

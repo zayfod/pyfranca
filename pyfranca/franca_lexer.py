@@ -120,7 +120,7 @@ class Lexer(object):
     @staticmethod
     def t_ID(t):
         # noinspection PySingleQuotedDocstring
-        r"[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)*"
+        r"[A-Za-z][A-Za-z0-9_]*"
         t.type = Lexer._keyword_map.get(t.value, "ID")
         return t
 
