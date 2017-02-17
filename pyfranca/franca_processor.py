@@ -7,6 +7,7 @@ from pyfranca import franca_parser, ast
 class ProcessorException(Exception):
 
     def __init__(self, message):
+        super(ProcessorException, self).__init__()
         self.message = message
 
     def __str__(self):

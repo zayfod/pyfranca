@@ -10,51 +10,61 @@ PyFranca
 Introduction
 ------------
 
-`PyFranca` is a Python module and tools for working with [Franca interface definition language](https://github.com/franca/franca) (IDL) files (`.fidl`). It is entirely written in Python and intended to be used as a base for developing code generation and processing tools.
+`PyFranca` is a Python module and tools for working with
+[Franca interface definition language](https://github.com/franca/franca)
+(IDL) files (`.fidl`). It is entirely written in Python and intended to be
+used as a base for developing code generation and processing tools.
 
 `PyFranca` provides:
  
-- abstract syntax tree (AST) representation for a subset of the Franca IDL v0.9.2 .
-- a lexer and parser for the Franca IDL, based on [Python Lex-Yacc](http://www.dabeaz.com/ply/) (PLY)
+- abstract syntax tree (AST) representation for a subset of the
+    Franca IDL v0.9.2 .
+- a lexer and parser for the Franca IDL, based on
+    [Python Lex-Yacc](http://www.dabeaz.com/ply/) (PLY).
+- a processor for Franca IDL files that handles model imports and
+    type references.
+- a .fidl file command-line validator
 
 The following extensions are envisioned:
 
-- a base processor for Franca IDL files
-- .fidl validator
+- AST serializer
 - diff tool for .fidl files for detecting interface changes   
 
-This project is a tool for exploring the capabilities of Franca. It is unstable and heavily under development.
+This project is a tool for exploring the capabilities (and ambiguities) of
+Franca. It is unstable and heavily under development.
 
 
 Usage
 -----
 
-Parsing Franca IDL:
+Processing Franca IDL:
 
-    from pyfranca import Parser
-
-    parser = Parser()
-    package = parser.parse("""
+    from pyfranca import Processor
+    
+    processor = Processor()
+    processor.import_string("hello.fidl", """
         package Example
         interface Interface {
             method Hello {}
         }
     """)
+            
+    assert processor.packages["Example"].interfaces["Interface"].methods["Hello"].name == "Hello"
 
-    assert package.interfaces["Interface"].methods["Hello"].name == "Hello"
+Listing the packages and interfaces, defined in a `.fidl` file:
 
-Parsing a `.fidl` file:
-
-    from pyfranca import LexerException, ParserException, Parser
+    from pyfranca import Processor, LexerException, ParserException, ProcessorException
     
-    parser = Parser()
+    processor = Processor()
     try:
-        package = parser.parse_file("examples/Calculator.fidl")
+        processor.import_file("hello.fidl")        
+    except (LexerException, ParserException, ProcessorException) as e:
+        print("ERROR: {}".format(e))
+
+    for package in processor.packages.values():
         print(package.name)
         for interface in package.interfaces.values():
-            print(interface.name)
-    except (LexerException, ParserException) as e:
-        print("ERROR: {}".format(e))
+            print("\t", interface.name)
 
 
 Limitations
