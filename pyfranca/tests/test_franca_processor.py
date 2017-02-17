@@ -13,6 +13,30 @@ class BaseTestCase(unittest.TestCase):
         self.processor = None
 
 
+class TestFQNs(BaseTestCase):
+    """Test FQN parsing methods."""
+
+    def test_basename(self):
+        self.assertEqual(Processor.basename("P.I.A"), "A")
+        self.assertEqual(Processor.basename("A"), "A")
+
+    def test_packagename(self):
+        self.assertEqual(Processor.packagename("P.I.A"), "P.I")
+        self.assertIsNone(Processor.packagename("A"))
+
+    def test_is_fqn(self):
+        self.assertTrue(Processor.is_fqn("P.P.I.A"))
+        self.assertTrue(Processor.is_fqn("P.I.A"))
+        self.assertFalse(Processor.is_fqn("I.A"))
+        self.assertFalse(Processor.is_fqn("A"))
+
+    def test_split_fqn(self):
+        self.assertEqual(Processor.split_fqn("P.P.I.A"), ("P.P", "I", "A"))
+        self.assertEqual(Processor.split_fqn("P.I.A"), ("P", "I", "A"))
+        self.assertEqual(Processor.split_fqn("I.A"), (None, "I", "A"))
+        self.assertEqual(Processor.split_fqn("A"), (None, None, "A"))
+
+
 class TestImports(BaseTestCase):
     """Test import related features."""
 
@@ -113,6 +137,21 @@ class TestReferences(BaseTestCase):
         self.assertEqual(b.type.name, "A")
         self.assertEqual(b.type.reference, a)
 
+    def test_fqn_reference(self):
+        self.processor.import_string("test.fidl", """
+            package P
+            typeCollection TC {
+                typedef A is Int32
+                typedef B is P.TC.A
+            }
+        """)
+        a = self.processor.packages["P"].typecollections["TC"].typedefs["A"]
+        self.assertTrue(isinstance(a.type, ast.Int32))
+        b = self.processor.packages["P"].typecollections["TC"].typedefs["B"]
+        self.assertTrue(isinstance(b.type, ast.Reference))
+        self.assertEqual(b.type.name, "P.TC.A")
+        self.assertEqual(b.type.reference, a)
+
     def test_reference_to_different_namespace(self):
         self.processor.import_string("test.fidl", """
             package P
@@ -151,7 +190,19 @@ class TestReferences(BaseTestCase):
         self.assertEqual(b.type.name, "A")
         self.assertEqual(b.type.reference, a)
 
-    @unittest.skip("FQN references currently failing.")
+    @unittest.skip("Currently not checked.")
+    def test_circular_reference(self):
+        with self.assertRaises(ProcessorException) as context:
+            self.processor.import_string("test.fidl", """
+                package P
+                typeCollection TC {
+                    typedef A is B
+                    typedef B is A
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Circular reference 'B'.")
+
     def test_reference_priority(self):
         self.processor.import_string("test.fidl", """
             package P
@@ -180,8 +231,34 @@ class TestReferences(BaseTestCase):
         self.assertEqual(b.type.reference, a2)
         b2 = self.processor.packages["P2"].interfaces["I"].typedefs["B2"]
         self.assertTrue(isinstance(b2.type, ast.Reference))
-        self.assertEqual(b2.type.name, "A")
+        self.assertEqual(b2.type.name, "P.TC.A")
         self.assertEqual(b2.type.reference, a)
+
+    def test_interface_visibility(self):
+        self.processor.import_string("test.fidl", """
+            package P
+            typeCollection TC {
+                typedef A is Int32
+            }
+        """)
+        self.processor.import_string("test2.fidl", """
+            package P2
+            import P.TC.* from "test.fidl"
+            interface I {
+                typedef A is UInt32
+            }
+            typeCollection TC {
+                typedef B is A
+            }
+        """)
+        a = self.processor.packages["P"].typecollections["TC"].typedefs["A"]
+        self.assertTrue(isinstance(a.type, ast.Int32))
+        a2 = self.processor.packages["P2"].interfaces["I"].typedefs["A"]
+        self.assertTrue(isinstance(a2.type, ast.UInt32))
+        b = self.processor.packages["P2"].typecollections["TC"].typedefs["B"]
+        self.assertTrue(isinstance(b.type, ast.Reference))
+        self.assertEqual(b.type.name, "A")
+        self.assertEqual(b.type.reference, a)
 
     def test_unresolved_reference_in_typedef(self):
         with self.assertRaises(ProcessorException) as context:

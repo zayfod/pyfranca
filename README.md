@@ -55,7 +55,7 @@ Parsing a `.fidl` file:
             print(interface.name)
     except (LexerException, ParserException) as e:
         print("ERROR: {}".format(e))
-    	
+
 
 Limitations
 -----------
@@ -85,13 +85,13 @@ Installation
 
 Using pip:
 
-	pip install pyfranca
+    pip install pyfranca
 
 From source:
 
-	git clone http://github.com/zayfod/pyfranca.git
-	cd pyfranca
-	python setup.py install
+    git clone http://github.com/zayfod/pyfranca.git
+    cd pyfranca
+    python setup.py install
 
 
 Bugs

@@ -49,60 +49,75 @@ class Processor:
         else:
             return namespace[0:dot]
 
-    # TODO: Remove?
-    def resolve_fqn(self, fqn):
-        package_fqn = fqn
-        while True:
-            package_fqn = self.packagename(package_fqn)
-            if package_fqn is None:
-                return None
-            if package_fqn in self.packages:
-                break
-        package = self.packages[package_fqn]
-        namespace_name = fqn[len(package_fqn)+1:]
-        if namespace_name not in package:
-            return None
-        namespace = package[namespace_name]
-        return package, namespace
+    @staticmethod
+    def is_fqn(string):
+        """
+        Defines whether a Franca name is an ID or an FQN.
+        """
+        return string.count(".") >= 2
 
     @staticmethod
-    def resolve(namespace, name):
+    def split_fqn(fqn):
+        """
+        Split a Franca FQN into a tuple - package, namespace, and name.
+        """
+        parts = fqn.rsplit(".", 2)
+        while len(parts) < 3:
+            parts.insert(0, None)
+        return tuple(parts)
+
+    @staticmethod
+    def resolve(namespace, fqn):
         """
         Resolve type references.
 
         :param namespace: context ast.Namespace object.
-        :param name: name string.
+        :param fqn: FQN or ID string.
         :return: Dereferenced ast.Type object.
         """
-        # TODO: relative and FQN imports
-        # FIXME: Circular references
         if not isinstance(namespace, ast.Namespace) or \
-                not isinstance(name, str):
+                not isinstance(fqn, str):
             raise ValueError("Unexpected input.")
-        # Look in the type's namespace
-        if name in namespace:
-            return namespace[name]
-        # Look in other type collections in the type's package
-        for typecollection in namespace.package.typecollections.values():
-            if name in typecollection:
-                return typecollection[name]
-        # Look in imports
-        for package_import in namespace.package.imports:
-            if package_import.namespace_reference:
-                # Look in namespaces imported in the type's package
-                if name in package_import.namespace_reference:
-                    return package_import.namespace_reference[name]
+        pkg, ns, id = Processor.split_fqn(fqn)
+        if pkg is None:
+            # This is an ID
+            # Look in the type's namespace
+            if id in namespace:
+                return namespace[id]
+            # Look in other type collections in the type's package
+            for typecollection in namespace.package.typecollections.values():
+                if id in typecollection:
+                    return typecollection[id]
+            # Look in imports
+            for package_import in namespace.package.imports:
+                if package_import.namespace_reference:
+                    # Look in namespaces imported in the type's package
+                    if id in package_import.namespace_reference:
+                        return package_import.namespace_reference[id]
+        else:
+            # This is an FQN
+            if pkg == namespace.package.name:
+                # Check in the current package
+                if ns in namespace.package.typecollections:
+                    if id in namespace.package.typecollections[ns]:
+                        return namespace.package.typecollections[ns][id]
             else:
-                # Look in typecollections of packages imported in the type's
-                #   package using FQNs.
-                # FIXME: FQNs
-                for typecollection in \
-                        package_import.package_reference.typecollections:
-                    if name in typecollection:
-                        return typecollection[name]
+                # Look in typecollections of packages imported in the
+                #   type's package using FQNs.
+                for package_import in namespace.package.imports:
+                    if package_import.namespace == "{}.{}.*".format(pkg, ns):
+                        for typecollection in package_import.\
+                                package_reference.typecollections.values():
+                            if typecollection.name == ns and \
+                                    id in typecollection:
+                                return typecollection[id]
+                        for interface in package_import. \
+                                package_reference.interfaces.values():
+                            if id in interface:
+                                return interface[id]
         # Give up
         raise ProcessorException(
-            "Unresolved reference '{}'.".format(name))
+            "Unresolved reference '{}'.".format(fqn))
 
     def _udpate_complextype_references(self, name):
         """
