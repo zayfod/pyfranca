@@ -384,7 +384,7 @@ class TestReferences(BaseTestCase):
         m = self.processor.packages["P"].interfaces["I"].methods["M"]
         me = m.errors
         self.assertTrue(isinstance(me, ast.Reference))
-        self.assertTrue(isinstance(me.reference, ast.Enumeration))
+        self.assertEqual(me.reference, e)
 
     def test_invalid_method_error_reference(self):
         with self.assertRaises(ProcessorException) as context:

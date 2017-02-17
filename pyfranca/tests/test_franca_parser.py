@@ -1,4 +1,3 @@
-
 import unittest
 
 from pyfranca import LexerException, ParserException, Parser, ast
@@ -268,7 +267,7 @@ class TestUnsupported(BaseTestCase):
             self._parse("""
                 package P
                 typeCollection TC {
-                    const UInt32 twentyve = 55
+                    const UInt32 twentyFive = 55
                     const Boolean b2 = MAX COUNT > 3
                     const Boolean b3 = (a && b) jj foo=="bar"
                 }
@@ -284,7 +283,7 @@ class TestUnsupported(BaseTestCase):
                 typeCollection TC {
                     array Array1 of UInt16
                     const Array1 empty = []
-                    const Array1 full = [ 1, 2, 2+3, 100100+100 ]
+                    const Array1 full = [ 1, 2, 2+3, 100*100+100 ]
 
                     struct Struct1 {
                         Boolean e1

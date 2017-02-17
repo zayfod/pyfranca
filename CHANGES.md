@@ -2,11 +2,13 @@
 Revision History
 ================
 
-0.2.0
+0.2.0 (Feb ?, 2017)
 --------------------
-- Processor class.
+- Processor class to handle model imports, type references, and validation.
+- Added support for FQNs.
+- Added command line-tools - fidl_dump.py and fidl_validator.py
 - More unit tests.
-- Fixed support for FQN IDs in the lexer.
+- Bugfixes.
 
 v0.1.1 (Dec 1, 2016)
 --------------------

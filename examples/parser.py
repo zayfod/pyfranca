@@ -11,11 +11,10 @@ def main():
             interface Interface {
                 method Hello {}
             }
-        """)        
+        """)
+        assert package.interfaces["Interface"].methods["Hello"].name == "Hello"
     except (LexerException, ParserException) as e:
         print("ERROR: {}".format(e))
-
-    assert package.interfaces["Interface"].methods["Hello"].name == "Hello"
 
 
 if __name__ == "__main__":
