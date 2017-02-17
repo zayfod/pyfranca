@@ -10,5 +10,6 @@ build/
 dist/
 MANIFEST
 *.egg-info/
+html/
 
 .coverage
