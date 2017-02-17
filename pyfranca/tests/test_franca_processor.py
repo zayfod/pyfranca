@@ -371,3 +371,117 @@ class TestReferences(BaseTestCase):
             """)
         self.assertEqual(str(context.exception),
                          "Unresolved reference 'Unknown'.")
+
+    def test_method_error_reference(self):
+        self.processor.import_string("test.fidl", """
+            package P
+            interface I {
+                enumeration E { A B C }
+                method M { error E }
+            }
+        """)
+        e = self.processor.packages["P"].interfaces["I"].enumerations["E"]
+        m = self.processor.packages["P"].interfaces["I"].methods["M"]
+        me = m.errors
+        self.assertTrue(isinstance(me, ast.Reference))
+        self.assertTrue(isinstance(me.reference, ast.Enumeration))
+
+    def test_invalid_method_error_reference(self):
+        with self.assertRaises(ProcessorException) as context:
+            self.processor.import_string("test.fidl", """
+                package P
+                interface I {
+                    typedef E is String
+                    method M { error E }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Invalid error reference 'E'.")
+
+    def test_enumeration_extension(self):
+        self.processor.import_string("test.fidl", """
+            package P
+            interface I {
+                enumeration E { A B C }
+                enumeration E2 extends E { D E F }
+            }
+        """)
+        e = self.processor.packages["P"].interfaces["I"].enumerations["E"]
+        e2 = self.processor.packages["P"].interfaces["I"].enumerations["E2"]
+        self.assertEqual(e2.reference, e)
+
+    def test_invalid_enumeration_extension(self):
+        with self.assertRaises(ProcessorException) as context:
+            self.processor.import_string("test.fidl", """
+                package P
+                interface I {
+                    typedef E is String
+                    enumeration E2 extends E { D E F }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Invalid enumeration reference 'E'.")
+
+    def test_struct_extension(self):
+        self.processor.import_string("test.fidl", """
+            package P
+            interface I {
+                struct S { Int32 a }
+                struct S2 extends S { Int32 b }
+            }
+        """)
+        s = self.processor.packages["P"].interfaces["I"].structs["S"]
+        s2 = self.processor.packages["P"].interfaces["I"].structs["S2"]
+        self.assertEqual(s2.reference, s)
+
+    def test_invalid_struct_extension(self):
+        with self.assertRaises(ProcessorException) as context:
+            self.processor.import_string("test.fidl", """
+                package P
+                interface I {
+                    typedef S is String
+                    struct S2 extends S { Int32 b }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Invalid struct reference 'S'.")
+
+    def test_interface_extension(self):
+        self.processor.import_string("test.fidl", """
+            package P
+            interface I { }
+            interface I2 extends I { }
+            interface I3 extends P.I { }
+        """)
+        i = self.processor.packages["P"].interfaces["I"]
+        i2 = self.processor.packages["P"].interfaces["I2"]
+        self.assertEqual(i2.reference, i)
+        i3 = self.processor.packages["P"].interfaces["I3"]
+        self.assertEqual(i3.reference, i)
+
+    def test_interface_extension2(self):
+        self.processor.import_string("test.fidl", """
+            package P
+            interface I { }
+        """)
+        self.processor.import_string("test2.fidl", """
+            package P2
+            import model "test.fidl"
+            interface I2 extends I { }
+            interface I3 extends P.I { }
+        """)
+        i = self.processor.packages["P"].interfaces["I"]
+        i2 = self.processor.packages["P2"].interfaces["I2"]
+        self.assertEqual(i2.reference, i)
+        i3 = self.processor.packages["P2"].interfaces["I3"]
+        self.assertEqual(i3.reference, i)
+
+    def test_invalid_interface_extension(self):
+        with self.assertRaises(ProcessorException) as context:
+            self.processor.import_string("test.fidl", """
+                package P
+                typeCollection TC { typedef I is Int32 }
+                interface I2 extends I { }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Unresolved namespace reference 'I'.")

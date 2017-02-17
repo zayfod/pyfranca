@@ -78,29 +78,29 @@ class Processor:
         if not isinstance(namespace, ast.Namespace) or \
                 not isinstance(fqn, str):
             raise ValueError("Unexpected input.")
-        pkg, ns, id = Processor.split_fqn(fqn)
+        pkg, ns, name = Processor.split_fqn(fqn)
         if pkg is None:
             # This is an ID
             # Look in the type's namespace
-            if id in namespace:
-                return namespace[id]
+            if name in namespace:
+                return namespace[name]
             # Look in other type collections in the type's package
             for typecollection in namespace.package.typecollections.values():
-                if id in typecollection:
-                    return typecollection[id]
+                if name in typecollection:
+                    return typecollection[name]
             # Look in imports
             for package_import in namespace.package.imports:
                 if package_import.namespace_reference:
                     # Look in namespaces imported in the type's package
-                    if id in package_import.namespace_reference:
-                        return package_import.namespace_reference[id]
+                    if name in package_import.namespace_reference:
+                        return package_import.namespace_reference[name]
         else:
             # This is an FQN
             if pkg == namespace.package.name:
                 # Check in the current package
                 if ns in namespace.package.typecollections:
-                    if id in namespace.package.typecollections[ns]:
-                        return namespace.package.typecollections[ns][id]
+                    if name in namespace.package.typecollections[ns]:
+                        return namespace.package.typecollections[ns][name]
             else:
                 # Look in typecollections of packages imported in the
                 #   type's package using FQNs.
@@ -109,15 +109,56 @@ class Processor:
                         for typecollection in package_import.\
                                 package_reference.typecollections.values():
                             if typecollection.name == ns and \
-                                    id in typecollection:
-                                return typecollection[id]
+                                    name in typecollection:
+                                return typecollection[name]
                         for interface in package_import. \
                                 package_reference.interfaces.values():
-                            if id in interface:
-                                return interface[id]
+                            if name in interface:
+                                return interface[name]
         # Give up
         raise ProcessorException(
             "Unresolved reference '{}'.".format(fqn))
+
+    @staticmethod
+    def resolve_namespace(package, fqn):
+        """
+        Resolve namespace references.
+
+        :param package: context ast.Package object.
+        :param fqn: FQN or ID string.
+        :return: Dereferenced ast.Namespace object.
+        """
+        if not isinstance(package, ast.Package) or not isinstance(fqn, str):
+            raise ValueError("Unexpected input.")
+        if fqn.count(".") > 0:
+            pkg, name = fqn.rsplit(".", 2)
+        else:
+            pkg, name = (None, fqn)
+        if pkg is None:
+            # This is an ID
+            # Look for other namespaces in the package
+            if name in package:
+                return package[name]
+            # Look in model imports
+            for package_import in package.imports:
+                if not package_import.namespace:
+                    if name in package_import.package_reference:
+                        return package_import.package_reference[name]
+        else:
+            # This is an FQN
+            if pkg == package.name:
+                # Check in the current package
+                if name in package:
+                    return package[name]
+            else:
+                # Look in model imports
+                for package_import in package.imports:
+                    if not package_import.namespace:
+                        if name in package_import.package_reference:
+                            return package_import.package_reference[name]
+        # Give up
+        raise ProcessorException(
+            "Unresolved namespace reference '{}'.".format(fqn))
 
     def _udpate_complextype_references(self, name):
         """
@@ -126,15 +167,21 @@ class Processor:
         :param name: ast.ComplexType object.
         """
         if isinstance(name, ast.Enumeration):
-            # TODO: Handle extends
             if name.extends:
-                self._update_type_references(name.namespace, name.extends)
+                name.reference = self.resolve(name.namespace, name.extends)
+                if not isinstance(name.reference, ast.Enumeration):
+                    raise ProcessorException(
+                        "Invalid enumeration reference '{}'.".format(
+                            name.extends))
         elif isinstance(name, ast.Struct):
             for field in name.fields.values():
                 self._update_type_references(name.namespace, field.type)
-            # TODO: Handle extends
             if name.extends:
-                self._update_type_references(name.namespace, name.extends)
+                name.reference = self.resolve(name.namespace, name.extends)
+                if not isinstance(name.reference, ast.Struct):
+                    raise ProcessorException(
+                        "Invalid struct reference '{}'.".format(
+                            name.extends))
         elif isinstance(name, ast.Array):
             self._update_type_references(name.namespace, name.type)
         elif isinstance(name, ast.Map):
@@ -172,10 +219,15 @@ class Processor:
             if isinstance(name.errors, OrderedDict):
                 for arg in name.errors.values():
                     self._update_type_references(name.namespace, arg.type)
-            else:
+            elif isinstance(name.errors, ast.Reference):
                 # Errors can be a reference to an enumeration
                 self._update_type_references(name.namespace, name.errors)
-                # FIXME: Check the reference type
+                if not isinstance(name.errors.reference, ast.Enumeration):
+                    raise ProcessorException(
+                        "Invalid error reference '{}'.".format(
+                            name.errors.name))
+            else:
+                assert False
         elif isinstance(name, ast.Broadcast):
             for arg in name.out_args.values():
                 self._update_type_references(name.namespace, arg.type)
@@ -212,9 +264,13 @@ class Processor:
             self._update_type_references(namespace, name)
         for name in namespace.broadcasts.values():
             self._update_type_references(namespace, name)
-        # TODO: Handle extends
         if namespace.extends:
-            self._update_type_references(namespace, namespace.extends)
+            namespace.reference = self.resolve_namespace(
+                namespace.package, namespace.extends)
+            if not isinstance(namespace.reference, ast.Interface):
+                raise ProcessorException(
+                    "Invalid interface reference '{}'.".format(
+                        namespace.extends))
 
     def _update_package_references(self, package):
         """
