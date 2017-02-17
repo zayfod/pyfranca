@@ -143,6 +143,7 @@ checks:
 filter:
     excluded_paths:
         - '*/tests/*'
+        - 'examples/*'
 build:
     dependencies:
         before:

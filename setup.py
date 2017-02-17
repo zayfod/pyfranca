@@ -11,7 +11,7 @@ setup(
     author="Kaloyan Tenchov",
     author_email="zayfod@gmail.com",
     url="http://github.com/zayfod/pyfranca",
-    download_url="https://github.com/zayfod/pyfranca/archive/0.2.1.zip",
+    download_url="https://github.com/zayfod/pyfranca/archive/0.2.0.zip",
     license="MIT",
     platforms="Python 2.7 and later.",
     keywords=["franca", "franca-idl", "idl", "fidl", "parsing"],

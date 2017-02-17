@@ -12,5 +12,7 @@ script:
   - pylint --errors-only pyfranca
   - python setup.py check
   - coverage run --source=pyfranca setup.py test
+  - python tools/fidl_dump.py examples/fidl/hello.fidl
+  - python tools/fidl_validator.py examples/fidl/hello.fidl
 after_success:
   coveralls

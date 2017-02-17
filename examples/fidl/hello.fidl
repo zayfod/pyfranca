@@ -1,0 +1,5 @@
+package Package
+
+interface Interface {
+    method Hello {}
+}
