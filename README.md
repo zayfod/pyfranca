@@ -34,8 +34,8 @@ This project is a tool for exploring the capabilities (and ambiguities) of
 Franca. It is unstable and heavily under development.
 
 
-Usage
------
+Library Usage
+-------------
 
 Processing Franca IDL:
 
@@ -65,6 +65,18 @@ Listing the packages and interfaces, defined in a `.fidl` file:
         print(package.name)
         for interface in package.interfaces.values():
             print("\t", interface.name)
+
+
+Tool Usage
+----------
+
+Visualizing Franca models:
+
+    fidl_dump.py model.fidl
+
+Validating Franca models:
+
+    fidl_validator.py -I packages model.fidl
 
 
 Limitations
