@@ -39,32 +39,36 @@ Library Usage
 
 Processing Franca IDL:
 
-    from pyfranca import Processor
-    
-    processor = Processor()
-    processor.import_string("hello.fidl", """
-        package Example
-        interface Interface {
-            method Hello {}
-        }
-    """)
-            
-    assert processor.packages["Example"].interfaces["Interface"].methods["Hello"].name == "Hello"
+```python
+from pyfranca import Processor
+
+processor = Processor()
+processor.import_string("hello.fidl", """
+    package Example
+    interface Interface {
+        method Hello {}
+    }
+""")
+        
+assert processor.packages["Example"].interfaces["Interface"].methods["Hello"].name == "Hello"
+```
 
 Listing the packages and interfaces, defined in a `.fidl` file:
 
-    from pyfranca import Processor, LexerException, ParserException, ProcessorException
-    
-    processor = Processor()
-    try:
-        processor.import_file("hello.fidl")        
-    except (LexerException, ParserException, ProcessorException) as e:
-        print("ERROR: {}".format(e))
+```python
+from pyfranca import Processor, LexerException, ParserException, ProcessorException
 
-    for package in processor.packages.values():
-        print(package.name)
-        for interface in package.interfaces.values():
-            print("\t", interface.name)
+processor = Processor()
+try:
+    processor.import_file("hello.fidl")        
+except (LexerException, ParserException, ProcessorException) as e:
+    print("ERROR: {}".format(e))
+
+for package in processor.packages.values():
+    print(package.name)
+    for interface in package.interfaces.values():
+        print("\t", interface.name)
+```
 
 
 Tool Usage
