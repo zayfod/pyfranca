@@ -1,3 +1,6 @@
+"""
+Franca lexer.
+"""
 
 import ply.lex as lex
 

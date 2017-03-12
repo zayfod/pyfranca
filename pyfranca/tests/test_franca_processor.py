@@ -1,3 +1,6 @@
+"""
+Pyfranca processor tests.
+"""
 
 import unittest
 

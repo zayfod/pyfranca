@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+"""
+Pyfranca setup script.
+"""
 
 import os
 import re

@@ -1,3 +1,6 @@
+"""
+Franca processor.
+"""
 
 import os
 from collections import OrderedDict

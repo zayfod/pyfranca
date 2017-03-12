@@ -1,3 +1,7 @@
+"""
+Pyfranca lexer and parser tests.
+"""
+
 import unittest
 
 from pyfranca import LexerException, ParserException, Parser, ast

@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""
+Pyfranca processor example.
+"""
 
 from pyfranca import Processor, LexerException, ParserException, \
     ProcessorException

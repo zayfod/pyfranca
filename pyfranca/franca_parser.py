@@ -1,3 +1,6 @@
+"""
+Franca parser.
+"""
 
 from collections import OrderedDict
 from abc import ABCMeta

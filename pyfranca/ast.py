@@ -1,3 +1,6 @@
+"""
+Franca abstract syntax tree representation.
+"""
 
 from abc import ABCMeta
 from collections import OrderedDict

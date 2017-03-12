@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""
+Pyfranca parser example.
+"""
 
 from pyfranca import Parser, LexerException, ParserException
 

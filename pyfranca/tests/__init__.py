@@ -1,3 +1,6 @@
+"""
+Pyfranca test suite.
+"""
 
 import unittest
 
