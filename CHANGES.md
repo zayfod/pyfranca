@@ -2,7 +2,11 @@
 Revision History
 ================
 
-0.2.0 (Feb 17, 2017)
+v0.2.1 (Mar 11, 2017)
+--------------------
+- Added package version as suggested by Jens Baumann.
+
+v0.2.0 (Feb 17, 2017)
 --------------------
 - Processor class to handle model imports, type references, and validation.
 - Added support for FQN references.
