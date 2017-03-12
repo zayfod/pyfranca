@@ -1,4 +1,4 @@
-
+__version__ = '0.2.0'
 from pyfranca.franca_lexer import LexerException, Lexer
 from pyfranca.franca_parser import ParserException, Parser
 from pyfranca.franca_processor import ProcessorException, Processor

@@ -1,11 +1,11 @@
 
 from setuptools import setup
-
+from pyfranca import __version__
 
 setup(
     name="pyfranca",
     packages=["pyfranca"],
-    version="0.2.0",
+    version=__version__,
     description="Python parser and tools for working with the Franca "
                 "interface definition language.",
     author="Kaloyan Tenchov",
