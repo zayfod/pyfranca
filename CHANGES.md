@@ -2,12 +2,18 @@
 Revision History
 ================
 
+v0.3.0
+------
+- Added support for packages in multiple files.
+- Fixed package file references.
+- Integrated Sphinx for API documentation generation.
+
 v0.2.1 (Mar 11, 2017)
---------------------
+---------------------
 - Added package version as suggested by Jens Baumann.
 
 v0.2.0 (Feb 17, 2017)
---------------------
+---------------------
 - Processor class to handle model imports, type references, and validation.
 - Added support for FQN references.
 - Added command line-tools - fidl_dump.py and fidl_validator.py .
