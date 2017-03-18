@@ -27,7 +27,7 @@ class Package(object):
         Constructs a new Package.
         """
         self.name = name
-        self.file = file_name
+        self.files = [file_name] if file_name else []
         self.imports = imports if imports else []
         self.interfaces = interfaces if interfaces else OrderedDict()
         self.typecollections = typecollections if typecollections else \
@@ -39,6 +39,8 @@ class Package(object):
             item.package = self
 
     def __contains__(self, namespace):
+        if not isinstance(namespace, str):
+            raise TypeError
         res = namespace in self.typecollections or \
               namespace in self.interfaces
         return res
@@ -52,6 +54,25 @@ class Package(object):
             return self.interfaces[namespace]
         else:
             raise KeyError
+
+    def __iadd__(self, package):
+        if not isinstance(package, Package):
+            raise TypeError
+        # Ignore the name and imports
+        self.files += package.files
+        for item in package.interfaces.values():
+            if item.name in self:
+                raise ASTException("Interface member defined more than"
+                                   " once '{}'.".format(item.name))
+            self.interfaces[item.name] = item
+            item.package = self
+        for item in package.typecollections.values():
+            if item.name in self:
+                raise ASTException("Type collection member defined more than"
+                                   " once '{}'.".format(item.name))
+            self.typecollections[item.name] = item
+            item.package = self
+        return self
 
 
 class Import(object):
@@ -82,6 +103,8 @@ class Namespace(object):
                 self._add_member(member)
 
     def __contains__(self, name):
+        if not isinstance(name, str):
+            raise TypeError
         res = name in self.typedefs or \
               name in self.enumerations or \
               name in self.structs or \
@@ -324,6 +347,8 @@ class Interface(Namespace):
                 self._add_member(member)
 
     def __contains__(self, name):
+        if not isinstance(name, str):
+            raise TypeError
         res = super(Interface, self).__contains__(name) or \
               name in self.attributes or \
               name in self.methods or \

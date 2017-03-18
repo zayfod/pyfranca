@@ -695,5 +695,5 @@ class Parser(object):
             fidl = f.read()
         package = self.parse(fidl)
         if package:
-            package.file = fspec
+            package.files = [fspec]
         return package
