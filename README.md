@@ -120,6 +120,14 @@ From source:
     python setup.py install
 
 
+Documentation
+-------------
+
+API documentation is available on PythonHosted.org:
+
+http://pythonhosted.org/pyfranca/
+
+
 Bugs
 ----
 

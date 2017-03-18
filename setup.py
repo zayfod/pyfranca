@@ -35,6 +35,10 @@ setup(
     platforms="Python 2.7 and later.",
     keywords=["franca", "franca-idl", "idl", "fidl", "parsing"],
     install_requires=["ply"],
+    setup_requires=[
+        'setuptools_pep8',
+        'sphinx',
+    ],    
     test_suite="pyfranca.tests.get_suite",
     scripts=[
         "tools/fidl_dump.py",
