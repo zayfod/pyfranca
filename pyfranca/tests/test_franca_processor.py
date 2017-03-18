@@ -147,6 +147,7 @@ class TestPackagesInMultipleFiles(BaseTestCase):
         self.assertEqual(b.type.name, "A")
         self.assertEqual(b.type.reference, a)
 
+
 class TestReferences(BaseTestCase):
     """Test type references."""
 

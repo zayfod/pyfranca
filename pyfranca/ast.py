@@ -41,8 +41,7 @@ class Package(object):
     def __contains__(self, namespace):
         if not isinstance(namespace, str):
             raise TypeError
-        res = namespace in self.typecollections or \
-              namespace in self.interfaces
+        res = namespace in self.typecollections or namespace in self.interfaces
         return res
 
     def __getitem__(self, namespace):
@@ -106,10 +105,10 @@ class Namespace(object):
         if not isinstance(name, str):
             raise TypeError
         res = name in self.typedefs or \
-              name in self.enumerations or \
-              name in self.structs or \
-              name in self.arrays or \
-              name in self.maps
+            name in self.enumerations or \
+            name in self.structs or \
+            name in self.arrays or \
+            name in self.maps
         return res
 
     def __getitem__(self, name):
@@ -350,9 +349,9 @@ class Interface(Namespace):
         if not isinstance(name, str):
             raise TypeError
         res = super(Interface, self).__contains__(name) or \
-              name in self.attributes or \
-              name in self.methods or \
-              name in self.broadcasts
+            name in self.attributes or \
+            name in self.methods or \
+            name in self.broadcasts
         return res
 
     def __getitem__(self, name):
