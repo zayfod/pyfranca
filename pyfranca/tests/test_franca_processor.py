@@ -514,3 +514,39 @@ class TestReferences(BaseTestCase):
             """)
         self.assertEqual(str(context.exception),
                          "Unresolved namespace reference 'I'.")
+
+    def test_anonymous_array_references(self):
+        self.processor.import_string("test.fidl", """
+            package P
+            typeCollection TC {
+                typedef TD is Int32
+                typedef TDA is TD[]
+                array ATDA of TD[]
+                struct S { TD[] tda }
+                map M { TD[] to TD[] }
+            }
+            interface I {
+                attribute TD[] A
+                method M { in { TD[] tda } out { TD[] tda } }
+                broadcast B { out { TD[] tda } }
+            }
+        """)
+        tc = self.processor.packages["P"].typecollections["TC"]
+        td = tc.typedefs["TD"]
+        tda = tc.typedefs["TDA"]
+        self.assertEqual(tda.type.type.reference, td)
+        atda = tc.arrays["ATDA"]
+        self.assertEqual(atda.type.type.reference, td)
+        s = tc.structs["S"]
+        self.assertEqual(s.fields["tda"].type.type.reference, td)
+        m = tc.maps["M"]
+        self.assertEqual(m.key_type.type.reference, td)
+        self.assertEqual(m.value_type.type.reference, td)
+        i = self.processor.packages["P"].interfaces["I"]
+        a = i.attributes["A"]
+        self.assertEqual(a.type.type.reference, td)
+        m = i.methods["M"]
+        self.assertEqual(m.in_args["tda"].type.type.reference, td)
+        self.assertEqual(m.out_args["tda"].type.type.reference, td)
+        b = i.broadcasts["B"]
+        self.assertEqual(b.out_args["tda"].type.type.reference, td)

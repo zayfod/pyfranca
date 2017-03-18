@@ -139,14 +139,29 @@ class Namespace(object):
                     "Duplicate namespace member '{}'.".format(member.name))
             if isinstance(member, Typedef):
                 self.typedefs[member.name] = member
+                # Handle anonymous array special case.
+                if isinstance(member.type, Array):
+                    member.type.namespace = self
             elif isinstance(member, Enumeration):
                 self.enumerations[member.name] = member
             elif isinstance(member, Struct):
                 self.structs[member.name] = member
+                # Handle anonymous array special case.
+                for field in member.fields.values():
+                    if isinstance(field.type, Array):
+                        field.type.namespace = self
             elif isinstance(member, Array):
                 self.arrays[member.name] = member
+                # Handle anonymous array special case.
+                if isinstance(member.type, Array):
+                    member.type.namespace = self
             elif isinstance(member, Map):
                 self.maps[member.name] = member
+                # Handle anonymous array special case.
+                if isinstance(member.key_type, Array):
+                    member.key_type.namespace = self
+                if isinstance(member.value_type, Array):
+                    member.value_type.namespace = self
             else:
                 raise ASTException("Unexpected namespace member type.")
             member.namespace = self
@@ -373,10 +388,24 @@ class Interface(Namespace):
                     "Duplicate namespace member '{}'.".format(member.name))
             if isinstance(member, Attribute):
                 self.attributes[member.name] = member
+                # Handle anonymous array special case.
+                if isinstance(member.type, Array):
+                    member.type.namespace = self
             elif isinstance(member, Method):
                 self.methods[member.name] = member
+                # Handle anonymous array special case.
+                for arg in member.in_args.values():
+                    if isinstance(arg.type, Array):
+                        arg.type.namespace = self
+                for arg in member.out_args.values():
+                    if isinstance(arg.type, Array):
+                        arg.type.namespace = self
             elif isinstance(member, Broadcast):
                 self.broadcasts[member.name] = member
+                # Handle anonymous array special case.
+                for arg in member.out_args.values():
+                    if isinstance(arg.type, Array):
+                        arg.type.namespace = self
             else:
                 super(Interface, self)._add_member(member)
             member.namespace = self

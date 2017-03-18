@@ -5,6 +5,7 @@ Revision History
 v0.3.0
 ------
 - Added support for packages in multiple files.
+- Fixed anonymous array reference handling.
 - Fixed package file references.
 - Integrated Sphinx for API documentation generation.
 
