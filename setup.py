@@ -32,7 +32,7 @@ setup(
     download_url="https://github.com/zayfod/pyfranca/archive/{}.zip".format(
         version),
     license="MIT",
-    platforms="Python 2.7 and later.",
+    platforms="Python 2.7 or 3.4 .",
     keywords=["franca", "franca-idl", "idl", "fidl", "parsing"],
     install_requires=["ply"],
     setup_requires=[

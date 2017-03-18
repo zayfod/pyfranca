@@ -89,7 +89,6 @@ Limitations
 The following Franca features are not supported:
 
 - structured comments
-- packages in multiple files
 - dots in type collection and interface names
 - constants
 - expressions
@@ -102,7 +101,7 @@ The following Franca features are not supported:
 Requirements
 ------------
 
-- Python 2.7 or 3
+- Python 2.7 or 3.4
 - PLY
 
 
