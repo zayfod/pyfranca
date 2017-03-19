@@ -681,23 +681,16 @@ class Parser(object):
         """
         real : INTEGER '.' INTEGER ID
         """
-        if p[4] == 'd' or p[4] == 'f':
+        6.054 = wird abgeschnitten
+        if p[4][0] == 'd' or p[4][0] == 'f':
             p[0] = float(str(p[1]) + "." + str(p[3]))
+        elif p[4][0] == 'e':
+            p[4] = p[4].replace("f", '')
+            p[4] = p[4].replace("d", '')
+            p[0] = float(str(p[1]) + "." + str(p[3]) + str(p[4]))
         else:
             raise ParserException("Syntax error at line {} near '{}'.".format(
-                p.lineno, 200))
-
-        # noinspection PyIncorrectDocstring
-        # @staticmethod
-        # def p_real_1(p):
-        #     """
-        #   real : INTEGER '.' INTEGER ID INTEGER ID
-        #   """
-        #   if (p[6] == 'd' or p[6] == 'f') and  (p[4] == 'e'):
-        #       p[0] = float(str(p[1]) + "." + str(p[3]) + p[4] + str(p[5] + p[6]))
-        #   else:
-        #       raise ParserException("Syntax error at line {} near '{}'.".format(
-        #           p.lineno, p.value))
+                p.lineno, p.value))
 
     # noinspection PyIncorrectDocstring
     @staticmethod

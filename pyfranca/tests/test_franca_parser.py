@@ -259,6 +259,7 @@ class TestUnsupported(BaseTestCase):
                 const Double pi = 3.1415d
                 const Float f1 = 1.2f
                 const Boolean b1 = true
+                const Float f2 = 6.022e23f
 
             }
         """)
@@ -278,7 +279,7 @@ class TestUnsupported(BaseTestCase):
         self.assertEqual(len(typecollection.structs), 0)
         self.assertEqual(len(typecollection.arrays), 0)
         self.assertEqual(len(typecollection.maps), 0)
-        self.assertEqual(len(typecollection.constants), 4)
+        self.assertEqual(len(typecollection.constants), 5)
 
         self.assertEqual(typecollection.constants["MAX_COUNT"].name, "MAX_COUNT")
         self.assertEqual(typecollection.constants["MAX_COUNT"].type.name, "UInt32")
@@ -294,16 +295,24 @@ class TestUnsupported(BaseTestCase):
 
         self.assertEqual(typecollection.constants["f1"].name, "f1")
         self.assertEqual(typecollection.constants["f1"].type.name, "Float")
-        self.assertEqual(typecollection.constants["f1"].value, 1.2)
+        self.assertAlmostEqual(typecollection.constants["f1"].value, 1.2)
+
+        self.assertEqual(typecollection.constants["f2"].name, "f2")
+        self.assertEqual(typecollection.constants["f2"].type.name, "Float")
+        self.assertAlmostEqual(typecollection.constants["f2"].value, 6.022e23)
 
     def test_constants_test(self):
         """Franca 0.9.2, section 5.2.1"""
         package = self._parse("""
             package P
             typeCollection TC {
-                const String foo = "bar"
+                const Float f2 = 6.022e23f
             }
         """)
+        # const Float f2 = 6.022e23f
+        # const Double d2 = 8.617e-5d
+        # const String foo = "bar"
+
     def test_expressions(self):
         """Franca 0.9.2, section 5.2.1"""
         with self.assertRaises(ParserException) as context:
