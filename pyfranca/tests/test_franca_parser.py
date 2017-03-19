@@ -252,19 +252,58 @@ class TestUnsupported(BaseTestCase):
 
     def test_constants(self):
         """Franca 0.9.2, section 5.2.1"""
-        with self.assertRaises(ParserException) as context:
-            self._parse("""
-                package P
-                typeCollection TC {
-                    const Boolean b1 = true
-                    const UInt32 MAX COUNT = 10000
-                    const String foo = "bar"
-                    const Double pi = 3.1415d
-                }
-            """)
-        self.assertEqual(str(context.exception),
-                         "Syntax error at line 4 near 'const'.")
+        package = self._parse("""
+            package P
+            typeCollection TC {
+                const UInt32 MAX_COUNT = 10000
+                const Double pi = 3.1415d
+                const Float f1 = 1.2f
+                const Boolean b1 = true
 
+            }
+        """)
+        self.assertEqual(package.name, "P")
+        self.assertIsNone(package.file)
+        self.assertEqual(len(package.imports), 0)
+        self.assertEqual(len(package.typecollections), 1)
+        self.assertEqual(len(package.interfaces), 0)
+        self.assertTrue("TC" in package.typecollections)
+        typecollection = package.typecollections["TC"]
+        self.assertEqual(typecollection.package, package)
+        self.assertEqual(typecollection.name, "TC")
+        self.assertListEqual(typecollection.flags, [])
+        self.assertIsNone(typecollection.version)
+        self.assertEqual(len(typecollection.typedefs), 0)
+        self.assertEqual(len(typecollection.enumerations), 0)
+        self.assertEqual(len(typecollection.structs), 0)
+        self.assertEqual(len(typecollection.arrays), 0)
+        self.assertEqual(len(typecollection.maps), 0)
+        self.assertEqual(len(typecollection.constants), 4)
+
+        self.assertEqual(typecollection.constants["MAX_COUNT"].name, "MAX_COUNT")
+        self.assertEqual(typecollection.constants["MAX_COUNT"].type.name, "UInt32")
+        self.assertEqual(typecollection.constants["MAX_COUNT"].value, 10000)
+
+        self.assertEqual(typecollection.constants["pi"].name, "pi")
+        self.assertEqual(typecollection.constants["pi"].type.name, "Double")
+        self.assertEqual(typecollection.constants["pi"].value, 3.1415)
+
+        self.assertEqual(typecollection.constants["b1"].name, "b1")
+        self.assertEqual(typecollection.constants["b1"].type.name, "Boolean")
+        self.assertEqual(typecollection.constants["b1"].value, True)
+
+        self.assertEqual(typecollection.constants["f1"].name, "f1")
+        self.assertEqual(typecollection.constants["f1"].type.name, "Float")
+        self.assertEqual(typecollection.constants["f1"].value, 1.2)
+
+    def test_constants_test(self):
+        """Franca 0.9.2, section 5.2.1"""
+        package = self._parse("""
+            package P
+            typeCollection TC {
+                const String foo = "bar"
+            }
+        """)
     def test_expressions(self):
         """Franca 0.9.2, section 5.2.1"""
         with self.assertRaises(ParserException) as context:
@@ -277,7 +316,7 @@ class TestUnsupported(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Syntax error at line 4 near 'const'.")
+                         "Syntax error at line 5 near 'MAX'.")
 
     def test_complex_constants(self):
         """Franca 0.9.2, section 5.2.2"""
@@ -309,7 +348,7 @@ class TestUnsupported(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Syntax error at line 5 near 'const'.")
+                         "Syntax error at line 5 near '['.")
 
     def test_unions(self):
         """Franca 0.9.2, section 5.1.6"""

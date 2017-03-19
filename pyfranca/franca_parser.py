@@ -182,6 +182,7 @@ class Parser(object):
                               | struct_def
                               | array_def
                               | map_def
+                              | constant_def
         """
         p[0] = p[1]
 
@@ -263,6 +264,7 @@ class Parser(object):
                          | struct_def
                          | array_def
                          | map_def
+                         | constant_def
         """
         p[0] = p[1]
 
@@ -583,6 +585,39 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
+    def p_constant_def(p):
+        """
+        constant_def : CONST type ID '=' INTEGER
+        """
+        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_1(p):
+        """
+        constant_def : CONST type ID '=' real
+        """
+        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_2(p):
+        """
+        constant_def : CONST type ID '=' boolean
+        """
+        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_3(p):
+        """
+        constant_def : CONST type ID '=' string
+        """
+        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
+
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
     def p_type_1(p):
         """
         type : INT8
@@ -639,6 +674,53 @@ class Parser(object):
         """
         element_type = ast.Reference(name=p[1])
         p[0] = ast.Array(name=None, element_type=element_type)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_real(p):
+        """
+        real : INTEGER '.' INTEGER ID
+        """
+        if p[4] == 'd' or p[4] == 'f':
+            p[0] = float(str(p[1]) + "." + str(p[3]))
+        else:
+            raise ParserException("Syntax error at line {} near '{}'.".format(
+                p.lineno, 200))
+
+        # noinspection PyIncorrectDocstring
+        # @staticmethod
+        # def p_real_1(p):
+        #     """
+        #   real : INTEGER '.' INTEGER ID INTEGER ID
+        #   """
+        #   if (p[6] == 'd' or p[6] == 'f') and  (p[4] == 'e'):
+        #       p[0] = float(str(p[1]) + "." + str(p[3]) + p[4] + str(p[5] + p[6]))
+        #   else:
+        #       raise ParserException("Syntax error at line {} near '{}'.".format(
+        #           p.lineno, p.value))
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_boolean(p):
+        """
+        boolean : TRUE
+                | FALSE
+        """
+        if p[1] == "true":
+            p[0] = True
+        elif p[1] == "false":
+            p[0] = False
+        else:
+            raise ParserException("Syntax error in boolean constant at line {} near '{}'.".format(
+                p.lineno, p.value))
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_string(p):
+        """
+        string : '\"' ID '\"'
+        """
+        p[0] = p[2]
 
     # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
