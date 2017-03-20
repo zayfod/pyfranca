@@ -645,31 +645,70 @@ class Parser(object):
         """
         constant_def : CONST type ID '=' INTEGER
         """
+        if p[2].name not in [  "Int8",  "Int16",  "Int32",  "Int64",
+                              "UInt8", "UInt16", "UInt32", "UInt64",  "Integer"]:
+            raise ParserException("rvalue type 'Integer Type' does not match lvalue type '{}'".format(p[2].name))
         p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_constant_def_1(p):
         """
-        constant_def : CONST type ID '=' real
+        constant_def : CONST type ID '=' FLOAT_VAL
         """
+        if not p[2].name == "Float":
+            raise ParserException("rvalue type 'Float' does not match lvalue type '{}'".format(p[2].name))
         p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_constant_def_2(p):
         """
-        constant_def : CONST type ID '=' boolean
+        constant_def : CONST type ID '=' DOUBLE_VAL
         """
+        if not p[2].name == "Double":
+            raise ParserException("rvalue type 'Double' does not match lvalue type '{}'".format(p[2].name))
         p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_constant_def_3(p):
         """
-        constant_def : CONST type ID '=' string
+        constant_def : CONST type ID '=' STRING_VAL
         """
+        if not p[2].name == "String":
+            raise ParserException("rvalue type 'String' does not match lvalue type '{}'".format(p[2].name))
         p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_4(p):
+        """
+        constant_def : CONST type ID '=' FILE_NAME
+        """
+        if not p[2].name == "String":
+            raise ParserException("rvalue type 'String' does not match lvalue type '{}'".format(p[2].name))
+        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_5(p):
+        """
+        constant_def : CONST type ID '=' FALSE
+        """
+        if not p[2].name == "Boolean":
+            raise ParserException("rvalue type 'Boolean' does not match lvalue type '{}'".format(p[2].name))
+        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=False)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_6(p):
+        """
+        constant_def : CONST type ID '=' TRUE
+        """
+        if not p[2].name == "Boolean":
+            raise ParserException("rvalue type 'Boolean' does not match lvalue type '{}'".format(p[2].name))
+        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=True)
 
 
     # noinspection PyIncorrectDocstring
@@ -731,47 +770,7 @@ class Parser(object):
         element_type = ast.Reference(name=p[1])
         p[0] = ast.Array(name=None, element_type=element_type)
 
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_real(p):
-        """
-        real : INTEGER '.' INTEGER ID
-        """
-        6.054 = wird abgeschnitten
-        if p[4][0] == 'd' or p[4][0] == 'f':
-            p[0] = float(str(p[1]) + "." + str(p[3]))
-        elif p[4][0] == 'e':
-            p[4] = p[4].replace("f", '')
-            p[4] = p[4].replace("d", '')
-            p[0] = float(str(p[1]) + "." + str(p[3]) + str(p[4]))
-        else:
-            raise ParserException("Syntax error at line {} near '{}'.".format(
-                p.lineno, p.value))
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_boolean(p):
-        """
-        boolean : TRUE
-                | FALSE
-        """
-        if p[1] == "true":
-            p[0] = True
-        elif p[1] == "false":
-            p[0] = False
-        else:
-            raise ParserException("Syntax error in boolean constant at line {} near '{}'.".format(
-                p.lineno, p.value))
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_string(p):
-        """
-        string : '\"' ID '\"'
-        """
-        p[0] = p[2]
-
-    # noinspection PyUnusedLocal, PyIncorrectDocstring
+       # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
     def p_empty(p):
         """

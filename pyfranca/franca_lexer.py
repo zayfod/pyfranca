@@ -77,6 +77,9 @@ class Lexer(object):
         "ID",
         "INTEGER",
         "FILE_NAME",
+        "DOUBLE_VAL",
+        "FLOAT_VAL",
+        "STRING_VAL"
     ]
 
     # Ignored characters
@@ -146,6 +149,33 @@ class Lexer(object):
         # noinspection PySingleQuotedDocstring
         r"[+-]?\d+"
         t.value = int(t.value)
+        return t
+
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_FLOAT_VAL(t):
+        # noinspection PySingleQuotedDocstring
+        r"[-+]?\d+(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[f]"
+        t.value = t.value.replace("f", '')
+        t.value = float(t.value)
+        return t
+
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_DOUBLE_VAL(t):
+        # noinspection PySingleQuotedDocstring
+        r"[-+]?\d+(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[d]"
+        t.value = t.value.replace("d", '')
+        t.value = float(t.value)
+        return t
+
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_STRING_VAL(t):
+        # noinspection PySingleQuotedDocstring
+        r"\"[^\"]*\""
+        t.value = t.value.replace("\"", '')
+        t.value = str(t.value)
         return t
 
     @staticmethod
