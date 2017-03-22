@@ -269,7 +269,7 @@ class TestUnsupported(BaseTestCase):
             }
         """)
         self.assertEqual(package.name, "P")
-        self.assertIsNone(package.file)
+        self.assertEqual(package.files, [])
         self.assertEqual(len(package.imports), 0)
         self.assertEqual(len(package.typecollections), 1)
         self.assertEqual(len(package.interfaces), 0)
