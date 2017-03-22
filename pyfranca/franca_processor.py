@@ -27,7 +27,7 @@ class Processor:
         Constructor.
         """
         # Default package paths.
-        self.package_paths = ["."]
+        self.package_paths = []
         self.files = {}
         self.packages = {}
 
@@ -409,6 +409,9 @@ class Processor:
         # Parse the file.
         parser = franca_parser.Parser()
         package = parser.parse_file(fspec)
+        fspec_path = os.path.abspath(fspec)
+        fspec_dir = os.path.split(fspec_path)
+        self.package_paths.extend(fspec_dir)
         # Import the package in the processor.
         self.import_package(fspec, package, references)
         return package
