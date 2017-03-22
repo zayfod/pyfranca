@@ -320,21 +320,21 @@ class Processor:
             ValueError("Expected ast.Package as input.")
         if not references:
             references = []
-        # Check for circular package dependencies.
-        if package.name in references:
-            raise ProcessorException(
-                "Circular dependency for package '{}'.".format(package.name))
         # Check whether package is already imported
         if package.name in self.packages:
-            if fspec != self.packages[package.name].file:
-                raise ProcessorException(
-                    "Package '{}' defined in multiple files.".format(
-                        package.name))
+            if fspec not in self.packages[package.name].files:
+                # Merge the new package into the already existing one.
+                self.packages[package.name] += package
+                # Register the package file in the processor.
+                self.files[fspec] = self.packages[package.name]
+                package = self.packages[package.name]
             else:
                 return
-        # Register the package in the processor.
-        self.packages[package.name] = package
-        self.files[fspec] = package
+        else:
+            # Register the package in the processor.
+            self.packages[package.name] = package
+            # Register the package file in the processor.
+            self.files[fspec] = package
         # Process package imports
         for package_import in package.imports:
             imported_package = self.import_file(
@@ -356,6 +356,7 @@ class Processor:
         # Parse the string.
         parser = franca_parser.Parser()
         package = parser.parse(fidl)
+        package.files = [fspec]
         # Import the package in the processor.
         self.import_package(fspec, package, references)
         return package

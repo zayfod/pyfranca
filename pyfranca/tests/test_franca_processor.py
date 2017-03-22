@@ -54,8 +54,10 @@ class TestImports(BaseTestCase):
         self.assertEqual(len(self.processor.files), 2)
         p = self.processor.files["test.fidl"]
         self.assertEqual(p.name, "P")
+        self.assertEqual(p.files, ["test.fidl"])
         p2 = self.processor.files["test2.fidl"]
         self.assertEqual(p2.name, "P2")
+        self.assertEqual(p2.files, ["test2.fidl"])
         # Verify package access
         self.assertEqual(len(self.processor.packages), 2)
         p = self.processor.packages["P"]
@@ -107,19 +109,43 @@ class TestImports(BaseTestCase):
     #     """)
 
 
-class TestUnsupported(BaseTestCase):
-    """Test that unsupported Franca features fail appropriately."""
+class TestPackagesInMultipleFiles(BaseTestCase):
+    """Support for packages in multiple files"""
 
     def test_package_in_multiple_files(self):
-        with self.assertRaises(ProcessorException) as context:
-            self.processor.import_string("test.fidl", """
-                package P
-            """)
-            self.processor.import_string("test2.fidl", """
-                package P
-            """)
-        self.assertEqual(str(context.exception),
-                         "Package 'P' defined in multiple files.")
+        self.processor.import_string("test.fidl", """
+            package P
+        """)
+        self.processor.import_string("test2.fidl", """
+            package P
+        """)
+        p = self.processor.packages["P"]
+        self.assertEqual(p.files, ["test.fidl", "test2.fidl"])
+
+    def test_package_in_multiple_files_reuse(self):
+        self.processor.import_string("test.fidl", """
+            package P
+            typeCollection TC {
+                typedef A is Int32
+            }
+        """)
+        self.processor.import_string("test2.fidl", """
+            package P
+            import P.TC.* from "test.fidl"
+            interface I {
+                typedef B is A
+            }
+        """)
+        p = self.processor.packages["P"]
+        self.assertEqual(p.files, ["test.fidl", "test2.fidl"])
+        a = p.typecollections["TC"].typedefs["A"]
+        self.assertEqual(a.namespace.package, p)
+        self.assertTrue(isinstance(a.type, ast.Int32))
+        b = p.interfaces["I"].typedefs["B"]
+        self.assertEqual(b.namespace.package, p)
+        self.assertTrue(isinstance(b.type, ast.Reference))
+        self.assertEqual(b.type.name, "A")
+        self.assertEqual(b.type.reference, a)
 
 
 class TestReferences(BaseTestCase):
@@ -488,3 +514,39 @@ class TestReferences(BaseTestCase):
             """)
         self.assertEqual(str(context.exception),
                          "Unresolved namespace reference 'I'.")
+
+    def test_anonymous_array_references(self):
+        self.processor.import_string("test.fidl", """
+            package P
+            typeCollection TC {
+                typedef TD is Int32
+                typedef TDA is TD[]
+                array ATDA of TD[]
+                struct S { TD[] tda }
+                map M { TD[] to TD[] }
+            }
+            interface I {
+                attribute TD[] A
+                method M { in { TD[] tda } out { TD[] tda } }
+                broadcast B { out { TD[] tda } }
+            }
+        """)
+        tc = self.processor.packages["P"].typecollections["TC"]
+        td = tc.typedefs["TD"]
+        tda = tc.typedefs["TDA"]
+        self.assertEqual(tda.type.type.reference, td)
+        atda = tc.arrays["ATDA"]
+        self.assertEqual(atda.type.type.reference, td)
+        s = tc.structs["S"]
+        self.assertEqual(s.fields["tda"].type.type.reference, td)
+        m = tc.maps["M"]
+        self.assertEqual(m.key_type.type.reference, td)
+        self.assertEqual(m.value_type.type.reference, td)
+        i = self.processor.packages["P"].interfaces["I"]
+        a = i.attributes["A"]
+        self.assertEqual(a.type.type.reference, td)
+        m = i.methods["M"]
+        self.assertEqual(m.in_args["tda"].type.type.reference, td)
+        self.assertEqual(m.out_args["tda"].type.type.reference, td)
+        b = i.broadcasts["B"]
+        self.assertEqual(b.out_args["tda"].type.type.reference, td)

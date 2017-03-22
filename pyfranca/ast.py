@@ -27,7 +27,7 @@ class Package(object):
         Constructs a new Package.
         """
         self.name = name
-        self.file = file_name
+        self.files = [file_name] if file_name else []
         self.imports = imports if imports else []
         self.interfaces = interfaces if interfaces else OrderedDict()
         self.typecollections = typecollections if typecollections else \
@@ -39,8 +39,9 @@ class Package(object):
             item.package = self
 
     def __contains__(self, namespace):
-        res = namespace in self.typecollections or \
-              namespace in self.interfaces
+        if not isinstance(namespace, str):
+            raise TypeError
+        res = namespace in self.typecollections or namespace in self.interfaces
         return res
 
     def __getitem__(self, namespace):
@@ -52,6 +53,25 @@ class Package(object):
             return self.interfaces[namespace]
         else:
             raise KeyError
+
+    def __iadd__(self, package):
+        if not isinstance(package, Package):
+            raise TypeError
+        # Ignore the name and imports
+        self.files += package.files
+        for item in package.interfaces.values():
+            if item.name in self:
+                raise ASTException("Interface member defined more than"
+                                   " once '{}'.".format(item.name))
+            self.interfaces[item.name] = item
+            item.package = self
+        for item in package.typecollections.values():
+            if item.name in self:
+                raise ASTException("Type collection member defined more than"
+                                   " once '{}'.".format(item.name))
+            self.typecollections[item.name] = item
+            item.package = self
+        return self
 
 
 class Import(object):
@@ -83,12 +103,14 @@ class Namespace(object):
                 self._add_member(member)
 
     def __contains__(self, name):
+        if not isinstance(name, str):
+            raise TypeError
         res = name in self.typedefs or \
-              name in self.enumerations or \
-              name in self.structs or \
-              name in self.arrays or \
-              name in self.maps or \
-              name in self.constants
+            name in self.enumerations or \
+            name in self.structs or \
+            name in self.arrays or \
+            name in self.maps or \
+            name in self.constants
         return res
 
     def __getitem__(self, name):
@@ -121,14 +143,29 @@ class Namespace(object):
                     "Duplicate namespace member '{}'.".format(member.name))
             if isinstance(member, Typedef):
                 self.typedefs[member.name] = member
+                # Handle anonymous array special case.
+                if isinstance(member.type, Array):
+                    member.type.namespace = self
             elif isinstance(member, Enumeration):
                 self.enumerations[member.name] = member
             elif isinstance(member, Struct):
                 self.structs[member.name] = member
+                # Handle anonymous array special case.
+                for field in member.fields.values():
+                    if isinstance(field.type, Array):
+                        field.type.namespace = self
             elif isinstance(member, Array):
                 self.arrays[member.name] = member
+                # Handle anonymous array special case.
+                if isinstance(member.type, Array):
+                    member.type.namespace = self
             elif isinstance(member, Map):
                 self.maps[member.name] = member
+                # Handle anonymous array special case.
+                if isinstance(member.key_type, Array):
+                    member.key_type.namespace = self
+                if isinstance(member.value_type, Array):
+                    member.value_type.namespace = self
             elif isinstance(member, Constant):
                 self.constants[member.name] = member
             else:
@@ -339,10 +376,12 @@ class Interface(Namespace):
                 self._add_member(member)
 
     def __contains__(self, name):
+        if not isinstance(name, str):
+            raise TypeError
         res = super(Interface, self).__contains__(name) or \
-              name in self.attributes or \
-              name in self.methods or \
-              name in self.broadcasts
+            name in self.attributes or \
+            name in self.methods or \
+            name in self.broadcasts
         return res
 
     def __getitem__(self, name):
@@ -364,10 +403,24 @@ class Interface(Namespace):
                     "Duplicate namespace member '{}'.".format(member.name))
             if isinstance(member, Attribute):
                 self.attributes[member.name] = member
+                # Handle anonymous array special case.
+                if isinstance(member.type, Array):
+                    member.type.namespace = self
             elif isinstance(member, Method):
                 self.methods[member.name] = member
+                # Handle anonymous array special case.
+                for arg in member.in_args.values():
+                    if isinstance(arg.type, Array):
+                        arg.type.namespace = self
+                for arg in member.out_args.values():
+                    if isinstance(arg.type, Array):
+                        arg.type.namespace = self
             elif isinstance(member, Broadcast):
                 self.broadcasts[member.name] = member
+                # Handle anonymous array special case.
+                for arg in member.out_args.values():
+                    if isinstance(arg.type, Array):
+                        arg.type.namespace = self
             else:
                 super(Interface, self)._add_member(member)
             member.namespace = self

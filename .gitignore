@@ -3,13 +3,13 @@
 
 *.pyc
 
-pyfranca/parser.out
-pyfranca/parsetab.py
+/pyfranca/parser.out
+/pyfranca/parsetab.py
 
-build/
-dist/
-MANIFEST
-*.egg-info/
-html/
+/build/
+/docs/build/
+/dist/
+/MANIFEST
+/*.egg-info/
 
 .coverage

@@ -89,7 +89,6 @@ Limitations
 The following Franca features are not supported:
 
 - structured comments
-- packages in multiple files
 - dots in type collection and interface names
 - constants
 - expressions
@@ -102,7 +101,7 @@ The following Franca features are not supported:
 Requirements
 ------------
 
-- Python 2.7 or 3
+- Python 2.7 or 3.4
 - PLY
 
 
@@ -118,6 +117,14 @@ From source:
     git clone http://github.com/zayfod/pyfranca.git
     cd pyfranca
     python setup.py install
+
+
+Documentation
+-------------
+
+API documentation is available on PythonHosted.org:
+
+http://pythonhosted.org/pyfranca/
 
 
 Bugs

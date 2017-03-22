@@ -64,7 +64,7 @@ class TestTopLevel(BaseTestCase):
     def test_empty_package(self):
         package = self._assertParse("package P")
         self.assertEqual(package.name, "P")
-        self.assertIsNone(package.file)
+        self.assertEqual(package.files, [])
         self.assertEqual(len(package.imports), 0)
         self.assertEqual(len(package.typecollections), 0)
         self.assertEqual(len(package.interfaces), 0)
@@ -81,7 +81,7 @@ class TestTopLevel(BaseTestCase):
     def test_import_namespace(self):
         package = self._assertParse("package P import NS from \"test.fidl\"")
         self.assertEqual(package.name, "P")
-        self.assertIsNone(package.file)
+        self.assertEqual(package.files, [])
         self.assertEqual(len(package.imports), 1)
         self.assertEqual(len(package.typecollections), 0)
         self.assertEqual(len(package.interfaces), 0)
@@ -92,7 +92,7 @@ class TestTopLevel(BaseTestCase):
     def test_import_model(self):
         package = self._assertParse("package P import model \"test.fidl\"")
         self.assertEqual(package.name, "P")
-        self.assertIsNone(package.file)
+        self.assertEqual(package.files, [])
         self.assertEqual(len(package.imports), 1)
         self.assertEqual(len(package.typecollections), 0)
         self.assertEqual(len(package.interfaces), 0)
@@ -107,7 +107,7 @@ class TestTopLevel(BaseTestCase):
             import NS2 from "test2.fidl"
         """)
         self.assertEqual(package.name, "P")
-        self.assertIsNone(package.file)
+        self.assertEqual(package.files, [])
         self.assertEqual(len(package.imports), 2)
         self.assertEqual(len(package.typecollections), 0)
         self.assertEqual(len(package.interfaces), 0)
@@ -121,7 +121,7 @@ class TestTopLevel(BaseTestCase):
     def test_empty_typecollection(self):
         package = self._assertParse("package P typeCollection TC {}")
         self.assertEqual(package.name, "P")
-        self.assertIsNone(package.file)
+        self.assertEqual(package.files, [])
         self.assertEqual(len(package.imports), 0)
         self.assertEqual(len(package.typecollections), 1)
         self.assertEqual(len(package.interfaces), 0)
@@ -144,7 +144,7 @@ class TestTopLevel(BaseTestCase):
             typeCollection TC2 {}
         """)
         self.assertEqual(package.name, "P")
-        self.assertIsNone(package.file)
+        self.assertEqual(package.files, [])
         self.assertEqual(len(package.imports), 0)
         self.assertEqual(len(package.typecollections), 2)
         self.assertEqual(len(package.interfaces), 0)
@@ -174,7 +174,7 @@ class TestTopLevel(BaseTestCase):
     def test_empty_interface(self):
         package = self._assertParse("package P interface I {}")
         self.assertEqual(package.name, "P")
-        self.assertIsNone(package.file)
+        self.assertEqual(package.files, [])
         self.assertEqual(len(package.imports), 0)
         self.assertEqual(len(package.typecollections), 0)
         self.assertEqual(len(package.interfaces), 1)
@@ -200,7 +200,7 @@ class TestTopLevel(BaseTestCase):
             interface I2 {}
         """)
         self.assertEqual(package.name, "P")
-        self.assertIsNone(package.file)
+        self.assertEqual(package.files, [])
         self.assertEqual(len(package.imports), 0)
         self.assertEqual(len(package.typecollections), 0)
         self.assertEqual(len(package.interfaces), 2)

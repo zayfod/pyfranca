@@ -45,7 +45,7 @@ def dump_interface(interface):
 
 
 def dump_package(package):
-    print("- {} ({})".format(package.name, package.file))
+    print("- {} ({})".format(package.name, str.join(", ", package.files)))
     if package.imports:
         print("\tImports:")
         for imp in package.imports:
