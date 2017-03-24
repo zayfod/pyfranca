@@ -550,3 +550,10 @@ class TestReferences(BaseTestCase):
         self.assertEqual(m.out_args["tda"].type.type.reference, td)
         b = i.broadcasts["B"]
         self.assertEqual(b.out_args["tda"].type.type.reference, td)
+
+    def test_import_multiple_files(self):
+        with self.assertRaises(ProcessorException) as context:
+            self.processor.import_file("fidl/idl/P.fidl")
+            self.processor.import_file("fidl/idl2/P2.fidl")
+            self.assertEqual(str(context.exception),
+                             "Model 'definitions.fidl' not found.")

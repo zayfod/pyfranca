@@ -401,11 +401,11 @@ class Processor:
                     "Model '{}' not found.".format(fspec))
             else:
                 # Relative specification.
-                package_paths = self.package_paths
+                package_paths = self.package_paths[:]
                 if package_path:
                     package_paths.insert(0, package_path)
                 # Check in the package path list.
-                for path in self.package_paths:
+                for path in package_paths:
                     temp_fspec = os.path.join(path, fspec)
                     if os.path.exists(temp_fspec):
                         fspec = temp_fspec
