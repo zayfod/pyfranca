@@ -355,9 +355,11 @@ class Processor:
             # Register the package file in the processor.
             self.files[fspec] = package
         # Process package imports
+        fspec_path = os.path.abspath(fspec)
+        fspec_dir = os.path.dirname(fspec_path)
         for package_import in package.imports:
             imported_package = self.import_file(
-                package_import.file, references + [package.name])
+                package_import.file, references + [package.name], fspec_dir)
             # Update import reference
             package_import.package_reference = imported_package
         # Update type references
@@ -380,12 +382,13 @@ class Processor:
         self.import_package(fspec, package, references)
         return package
 
-    def import_file(self, fspec, references=None):
+    def import_file(self, fspec, references=None, package_path=None):
         """
         Parse an FIDL file and import it into the processor as package.
 
         :param fspec: File specification.
         :param references: A list of package references.
+        :param package_paths: Additional model path to search for imports.
         :return: The parsed ast.Package.
         """
         if fspec in self.files:
@@ -397,7 +400,11 @@ class Processor:
                 raise ProcessorException(
                     "Model '{}' not found.".format(fspec))
             else:
-                # Relative specification - check in the package path list.
+                # Relative specification.
+                package_paths = self.package_paths
+                if package_path:
+                    package_paths.insert(0, package_path)
+                # Check in the package path list.
                 for path in self.package_paths:
                     temp_fspec = os.path.join(path, fspec)
                     if os.path.exists(temp_fspec):
@@ -409,9 +416,6 @@ class Processor:
         # Parse the file.
         parser = franca_parser.Parser()
         package = parser.parse_file(fspec)
-        fspec_path = os.path.abspath(fspec)
-        fspec_dir = os.path.split(fspec_path)
-        self.package_paths.extend(fspec_dir)
         # Import the package in the processor.
         self.import_package(fspec, package, references)
         return package
