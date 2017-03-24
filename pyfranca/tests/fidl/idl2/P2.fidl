@@ -1,0 +1,19 @@
+package P2
+
+import P.T.* from "definitions.fidl"
+
+
+interface I2 {
+	version { major 1 minor 0 }
+
+	method getData
+	{
+		out {
+              MyStruct outVal
+           }
+
+		in {
+              Int32 inVal
+           }
+	}
+}
