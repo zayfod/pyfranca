@@ -3,6 +3,8 @@ Pyfranca processor tests.
 """
 
 import unittest
+import os
+import sys
 
 from pyfranca import ProcessorException, Processor, ast
 
@@ -551,9 +553,17 @@ class TestReferences(BaseTestCase):
         b = i.broadcasts["B"]
         self.assertEqual(b.out_args["tda"].type.type.reference, td)
 
-    def test_import_multiple_files(self):
+    def test_import_missing_files(self):
         with self.assertRaises(ProcessorException) as context:
             self.processor.import_file("fidl/idl/P.fidl")
             self.processor.import_file("fidl/idl2/P2.fidl")
             self.assertEqual(str(context.exception),
                              "Model 'definitions.fidl' not found.")
+
+    def test_import_multiple_files(self):
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        fidl_dir = os.path.join(script_dir, "fidl", "idl")
+        self.processor.package_paths.extend([fidl_dir])
+        self.processor.import_file("fidl/idl/P.fidl")
+        self.processor.import_file("fidl/idl2/P2.fidl")
+
