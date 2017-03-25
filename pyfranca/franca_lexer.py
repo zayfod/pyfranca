@@ -53,8 +53,7 @@ class Lexer(object):
         "map",
         "to",
         "const",
-        "true",
-        "false",
+
 
         # Types
         "Int8",
@@ -79,7 +78,8 @@ class Lexer(object):
         "FILE_NAME",
         "DOUBLE_VAL",
         "FLOAT_VAL",
-        "STRING_VAL"
+        "STRING_VAL",
+        "BOOLEAN_VAL"
     ]
 
     # Ignored characters
@@ -125,15 +125,6 @@ class Lexer(object):
         r"<\*\*(.|\n)*?\*\*>"
         t.lexer.lineno += t.value.count("\n")
 
-    # Identifier
-    # noinspection PyPep8Naming,PyIncorrectDocstring
-    @staticmethod
-    def t_ID(t):
-        # noinspection PySingleQuotedDocstring
-        r"[A-Za-z][A-Za-z0-9_]*"
-        t.type = Lexer._keyword_map.get(t.value, "ID")
-        return t
-
     # File name (quoted)
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod
@@ -145,17 +136,21 @@ class Lexer(object):
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod
-    def t_INTEGER(t):
+    def t_STRING_VAL(t):
         # noinspection PySingleQuotedDocstring
-        r"[+-]?\d+"
-        t.value = int(t.value)
+        r"\"[^\"]*\""
+        t.value = t.value.replace("\"", '')
+        t.value = str(t.value)
         return t
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod
     def t_FLOAT_VAL(t):
         # noinspection PySingleQuotedDocstring
-        r"[-+]?\d+(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[f]"
+        # r"[-+]?(\d+)?(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[f]"
+        # currently valid float string without leading digits (.043f) are not supported
+        # result in conflict with text like org.franca... matche ".f" --> need to improve regex
+        r"[-+]?(\d+)(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[f]"
         t.value = t.value.replace("f", '')
         t.value = float(t.value)
         return t
@@ -164,18 +159,43 @@ class Lexer(object):
     @staticmethod
     def t_DOUBLE_VAL(t):
         # noinspection PySingleQuotedDocstring
-        r"[-+]?\d+(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[d]"
+
+        # r"[-+]?(\d+)?(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[d]"
+        # currently valid float string without leading digits (.043f) are not supported
+        # result in conflict with text like org.franca... matche ".f" --> need to improve regex
+        r"[-+]?(\d+)(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[d]"
         t.value = t.value.replace("d", '')
         t.value = float(t.value)
         return t
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod
-    def t_STRING_VAL(t):
+    def t_INTEGER(t):
         # noinspection PySingleQuotedDocstring
-        r"\"[^\"]*\""
-        t.value = t.value.replace("\"", '')
-        t.value = str(t.value)
+        r"[+-]?\d+"
+        t.value = int(t.value)
+        return t
+
+
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_BOOLEAN_VAL(t):
+        # noinspection PySingleQuotedDocstring
+        r"(true|false)"
+        t.value = t.value.strip()
+        if t.value == "true":
+            t.value = True
+        else:
+            t.value = False
+        return t
+
+    # Identifier
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_ID(t):
+        # noinspection PySingleQuotedDocstring
+        r"[A-Za-z][A-Za-z0-9_]*"
+        t.type = Lexer._keyword_map.get(t.value, "ID")
         return t
 
     @staticmethod
@@ -201,6 +221,21 @@ class Lexer(object):
             if not tok:
                 break
             print(tok)
+
+    def tokenize_data(self, data):
+        """
+        Tokenize input data to stdout for testing purposes.
+
+        :param data: Input text to parse.
+        """
+        self.lexer.input(data)
+        tokenized_data = []
+        while True:
+            tok = self.lexer.token()
+            if not tok:
+                break
+            tokenized_data.append(tok)
+        return tokenized_data
 
     def tokenize_file(self, fspec):
         """
