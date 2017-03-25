@@ -1,0 +1,19 @@
+package P
+
+import P.T.* from "definitions.fidl"
+
+
+interface I {
+	version { major 1 minor 0 }
+
+	method sendData
+	{
+		out {
+              Int32 outVal
+           }
+
+		in {
+              MyStruct inVal
+           }
+	}
+}
