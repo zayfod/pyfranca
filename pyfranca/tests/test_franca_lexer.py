@@ -36,7 +36,7 @@ class TestCheckRegularExpressions(BaseTestCase):
     def test_string_valid_syntax(self):
         """test a string """
         tokenized_data = self._tokenize("\"This is a string\"")
-        self.assertEqual(tokenized_data[0].type, "FILE_NAME")
+        self.assertEqual(tokenized_data[0].type, "STRING_VAL")
         self.assertEqual(tokenized_data[0].value, "This is a string")
 
         tokenized_data = self._tokenize("\"This is a string \n with an newline\"")

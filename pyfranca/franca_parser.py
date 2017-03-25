@@ -124,7 +124,7 @@ class Parser(object):
     @staticmethod
     def p_import_def_1(p):
         """
-        def : IMPORT fqn FROM FILE_NAME
+        def : IMPORT fqn FROM STRING_VAL
         """
         p[0] = ast.Import(file_name=p[4], namespace=p[2])
 
@@ -132,7 +132,7 @@ class Parser(object):
     @staticmethod
     def p_import_def_2(p):
         """
-        def : IMPORT MODEL FILE_NAME
+        def : IMPORT MODEL STRING_VAL
         """
         p[0] = ast.Import(file_name=p[3])
 
@@ -627,16 +627,6 @@ class Parser(object):
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_constant_def_4(p):
-        """
-        constant_def : CONST type ID '=' FILE_NAME
-        """
-        if not p[2].name == "String":
-            raise ParserException("rvalue type 'String' does not match lvalue type '{}'".format(p[2].name))
-        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_constant_def_5(p):
         """
         constant_def : CONST type ID '=' BOOLEAN_VAL
         """

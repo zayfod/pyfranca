@@ -74,7 +74,6 @@ class Lexer(object):
     tokens = [keyword.upper() for keyword in keywords] + [
         "ID",
         "INTEGER",
-        "FILE_NAME",
         "DOUBLE_VAL",
         "FLOAT_VAL",
         "STRING_VAL",
@@ -124,22 +123,12 @@ class Lexer(object):
         r"<\*\*(.|\n)*?\*\*>"
         t.lexer.lineno += t.value.count("\n")
 
-    # File name (quoted)
-    # noinspection PyPep8Naming,PyIncorrectDocstring
-    @staticmethod
-    def t_FILE_NAME(t):
-        # noinspection PySingleQuotedDocstring
-        r"\"([^\n]|\.)*?\""
-        t.value = t.value[1:-1]
-        return t
-
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod
     def t_STRING_VAL(t):
         # noinspection PySingleQuotedDocstring
         r"\"[^\"]*\""
-        t.value = t.value.replace("\"", '')
-        t.value = str(t.value)
+        t.value = t.value[1:-1]
         return t
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
