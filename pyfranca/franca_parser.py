@@ -591,7 +591,7 @@ class Parser(object):
         """
         if p[2].name not in [  "Int8",  "Int16",  "Int32",  "Int64",
                               "UInt8", "UInt16", "UInt32", "UInt64",  "Integer"]:
-            raise ParserException("rvalue type 'Integer Type' does not match lvalue type '{}'".format(p[2].name))
+            raise ParserException("rvalue type 'Integer' does not match lvalue type '{}'".format(p[2].name))
         p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
 
     # noinspection PyIncorrectDocstring
@@ -638,22 +638,11 @@ class Parser(object):
     @staticmethod
     def p_constant_def_5(p):
         """
-        constant_def : CONST type ID '=' FALSE
+        constant_def : CONST type ID '=' BOOLEAN_VAL
         """
         if not p[2].name == "Boolean":
             raise ParserException("rvalue type 'Boolean' does not match lvalue type '{}'".format(p[2].name))
-        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=False)
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_constant_def_6(p):
-        """
-        constant_def : CONST type ID '=' TRUE
-        """
-        if not p[2].name == "Boolean":
-            raise ParserException("rvalue type 'Boolean' does not match lvalue type '{}'".format(p[2].name))
-        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=True)
-
+        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
