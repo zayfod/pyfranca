@@ -692,6 +692,36 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
+    def p_boolean_val(p):
+        """
+        boolean_val : BOOLEAN_VAL
+         """
+        p[0] = ast.BooleanValue(p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_integer_val(p):
+        """
+        boolean_val : INTEGER
+         """
+        p[0] = ast.IntegerValue(p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_const_1(p):
+        """
+        type : BOOLEAN_VAL
+             | STRING_VAL
+             | DOUBLE_VAL
+             | FLOAT_VAL
+             | INTEGER
+         """
+        type_class = getattr(ast, p[1])
+        p[0] = type_class()
+
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
     def p_type_1(p):
         """
         type : INT8
