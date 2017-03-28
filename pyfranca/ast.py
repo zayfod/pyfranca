@@ -292,6 +292,41 @@ class ComplexType(Type):
         super(ComplexType, self).__init__()
 
 
+class Value(Type):
+
+    def __init__(self, value, value_type):
+        self.value = value
+        self.type = value_type
+
+class IntegerValue(Value):
+
+    def __init__(self):
+        super(IntegerValue, self).__init__()
+
+
+class BooleanValue(Value):
+
+    def __init__(self):
+        super(BooleanValue, self).__init__()
+
+
+class FloatValue(Value):
+
+    def __init__(self):
+        super(FloatValue, self).__init__()
+
+
+class DoubleValue(Value):
+
+    def __init__(self):
+        super(DoubleValue, self).__init__()
+
+
+class StringValue(Value):
+
+    def __init__(self):
+        super(StringValue, self).__init__()
+
 class Enumeration(ComplexType):
 
     def __init__(self, name, enumerators=None, extends=None, flags=None):
