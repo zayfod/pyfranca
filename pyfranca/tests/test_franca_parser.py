@@ -858,7 +858,7 @@ class TestConstants(BaseTestCase):
         self.assertEqual(len(typecollection.structs), 0)
         self.assertEqual(len(typecollection.arrays), 0)
         self.assertEqual(len(typecollection.maps), 0)
-        self.assertEqual(len(typecollection.constants), 9)
+        self.assertEqual(len(typecollection.constants), 8)
 
         self.assertEqual(typecollection.constants["MAX_COUNT"].name, "MAX_COUNT")
         self.assertEqual(typecollection.constants["MAX_COUNT"].type.name, "UInt32")
