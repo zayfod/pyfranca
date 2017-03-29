@@ -190,7 +190,7 @@ class Parser(object):
     @staticmethod
     def p_version_def(p):
         """
-        version_def : VERSION '{' MAJOR INTEGER MINOR INTEGER '}'
+        version_def : VERSION '{' MAJOR INTEGER_VAL MINOR INTEGER_VAL '}'
         """
         p[0] = ast.Version(major=p[4], minor=p[6])
 
@@ -509,7 +509,7 @@ class Parser(object):
     @staticmethod
     def p_enumerator_2(p):
         """
-        enumerator : ID '=' INTEGER
+        enumerator : ID '=' INTEGER_VAL
         """
         p[0] = ast.Enumerator(name=p[1], value=p[3])
 
@@ -587,52 +587,61 @@ class Parser(object):
     @staticmethod
     def p_constant_def(p):
         """
-        constant_def : CONST type ID '=' INTEGER
+        constant_def : CONST type ID '=' value
         """
-        if p[2].name not in [  "Int8",  "Int16",  "Int32",  "Int64",
-                              "UInt8", "UInt16", "UInt32", "UInt64",  "Integer"]:
-            raise ParserException("rvalue type 'Integer' does not match lvalue type '{}'".format(p[2].name))
         p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_constant_def_1(p):
+    def p_boolean_val(p):
         """
-        constant_def : CONST type ID '=' FLOAT_VAL
-        """
-        if not p[2].name == "Float":
-            raise ParserException("rvalue type 'Float' does not match lvalue type '{}'".format(p[2].name))
-        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
+        boolean_val : BOOLEAN_VAL
+         """
+        p[0] = ast.BooleanValue(p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_constant_def_2(p):
+    def p_integer_val(p):
         """
-        constant_def : CONST type ID '=' DOUBLE_VAL
-        """
-        if not p[2].name == "Double":
-            raise ParserException("rvalue type 'Double' does not match lvalue type '{}'".format(p[2].name))
-        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
+        integer_val : INTEGER_VAL
+         """
+        p[0] = ast.IntegerValue(p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_constant_def_3(p):
+    def p_double_val(p):
         """
-        constant_def : CONST type ID '=' STRING_VAL
-        """
-        if not p[2].name == "String":
-            raise ParserException("rvalue type 'String' does not match lvalue type '{}'".format(p[2].name))
-        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
+        double_val : DOUBLE_VAL
+         """
+        p[0] = ast.DoubleValue(p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_constant_def_4(p):
+    def p_float_val(p):
         """
-        constant_def : CONST type ID '=' BOOLEAN_VAL
+        float_val : FLOAT_VAL
+         """
+        p[0] = ast.FloatValue(p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_string_val(p):
         """
-        if not p[2].name == "Boolean":
-            raise ParserException("rvalue type 'Boolean' does not match lvalue type '{}'".format(p[2].name))
-        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
+        string_val : STRING_VAL
+         """
+        p[0] = ast.StringValue(p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_value(p):
+        """
+        value : boolean_val
+              | string_val
+              | double_val
+              | float_val
+              | integer_val
+         """
+        p[0] = p[1]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
