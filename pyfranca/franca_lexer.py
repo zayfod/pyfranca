@@ -73,7 +73,7 @@ class Lexer(object):
     # Tokens
     tokens = [keyword.upper() for keyword in keywords] + [
         "ID",
-        "INTEGER",
+        "INTEGER_VAL",
         "DOUBLE_VAL",
         "FLOAT_VAL",
         "STRING_VAL",
@@ -158,7 +158,7 @@ class Lexer(object):
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod
-    def t_INTEGER(t):
+    def t_INTEGER_VAL(t):
         # noinspection PySingleQuotedDocstring
         r"[+-]?\d+"
         t.value = int(t.value)

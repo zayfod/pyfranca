@@ -294,38 +294,40 @@ class ComplexType(Type):
 
 class Value(Type):
 
-    def __init__(self, value, value_type):
+    _metaclass__ = ABCMeta
+
+    def __init__(self, value, value_type=None):
+        super(Value, self).__init__(value_type if value_type else self.__class__.__name__)
         self.value = value
-        self.type = value_type
 
 class IntegerValue(Value):
 
-    def __init__(self):
-        super(IntegerValue, self).__init__()
+    def __init__(self, value):
+        super(IntegerValue, self).__init__(value)
 
 
 class BooleanValue(Value):
 
-    def __init__(self):
-        super(BooleanValue, self).__init__()
+    def __init__(self, value):
+        super(BooleanValue, self).__init__(value)
 
 
 class FloatValue(Value):
 
-    def __init__(self):
-        super(FloatValue, self).__init__()
+    def __init__(self, value):
+        super(FloatValue, self).__init__(value)
 
 
 class DoubleValue(Value):
 
-    def __init__(self):
-        super(DoubleValue, self).__init__()
+    def __init__(self, value):
+        super(DoubleValue, self).__init__(value)
 
 
 class StringValue(Value):
 
-    def __init__(self):
-        super(StringValue, self).__init__()
+    def __init__(self, value):
+        super(StringValue, self).__init__(value)
 
 class Enumeration(ComplexType):
 
