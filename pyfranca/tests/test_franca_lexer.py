@@ -59,61 +59,134 @@ class TestCheckRegularExpressions(BaseTestCase):
 
     def test_float_valid_syntax(self):
         """test a float value """
-        tokenized_data = self._tokenize("1.1f\n-2.2f\n3.3e3f\n-4.4e4f\n5.5e-5f\n-6.6e-6f\n0.00001f\n-0.000002f"
-                                        "1e4f\n-1e4f")
-        self.assertEqual(tokenized_data[0].type, "FLOAT_VAL")
+        tokenized_data = self._tokenize("1.1f\n-2.2f\n3.3e3f\n-4.4e4f\n5.5e-5f"
+                                        "-6.6e-6f\n0.00001f\n-0.000002f\n1e4f\n-1e4f"
+                                        ".1f\n-.2f\n.3e3f\n-.4e4f\n.5e-5f"
+                                        "-.6e-6f\n.00001f\n-.000002f"
+                                        )
+        cnt = 0
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
         self.assertAlmostEqual(tokenized_data[0].value, 1.1)
-        self.assertEqual(tokenized_data[1].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[1].value, -2.2)
-        self.assertEqual(tokenized_data[2].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[2].value, 3.3e3)
-        self.assertEqual(tokenized_data[3].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[3].value, -4.4e4)
-        self.assertEqual(tokenized_data[4].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[4].value, 5.5e-5)
-        self.assertEqual(tokenized_data[5].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[5].value, -6.6e-6)
-        self.assertEqual(tokenized_data[6].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[6].value, 0.00001)
-        self.assertEqual(tokenized_data[7].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[7].value, -0.000002)
-        self.assertEqual(tokenized_data[8].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[8].value, 1e4)
-        self.assertEqual(tokenized_data[9].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[9].value,-1e4)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -2.2)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, 3.3e3)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -4.4e4)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, 5.5e-5)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -6.6e-6)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, 0.00001)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -0.000002)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, 1e4)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -1e4)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, .1)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -.2)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, .3e3)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -.4e4)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, .5e-5)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -.6e-6)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, .00001)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -.000002)
 
     def test_double_valid_syntax(self):
         """test a double value """
-        tokenized_data = self._tokenize("1.1d\n-2.2d\n3.3e3d\n-4.4e4d\n5.5e-5d\n-6.6e-6d\n0.00001d\n-0.000002d"
-                                        "1e4d\n-1e4d")
-        self.assertEqual(tokenized_data[0].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[0].value, 1.1)
-        self.assertEqual(tokenized_data[1].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[1].value, -2.2)
-        self.assertEqual(tokenized_data[2].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[2].value, 3.3e3)
-        self.assertEqual(tokenized_data[3].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[3].value, -4.4e4)
-        self.assertEqual(tokenized_data[4].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[4].value, 5.5e-5)
-        self.assertEqual(tokenized_data[5].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[5].value, -6.6e-6)
-        self.assertEqual(tokenized_data[6].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[6].value, 0.00001)
-        self.assertEqual(tokenized_data[7].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[7].value, -0.000002)
-        self.assertEqual(tokenized_data[8].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[8].value, 1e4)
-        self.assertEqual(tokenized_data[9].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[9].value,-1e4)
+        tokenized_data = self._tokenize("1.1d\n-2.2d\n3.3e3d\n-4.4e4d\n5.5e-5d"
+                                        "-6.6e-6d\n0.00001d\n-0.000002d\n1e4d\n-1e4d"
+                                        ".1d\n-.2d\n.3e3d\n-.4e4d\n.5e-5d"
+                                        "-.6e-6d\n.00001d\n-.000002d"
+                                        )
 
-    def test_text(self):
+        cnt = 0
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[0].value, 1.1)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -2.2)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, 3.3e3)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -4.4e4)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, 5.5e-5)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -6.6e-6)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, 0.00001)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -0.000002)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, 1e4)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -1e4)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, .1)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -.2)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, .3e3)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -.4e4)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, .5e-5)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -.6e-6)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, .00001)
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
+        self.assertAlmostEqual(tokenized_data[cnt].value, -.000002)
+
+    def test_doublefloat_invalid_syntax(self):
         """test a text containing .f """
         tokenized_data = self._tokenize("""
                 package org.franca.examples
-                interface simple.ExampleInterface {
-                    // this interface can be globally accessed by the FQN
-                    // org.franca.examples.simple.ExampleInterface
+               0ef .ef  -1ef  -1.ef ef ed .ed .43g 0.23 .34
                 }
             """)
         for t in tokenized_data:

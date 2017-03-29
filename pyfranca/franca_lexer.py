@@ -136,10 +136,7 @@ class Lexer(object):
     @staticmethod
     def t_FLOAT_VAL(t):
         # noinspection PySingleQuotedDocstring
-        # r"[-+]?(\d+)?(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[f]"
-        # currently valid float string without leading digits (.043f) are not supported
-        # result in conflict with text like org.franca... matche ".f" --> need to improve regex
-        r"[-+]?(\d+)(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[f]"
+        r"[-+]?((\d+\.(\d+)?)|((\d+)?\.\d+)|\d)([eE][-+]?\d+)?[f]"
         t.value = t.value.replace("f", '')
         t.value = float(t.value)
         return t
@@ -148,11 +145,7 @@ class Lexer(object):
     @staticmethod
     def t_DOUBLE_VAL(t):
         # noinspection PySingleQuotedDocstring
-
-        # r"[-+]?(\d+)?(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[d]"
-        # currently valid float string without leading digits (.043f) are not supported
-        # result in conflict with text like org.franca... matche ".f" --> need to improve regex
-        r"[-+]?(\d+)(\.(\d+)?([eE][-+]?\d+)?|[eE][-+]?\d+)[d]"
+        r"[-+]?((\d+\.(\d+)?)|((\d+)?\.\d+)|\d)([eE][-+]?\d+)?[d]"
         t.value = t.value.replace("d", '')
         t.value = float(t.value)
         return t
