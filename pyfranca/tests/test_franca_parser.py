@@ -858,115 +858,45 @@ class TestConstants(BaseTestCase):
         self.assertEqual(len(typecollection.structs), 0)
         self.assertEqual(len(typecollection.arrays), 0)
         self.assertEqual(len(typecollection.maps), 0)
-        self.assertEqual(len(typecollection.constants), 8)
+        self.assertEqual(len(typecollection.constants), 9)
 
         self.assertEqual(typecollection.constants["MAX_COUNT"].name, "MAX_COUNT")
         self.assertEqual(typecollection.constants["MAX_COUNT"].type.name, "UInt32")
-        self.assertEqual(typecollection.constants["MAX_COUNT"].value, 10000)
+        self.assertEqual(typecollection.constants["MAX_COUNT"].value.value, 10000)
+        self.assertEqual(typecollection.constants["MAX_COUNT"].value.name, "IntegerValue")
 
         self.assertEqual(typecollection.constants["pi"].name, "pi")
         self.assertEqual(typecollection.constants["pi"].type.name, "Double")
-        self.assertEqual(typecollection.constants["pi"].value, 3.1415)
+        self.assertEqual(typecollection.constants["pi"].value.value, 3.1415)
+        self.assertEqual(typecollection.constants["pi"].value.name, "DoubleValue")
 
         self.assertEqual(typecollection.constants["f1"].name, "f1")
         self.assertEqual(typecollection.constants["f1"].type.name, "Float")
-        self.assertAlmostEqual(typecollection.constants["f1"].value, 1.2)
+        self.assertAlmostEqual(typecollection.constants["f1"].value.value, 1.2)
+        self.assertEqual(typecollection.constants["f1"].value.name, "FloatValue")
 
         self.assertEqual(typecollection.constants["f2"].name, "f2")
         self.assertEqual(typecollection.constants["f2"].type.name, "Float")
-        self.assertAlmostEqual(typecollection.constants["f2"].value, 6.022e23)
+        self.assertAlmostEqual(typecollection.constants["f2"].value.value, 6.022e23)
+        self.assertEqual(typecollection.constants["f2"].value.name, "FloatValue")
 
         self.assertEqual(typecollection.constants["b1"].name, "b1")
         self.assertEqual(typecollection.constants["b1"].type.name, "Boolean")
-        self.assertEqual(typecollection.constants["b1"].value, True)
+        self.assertEqual(typecollection.constants["b1"].value.value, True)
+        self.assertEqual(typecollection.constants["b1"].value.name, "BooleanValue")
 
         self.assertEqual(typecollection.constants["b2"].name, "b2")
         self.assertEqual(typecollection.constants["b2"].type.name, "Boolean")
-        self.assertEqual(typecollection.constants["b2"].value, False)
+        self.assertEqual(typecollection.constants["b2"].value.value, False)
+        self.assertEqual(typecollection.constants["b2"].value.name, "BooleanValue")
 
         self.assertEqual(typecollection.constants["s1"].name, "s1")
         self.assertEqual(typecollection.constants["s1"].type.name, "String")
-        self.assertAlmostEqual(typecollection.constants["s1"].value, "Hello")
+        self.assertAlmostEqual(typecollection.constants["s1"].value.value, "Hello")
+        self.assertEqual(typecollection.constants["s1"].value.name, "StringValue")
 
         self.assertEqual(typecollection.constants["s2"].name, "s2")
         self.assertEqual(typecollection.constants["s2"].type.name, "String")
-        self.assertAlmostEqual(typecollection.constants["s2"].value, "Hello\n                                   World")
+        self.assertAlmostEqual(typecollection.constants["s2"].value.value, "Hello\n                                   World")
+        self.assertEqual(typecollection.constants["s2"].value.name, "StringValue")
 
-    def test_constants_bad_syntax_Uint32(self):
-        """Franca 0.9.2, section 5.2.1"""
-
-        with self.assertRaises(ParserException) as context:
-            package = self._parse("""
-            package P
-            typeCollection TC {
-                const UInt32 MAX_COUNT = "Hello"
-            }
-        """)
-        self.assertEqual(str(context.exception),
-                         "rvalue type 'String' does not match lvalue type 'UInt32'")
-
-    def test_constants_bad_syntax_String(self):
-        """Franca 0.9.2, section 5.2.1"""
-
-        with self.assertRaises(ParserException) as context:
-            package = self._parse("""
-            package P
-            typeCollection TC {
-                const String s1 = 123
-            }
-        """)
-        self.assertEqual(str(context.exception),
-                         "rvalue type 'Integer' does not match lvalue type 'String'")
-
-    def test_constants_bad_syntax_Boolean(self):
-        """Franca 0.9.2, section 5.2.1"""
-
-        with self.assertRaises(ParserException) as context:
-            package = self._parse("""
-            package P
-            typeCollection TC {
-                const Boolean b1 = 123
-            }
-        """)
-        self.assertEqual(str(context.exception),
-                         "rvalue type 'Integer' does not match lvalue type 'Boolean'")
-
-    def test_constants_bad_syntax_Float(self):
-        """Franca 0.9.2, section 5.2.1"""
-
-        with self.assertRaises(ParserException) as context:
-            package = self._parse("""
-            package P
-            typeCollection TC {
-                const Float f1 = 123.3d
-            }
-        """)
-        self.assertEqual(str(context.exception),
-                         "rvalue type 'Double' does not match lvalue type 'Float'")
-
-
-    def test_constants_bad_syntax_Double(self):
-        """Franca 0.9.2, section 5.2.1"""
-
-        with self.assertRaises(ParserException) as context:
-            package = self._parse("""
-            package P
-            typeCollection TC {
-                const Double d1 = 123.3f
-            }
-        """)
-        self.assertEqual(str(context.exception),
-                         "rvalue type 'Float' does not match lvalue type 'Double'")
-
-    def test_constants_bad_syntax_typename(self):
-        """Franca 0.9.2, section 5.2.1"""
-
-        with self.assertRaises(ParserException) as context:
-            package = self._parse("""
-            package P
-            typeCollection TC {
-                const double d1 = 123.3d
-            }
-        """)
-        self.assertEqual(str(context.exception),
-                         "rvalue type 'Double' does not match lvalue type 'double'")

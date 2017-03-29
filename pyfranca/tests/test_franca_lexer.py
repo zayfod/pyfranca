@@ -27,10 +27,10 @@ class TestCheckRegularExpressions(BaseTestCase):
     def test_integer_valid_syntax(self):
         """test an integer """
         tokenized_data = self._tokenize("1234\n2345")
-        self.assertEqual(tokenized_data[0].type, "INTEGER")
+        self.assertEqual(tokenized_data[0].type, "INTEGER_VAL")
         self.assertEqual(tokenized_data[0].value, 1234)
 
-        self.assertEqual(tokenized_data[1].type, "INTEGER")
+        self.assertEqual(tokenized_data[1].type, "INTEGER_VAL")
         self.assertEqual(tokenized_data[1].value, 2345)
 
     def test_string_valid_syntax(self):
@@ -147,7 +147,4 @@ class TestCheckRegularExpressions(BaseTestCase):
         self.assertEqual(tokenized_data[3].value, '=')
         self.assertEqual(tokenized_data[4].type, "BOOLEAN_VAL")
         self.assertEqual(tokenized_data[4].value, True)
-
-
-
 

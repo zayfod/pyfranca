@@ -197,6 +197,8 @@ class Processor:
         elif isinstance(name, ast.Map):
             self._update_type_references(name.namespace, name.key_type)
             self._update_type_references(name.namespace, name.value_type)
+        elif isinstance(name, ast.Constant):
+            self._update_type_references(name.namespace, name.type)
         else:
             assert False
 
@@ -266,6 +268,8 @@ class Processor:
         for name in namespace.arrays.values():
             self._update_type_references(namespace, name)
         for name in namespace.maps.values():
+            self._update_type_references(namespace, name)
+        for name in namespace.constants.values():
             self._update_type_references(namespace, name)
 
     def _update_interface_references(self, namespace):
