@@ -585,7 +585,7 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_constant_def(p):
+    def p_constant_def_1(p):
         """
         constant_def : CONST INT8 ID '=' integer_val
                      | CONST INT16 ID '=' integer_val
@@ -595,13 +595,78 @@ class Parser(object):
                      | CONST UINT16 ID '=' integer_val
                      | CONST UINT32 ID '=' integer_val
                      | CONST UINT64 ID '=' integer_val
-                     | CONST BOOLEAN ID '=' boolean_val
-                     | CONST FLOAT ID '=' float_val
-                     | CONST DOUBLE ID '=' double_val
-                     | CONST STRING ID '=' string_val
+                     | CONST INT8 ID '=' boolean_val
+                     | CONST INT16 ID '=' boolean_val
+                     | CONST INT32 ID '=' boolean_val
+                     | CONST INT64 ID '=' boolean_val
+                     | CONST UINT8 ID '=' boolean_val
+                     | CONST UINT16 ID '=' boolean_val
+                     | CONST UINT32 ID '=' boolean_val
+                     | CONST UINT64 ID '=' boolean_val
+                     | CONST INT8 ID '=' float_val
+                     | CONST INT16 ID '=' float_val
+                     | CONST INT32 ID '=' float_val
+                     | CONST INT64 ID '=' float_val
+                     | CONST UINT8 ID '=' float_val
+                     | CONST UINT16 ID '=' float_val
+                     | CONST UINT32 ID '=' float_val
+                     | CONST UINT64 ID '=' float_val
+                     | CONST INT8 ID '=' double_val
+                     | CONST INT16 ID '=' double_val
+                     | CONST INT32 ID '=' double_val
+                     | CONST INT64 ID '=' double_val
+                     | CONST UINT8 ID '=' double_val
+                     | CONST UINT16 ID '=' double_val
+                     | CONST UINT32 ID '=' double_val
+                     | CONST UINT64 ID '=' double_val
         """
         type_class = getattr(ast, p[2])
-        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=p[5])
+        value = ast.IntegerValue(int(p[5].value))
+        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=value)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_2(p):
+        """
+        constant_def : CONST FLOAT ID '=' integer_val
+                     | CONST FLOAT ID '=' boolean_val
+                     | CONST FLOAT ID '=' float_val
+         """
+        type_class = getattr(ast, p[2])
+        value = ast.FloatValue(float(p[5].value))
+        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=value)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_3(p):
+        """
+        constant_def : CONST DOUBLE ID '=' integer_val
+                     | CONST DOUBLE ID '=' boolean_val
+                     | CONST DOUBLE ID '=' double_val
+         """
+        type_class = getattr(ast, p[2])
+        value = ast.DoubleValue(float(p[5].value))
+        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=value)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_4(p):
+        """
+        constant_def : CONST BOOLEAN ID '=' value
+         """
+        type_class = getattr(ast, p[2])
+        value = ast.BooleanValue(bool(p[5].value))
+        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=value)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_5(p):
+        """
+        constant_def : CONST STRING ID '=' value
+         """
+        type_class = getattr(ast, p[2])
+        value = ast.StringValue(str(p[5].value))
+        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=value)
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -643,6 +708,17 @@ class Parser(object):
          """
         p[0] = ast.StringValue(p[1])
 
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_value(p):
+        """
+        value : boolean_val
+              | string_val
+              | double_val
+              | float_val
+              | integer_val
+         """
+        p[0] = p[1]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -703,7 +779,7 @@ class Parser(object):
         element_type = ast.Reference(name=p[1])
         p[0] = ast.Array(name=None, element_type=element_type)
 
-       # noinspection PyUnusedLocal, PyIncorrectDocstring
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
     @staticmethod
     def p_empty(p):
         """

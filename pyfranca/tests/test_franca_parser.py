@@ -900,6 +900,115 @@ class TestConstants(BaseTestCase):
         self.assertAlmostEqual(typecollection.constants["s2"].value.value, "Hello\n                                   World")
         self.assertEqual(typecollection.constants["s2"].value.name, "StringValue")
 
+    def test_constants_casting(self):
+        """Franca 0.9.2, section 5.2.1"""
+        package = self._parse("""
+            package P
+            typeCollection TC {
+                const Float f1 = 123
+                const Float f2 = true
+                const Double d1 = 123
+                const Double d2 = true
+                const Boolean b1 = 123
+                const Boolean b2 = 123.0f
+                const Boolean b3 = 0.0d
+                const Boolean b4 = "123"
+                const String s1 = 123
+                const String s2 = 123.0f
+                const String s3 = 0.0d
+                const String s4 = true
+            }
+        """)
+        self.assertEqual(package.name, "P")
+        self.assertEqual(package.files, [])
+        self.assertEqual(len(package.imports), 0)
+        self.assertEqual(len(package.typecollections), 1)
+        self.assertEqual(len(package.interfaces), 0)
+        self.assertTrue("TC" in package.typecollections)
+        typecollection = package.typecollections["TC"]
+        self.assertEqual(typecollection.package, package)
+        self.assertEqual(typecollection.name, "TC")
+        self.assertListEqual(typecollection.flags, [])
+        self.assertIsNone(typecollection.version)
+        self.assertEqual(len(typecollection.typedefs), 0)
+        self.assertEqual(len(typecollection.enumerations), 0)
+        self.assertEqual(len(typecollection.structs), 0)
+        self.assertEqual(len(typecollection.arrays), 0)
+        self.assertEqual(len(typecollection.maps), 0)
+        self.assertEqual(len(typecollection.constants), 12)
+
+        x = "f1"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "Float")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, 123.0)
+        self.assertEqual(typecollection.constants[x].value.name, "FloatValue")
+
+        x = "f2"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "Float")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, 1.0)
+        self.assertEqual(typecollection.constants[x].value.name, "FloatValue")
+
+        x = "d1"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "Double")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, 123.0)
+        self.assertEqual(typecollection.constants[x].value.name, "DoubleValue")
+
+        x = "d2"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "Double")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, 1.0)
+        self.assertEqual(typecollection.constants[x].value.name, "DoubleValue")
+
+        x = "b1"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "Boolean")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, True)
+        self.assertEqual(typecollection.constants[x].value.name, "BooleanValue")
+
+        x = "b2"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "Boolean")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, True)
+        self.assertEqual(typecollection.constants[x].value.name, "BooleanValue")
+
+        x = "b3"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "Boolean")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, False)
+        self.assertEqual(typecollection.constants[x].value.name, "BooleanValue")
+
+        x = "b4"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "Boolean")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, True)
+        self.assertEqual(typecollection.constants[x].value.name, "BooleanValue")
+
+        x = "s1"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "String")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, "123")
+        self.assertEqual(typecollection.constants[x].value.name, "StringValue")
+
+        x = "s2"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "String")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, "123.0")
+        self.assertEqual(typecollection.constants[x].value.name, "StringValue")
+
+        x = "s3"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "String")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, "0.0")
+        self.assertEqual(typecollection.constants[x].value.name, "StringValue")
+
+        x = "s4"
+        self.assertEqual(typecollection.constants[x].name, x)
+        self.assertEqual(typecollection.constants[x].type.name, "String")
+        self.assertAlmostEqual(typecollection.constants[x].value.value, "True")
+        self.assertEqual(typecollection.constants[x].value.name, "StringValue")
+
     def test_constants_bad_syntax_Uint32(self):
         """Franca 0.9.2, section 5.2.1"""
 
@@ -920,11 +1029,11 @@ class TestConstants(BaseTestCase):
             package = self._parse("""
             package P
             typeCollection TC {
-                const String s1 = 123
+                const String s1 = 123abc
             }
         """)
         self.assertEqual(str(context.exception),
-                         "Syntax error at line 4 near '123'.")
+                         "Syntax error at line 4 near 'abc'.")
 
     def test_constants_bad_syntax_Boolean(self):
         """Franca 0.9.2, section 5.2.1"""
@@ -933,11 +1042,11 @@ class TestConstants(BaseTestCase):
             package = self._parse("""
             package P
             typeCollection TC {
-                const Boolean b1 = 123
+                const Boolean b1 = 123asc
             }
         """)
         self.assertEqual(str(context.exception),
-                         "Syntax error at line 4 near '123'.")
+                         "Syntax error at line 4 near 'asc'.")
 
     def test_constants_bad_syntax_Float(self):
         """Franca 0.9.2, section 5.2.1"""
