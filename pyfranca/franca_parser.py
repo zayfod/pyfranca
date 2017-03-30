@@ -587,9 +587,21 @@ class Parser(object):
     @staticmethod
     def p_constant_def(p):
         """
-        constant_def : CONST type ID '=' value
+        constant_def : CONST INT8 ID '=' integer_val
+                     | CONST INT16 ID '=' integer_val
+                     | CONST INT32 ID '=' integer_val
+                     | CONST INT64 ID '=' integer_val
+                     | CONST UINT8 ID '=' integer_val
+                     | CONST UINT16 ID '=' integer_val
+                     | CONST UINT32 ID '=' integer_val
+                     | CONST UINT64 ID '=' integer_val
+                     | CONST BOOLEAN ID '=' boolean_val
+                     | CONST FLOAT ID '=' float_val
+                     | CONST DOUBLE ID '=' double_val
+                     | CONST STRING ID '=' string_val
         """
-        p[0] = ast.Constant(name=p[3], element_type=p[2], element_value=p[5])
+        type_class = getattr(ast, p[2])
+        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=p[5])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -631,17 +643,6 @@ class Parser(object):
          """
         p[0] = ast.StringValue(p[1])
 
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_value(p):
-        """
-        value : boolean_val
-              | string_val
-              | double_val
-              | float_val
-              | integer_val
-         """
-        p[0] = p[1]
 
     # noinspection PyIncorrectDocstring
     @staticmethod

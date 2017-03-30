@@ -294,7 +294,7 @@ class TestUnsupported(BaseTestCase):
                 }
             """)
         self.assertEqual(str(context.exception),
-                         "Syntax error at line 5 near '['.")
+                         "Syntax error at line 5 near 'Array1'.")
 
     def test_unions(self):
         """Franca 0.9.2, section 5.1.6"""
@@ -900,3 +900,80 @@ class TestConstants(BaseTestCase):
         self.assertAlmostEqual(typecollection.constants["s2"].value.value, "Hello\n                                   World")
         self.assertEqual(typecollection.constants["s2"].value.name, "StringValue")
 
+    def test_constants_bad_syntax_Uint32(self):
+        """Franca 0.9.2, section 5.2.1"""
+
+        with self.assertRaises(ParserException) as context:
+            package = self._parse("""
+            package P
+            typeCollection TC {
+                const UInt32 MAX_COUNT = "Hello"
+            }
+        """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 4 near 'Hello'.")
+
+    def test_constants_bad_syntax_String(self):
+        """Franca 0.9.2, section 5.2.1"""
+
+        with self.assertRaises(ParserException) as context:
+            package = self._parse("""
+            package P
+            typeCollection TC {
+                const String s1 = 123
+            }
+        """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 4 near '123'.")
+
+    def test_constants_bad_syntax_Boolean(self):
+        """Franca 0.9.2, section 5.2.1"""
+
+        with self.assertRaises(ParserException) as context:
+            package = self._parse("""
+            package P
+            typeCollection TC {
+                const Boolean b1 = 123
+            }
+        """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 4 near '123'.")
+
+    def test_constants_bad_syntax_Float(self):
+        """Franca 0.9.2, section 5.2.1"""
+
+        with self.assertRaises(ParserException) as context:
+            package = self._parse("""
+            package P
+            typeCollection TC {
+                const Float f1 = 123.3d
+            }
+        """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 4 near '123.3'.")
+
+    def test_constants_bad_syntax_Double(self):
+        """Franca 0.9.2, section 5.2.1"""
+
+        with self.assertRaises(ParserException) as context:
+            package = self._parse("""
+            package P
+            typeCollection TC {
+                const Double d1 = 123.3f
+            }
+        """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 4 near '123.3'.")
+
+    def test_constants_bad_syntax_typename(self):
+        """Franca 0.9.2, section 5.2.1"""
+
+        with self.assertRaises(ParserException) as context:
+            package = self._parse("""
+            package P
+            typeCollection TC {
+                const double d1 = 123.3d
+            }
+        """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 4 near 'double'.")
