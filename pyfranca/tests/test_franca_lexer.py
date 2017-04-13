@@ -65,59 +65,59 @@ class TestCheckRegularExpressions(BaseTestCase):
                                         "-.6e-6f\n.00001f\n-.000002f"
                                         )
         cnt = 0
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[0].value, 1.1)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[0].value, "1.1f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -2.2)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-2.2f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, 3.3e3)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "3.3e3f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -4.4e4)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-4.4e4f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, 5.5e-5)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "5.5e-5f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -6.6e-6)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-6.6e-6f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, 0.00001)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "0.00001f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -0.000002)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-0.000002f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, 1e4)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "1e4f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -1e4)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-1e4f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, .1)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".1f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -.2)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.2f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, .3e3)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".3e3f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -.4e4)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.4e4f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, .5e-5)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".5e-5f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -.6e-6)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.6e-6f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, .00001)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".00001f")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "FLOAT_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -.000002)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.000002f")
 
     def test_double_valid_syntax(self):
         """test a double value """
@@ -128,70 +128,133 @@ class TestCheckRegularExpressions(BaseTestCase):
                                         )
 
         cnt = 0
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[0].value, 1.1)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[0].value, "1.1d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -2.2)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-2.2d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, 3.3e3)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "3.3e3d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -4.4e4)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-4.4e4d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, 5.5e-5)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "5.5e-5d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -6.6e-6)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-6.6e-6d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, 0.00001)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "0.00001d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -0.000002)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-0.000002d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, 1e4)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "1e4d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -1e4)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-1e4d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, .1)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".1d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -.2)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.2d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, .3e3)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".3e3d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -.4e4)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.4e4d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, .5e-5)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".5e-5d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -.6e-6)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.6e-6d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, .00001)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".00001d")
         cnt += 1
-        self.assertEqual(tokenized_data[cnt].type, "DOUBLE_VAL")
-        self.assertAlmostEqual(tokenized_data[cnt].value, -.000002)
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.000002d")
+
+
+    def test_real_valid_syntax(self):
+        """test a real value """
+        tokenized_data = self._tokenize("1.1\n-2.2\n3.3e3\n-4.4e4\n5.5e-5"
+                                        "-6.6e-6\n0.00001\n-0.000002\n1e4\n-1e4"
+                                        ".1\n-.2\n.3e3\n-.4e4\n.5e-5"
+                                        "-.6e-6\n.00001\n-.000002"
+                                        )
+
+        cnt = 0
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[0].value, "1.1")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-2.2")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "3.3e3")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-4.4e4")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "5.5e-5")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-6.6e-6")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "0.00001")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-0.000002")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "1e4")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-1e4")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".1")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.2")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".3e3")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.4e4")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".5e-5")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.6e-6")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, ".00001")
+        cnt += 1
+        self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
+        self.assertEqual(tokenized_data[cnt].value, "-.000002")
 
     def test_doublefloat_invalid_syntax(self):
         """test a text containing .f """
         tokenized_data = self._tokenize("""
                 package org.franca.examples
-               0ef .ef  -1ef  -1.ef ef ed .ed .43g 0.23 .34
+               0ef .ef  -1ef   ef ed .ed
                 }
             """)
         for t in tokenized_data:
-            self.assertNotEqual(t.type, "FLOAT_VAL")
-            self.assertNotEqual(t.type, "DOUBLE_VAL")
+            self.assertNotEqual(t.type, "REAL_VAL")
 
     def test_type_valid_syntax(self):
         """test an integer """
