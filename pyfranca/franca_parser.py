@@ -7,6 +7,7 @@ from abc import ABCMeta
 import ply.yacc as yacc
 from pyfranca import franca_lexer
 from pyfranca import ast
+import re
 
 
 class ArgumentGroup(object):
@@ -659,22 +660,14 @@ class Parser(object):
                      | CONST UINT16 ID '=' boolean_val
                      | CONST UINT32 ID '=' boolean_val
                      | CONST UINT64 ID '=' boolean_val
-                     | CONST INT8 ID '=' float_val
-                     | CONST INT16 ID '=' float_val
-                     | CONST INT32 ID '=' float_val
-                     | CONST INT64 ID '=' float_val
-                     | CONST UINT8 ID '=' float_val
-                     | CONST UINT16 ID '=' float_val
-                     | CONST UINT32 ID '=' float_val
-                     | CONST UINT64 ID '=' float_val
-                     | CONST INT8 ID '=' double_val
-                     | CONST INT16 ID '=' double_val
-                     | CONST INT32 ID '=' double_val
-                     | CONST INT64 ID '=' double_val
-                     | CONST UINT8 ID '=' double_val
-                     | CONST UINT16 ID '=' double_val
-                     | CONST UINT32 ID '=' double_val
-                     | CONST UINT64 ID '=' double_val
+                     | CONST INT8 ID '=' real_val
+                     | CONST INT16 ID '=' real_val
+                     | CONST INT32 ID '=' real_val
+                     | CONST INT64 ID '=' real_val
+                     | CONST UINT8 ID '=' real_val
+                     | CONST UINT16 ID '=' real_val
+                     | CONST UINT32 ID '=' real_val
+                     | CONST UINT64 ID '=' real_val
         """
         type_class = getattr(ast, p[2])
         value = ast.IntegerValue(int(p[5].value))
@@ -686,7 +679,7 @@ class Parser(object):
         """
         constant_def : CONST FLOAT ID '=' integer_val
                      | CONST FLOAT ID '=' boolean_val
-                     | CONST FLOAT ID '=' float_val
+                     | CONST FLOAT ID '=' real_val
          """
         type_class = getattr(ast, p[2])
         value = ast.FloatValue(float(p[5].value))
@@ -698,7 +691,7 @@ class Parser(object):
         """
         constant_def : CONST DOUBLE ID '=' integer_val
                      | CONST DOUBLE ID '=' boolean_val
-                     | CONST DOUBLE ID '=' double_val
+                     | CONST DOUBLE ID '=' real_val
          """
         type_class = getattr(ast, p[2])
         value = ast.DoubleValue(float(p[5].value))
@@ -742,19 +735,16 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_double_val(p):
+    def p_real_val(p):
         """
-        double_val : DOUBLE_VAL
+        real_val : REAL_VAL
          """
-        p[0] = ast.DoubleValue(p[1])
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_float_val(p):
-        """
-        float_val : FLOAT_VAL
-         """
-        p[0] = ast.FloatValue(p[1])
+        if re.match(r".*[dD]", p[1]):
+            p[0] = ast.DoubleValue(float(p[1][:-1]))
+        elif re.match(r".*[fF]", p[1]):
+            p[0] = ast.FloatValue(float(p[1][:-1]))
+        else:
+            p[0] = ast.DoubleValue(float(p[1]))
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -770,8 +760,7 @@ class Parser(object):
         """
         value : boolean_val
               | string_val
-              | double_val
-              | float_val
+              | real_val
               | integer_val
          """
         p[0] = p[1]

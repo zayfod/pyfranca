@@ -75,8 +75,7 @@ class Lexer(object):
     tokens = [keyword.upper() for keyword in keywords] + [
         "ID",
         "INTEGER_VAL",
-        "DOUBLE_VAL",
-        "FLOAT_VAL",
+        "REAL_VAL",
         "STRING_VAL",
         "BOOLEAN_VAL"
     ]
@@ -134,20 +133,9 @@ class Lexer(object):
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod
-    def t_FLOAT_VAL(t):
+    def t_REAL_VAL(t):
         # noinspection PySingleQuotedDocstring
-        r"[-+]?((\d+\.(\d+)?)|((\d+)?\.\d+)|\d)([eE][-+]?\d+)?[f]"
-        t.value = t.value.replace("f", '')
-        t.value = float(t.value)
-        return t
-
-    # noinspection PyPep8Naming,PyIncorrectDocstring
-    @staticmethod
-    def t_DOUBLE_VAL(t):
-        # noinspection PySingleQuotedDocstring
-        r"[-+]?((\d+\.(\d+)?)|((\d+)?\.\d+)|\d)([eE][-+]?\d+)?[d]"
-        t.value = t.value.replace("d", '')
-        t.value = float(t.value)
+        r"[+-]?((((([0-9]*\.[0-9]+)|([0-9]+\.))([eE][-+]?[0-9]+)?)|([0-9]+([eE][-+]?[0-9]+)))[fFdD]?)"
         return t
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
@@ -157,7 +145,6 @@ class Lexer(object):
         r"[+-]?\d+"
         t.value = int(t.value)
         return t
-
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod

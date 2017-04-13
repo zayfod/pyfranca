@@ -1048,31 +1048,6 @@ class TestConstants(BaseTestCase):
         self.assertEqual(str(context.exception),
                          "Syntax error at line 4 near 'asc'.")
 
-    def test_constants_bad_syntax_Float(self):
-        """Franca 0.9.2, section 5.2.1"""
-
-        with self.assertRaises(ParserException) as context:
-            package = self._parse("""
-            package P
-            typeCollection TC {
-                const Float f1 = 123.3d
-            }
-        """)
-        self.assertEqual(str(context.exception),
-                         "Syntax error at line 4 near '123.3'.")
-
-    def test_constants_bad_syntax_Double(self):
-        """Franca 0.9.2, section 5.2.1"""
-
-        with self.assertRaises(ParserException) as context:
-            package = self._parse("""
-            package P
-            typeCollection TC {
-                const Double d1 = 123.3f
-            }
-        """)
-        self.assertEqual(str(context.exception),
-                         "Syntax error at line 4 near '123.3'.")
 
     def test_constants_bad_syntax_typename(self):
         """Franca 0.9.2, section 5.2.1"""
