@@ -338,7 +338,7 @@ class Processor:
                 # Imports of  current package get lost.
                 # removing this line result in a correct order of imports. But I am not sure
                 # if function _update_package_references ist still working correctly.
-                package = self.packages[package.name]
+                # package = self.packages[package.name]
             else:
                 return
         else:
