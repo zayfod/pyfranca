@@ -77,7 +77,7 @@ class Package(object):
         # the recursive call of function import_package() in franca_processor
         for newitem in package.imports:
             for olditem in package.imports:
-                if newitem.file == olditem.file:
+                if newitem.file != olditem.file:
                     self.imports.append(item)
         return self
 
