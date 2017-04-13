@@ -71,6 +71,13 @@ class Package(object):
                                    " once '{}'.".format(item.name))
             self.typecollections[item.name] = item
             item.package = self
+
+        # possible Solution: merge also the imports into the package
+        # Problem: multiple imports of the same package, because of
+        # the recursive call of function import_package() in franca_processor
+        for item in package.imports:
+            if item not in self.imports:
+                self.imports.append(item)
         return self
 
 
