@@ -2,6 +2,10 @@
 Revision History
 ================
 
+v0.3.1 (Apr 16, 2017)
+---------------------
+- Added support for unions
+
 v0.3.0 (Mar 22, 2017)
 ---------------------
 - Added support for packages in multiple files.
