@@ -633,6 +633,14 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
+    def p_struct_field_1(p):
+        """
+        struct_field : structured_comment type ID
+        """
+        p[0] = ast.StructField(name=p[3], field_type=p[2], comments=p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
     def p_union_fields_1(p):
         """
         union_fields : union_fields union_field
@@ -660,14 +668,6 @@ class Parser(object):
         union_fields : empty
         """
         pass
-
-    # noinspection PyIncorrectDocstring
-    @staticmethod
-    def p_struct_field_1(p):
-        """
-        struct_field : structured_comment type ID
-        """
-        p[0] = ast.StructField(name=p[3], field_type=p[2], comments=p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
