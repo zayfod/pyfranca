@@ -46,6 +46,7 @@ class Lexer(object):
         "enumeration",
         "extends",
         "struct",
+        "union",
         "polymorphic",
         "array",
         "of",

@@ -95,6 +95,7 @@ class Namespace(object):
         self.typedefs = OrderedDict()
         self.enumerations = OrderedDict()
         self.structs = OrderedDict()
+        self.unions = OrderedDict()
         self.arrays = OrderedDict()
         self.maps = OrderedDict()
         if members:
@@ -107,6 +108,7 @@ class Namespace(object):
         res = name in self.typedefs or \
             name in self.enumerations or \
             name in self.structs or \
+            name in self.unions or \
             name in self.arrays or \
             name in self.maps
         return res
@@ -120,6 +122,8 @@ class Namespace(object):
             return self.enumerations[name]
         elif name in self.structs:
             return self.structs[name]
+        elif name in self.unions:
+            return self.unions[name]
         elif name in self.arrays:
             return self.arrays[name]
         elif name in self.maps:
@@ -146,6 +150,12 @@ class Namespace(object):
                 self.enumerations[member.name] = member
             elif isinstance(member, Struct):
                 self.structs[member.name] = member
+                # Handle anonymous array special case.
+                for field in member.fields.values():
+                    if isinstance(field.type, Array):
+                        field.type.namespace = self
+            elif isinstance(member, Union):
+                self.unions[member.name] = member
                 # Handle anonymous array special case.
                 for field in member.fields.values():
                     if isinstance(field.type, Array):
@@ -314,6 +324,15 @@ class Struct(ComplexType):
         self.reference = None
         self.flags = flags if flags else []
 
+class Union(ComplexType):
+
+    def __init__(self, name, fields=None, extends=None, flags=None):
+        super(Union, self).__init__()
+        self.name = name
+        self.fields = fields if fields else OrderedDict()
+        self.extends = extends
+        self.reference = None
+        self.flags = flags if flags else []
 
 class StructField(object):
 
@@ -321,6 +340,11 @@ class StructField(object):
         self.name = name
         self.type = field_type
 
+class UnionField(object):
+
+    def __init__(self, name, field_type):
+        self.name = name
+        self.type = field_type
 
 class Array(ComplexType):
 
