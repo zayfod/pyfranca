@@ -229,7 +229,13 @@ class Processor(object):
             for arg in name.out_args.values():
                 self._update_type_references(name.namespace, arg.type)
             if isinstance(name.errors, OrderedDict):
-                pass
+                for arg in name.errors.values():
+                    # I end up here also when it's an Enumeration so it
+                    # fails on arg.type.  Why?  Trying to workaround
+                    try:
+                        self._update_type_references(name.namespace, arg.type)
+                    except:
+                        pass
             elif isinstance(name.errors, ast.Reference):
                 # Errors can be a reference to an enumeration
                 self._update_type_references(name.namespace, name.errors)
