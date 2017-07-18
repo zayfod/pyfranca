@@ -97,6 +97,7 @@ class Namespace(object):
         self.structs = OrderedDict()
         self.arrays = OrderedDict()
         self.maps = OrderedDict()
+        self.constants = OrderedDict()
         if members:
             for member in members:
                 self._add_member(member)
@@ -108,7 +109,8 @@ class Namespace(object):
             name in self.enumerations or \
             name in self.structs or \
             name in self.arrays or \
-            name in self.maps
+            name in self.maps or \
+            name in self.constants
         return res
 
     def __getitem__(self, name):
@@ -124,6 +126,8 @@ class Namespace(object):
             return self.arrays[name]
         elif name in self.maps:
             return self.maps[name]
+        elif name in self.constants[name]:
+            return self.constants[name]
         else:
             raise KeyError
 
@@ -162,6 +166,8 @@ class Namespace(object):
                     member.key_type.namespace = self
                 if isinstance(member.value_type, Array):
                     member.value_type.namespace = self
+            elif isinstance(member, Constant):
+                self.constants[member.name] = member
             else:
                 raise ASTException("Unexpected namespace member type.")
             member.namespace = self
@@ -286,6 +292,43 @@ class ComplexType(Type):
         super(ComplexType, self).__init__()
 
 
+class Value(Type):
+
+    _metaclass__ = ABCMeta
+
+    def __init__(self, value, value_type=None):
+        super(Value, self).__init__(value_type if value_type else self.__class__.__name__)
+        self.value = value
+
+class IntegerValue(Value):
+
+    def __init__(self, value):
+        super(IntegerValue, self).__init__(value)
+
+
+class BooleanValue(Value):
+
+    def __init__(self, value):
+        super(BooleanValue, self).__init__(value)
+
+
+class FloatValue(Value):
+
+    def __init__(self, value):
+        super(FloatValue, self).__init__(value)
+
+
+class DoubleValue(Value):
+
+    def __init__(self, value):
+        super(DoubleValue, self).__init__(value)
+
+
+class StringValue(Value):
+
+    def __init__(self, value):
+        super(StringValue, self).__init__(value)
+
 class Enumeration(ComplexType):
 
     def __init__(self, name, enumerators=None, extends=None, flags=None):
@@ -337,6 +380,15 @@ class Map(ComplexType):
         self.name = name
         self.key_type = key_type
         self.value_type = value_type
+
+
+class Constant(ComplexType):
+
+    def __init__(self, name, element_type, element_value):
+        super(Constant, self).__init__()
+        self.name = name
+        self.type = element_type
+        self.value = element_value
 
 
 class Reference(Type):
