@@ -510,7 +510,7 @@ class Parser(object):
     @staticmethod
     def p_enumerator_2(p):
         """
-        enumerator : ID '=' INTEGER_VAL
+        enumerator : ID '=' integer_val
         """
         p[0] = ast.Enumerator(name=p[1], value=p[3])
 
@@ -614,7 +614,12 @@ class Parser(object):
                      | CONST UINT64 ID '=' real_val
         """
         type_class = getattr(ast, p[2])
-        value = ast.IntegerValue(int(p[5].value))
+
+        if p[5].name == "HexIntegerValue":
+            value = ast.HexIntegerValue(int(p[5].value))
+        else:
+            value = ast.IntegerValue(int(p[5].value))
+
         p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=value)
 
     # noinspection PyIncorrectDocstring
@@ -671,11 +676,19 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_integer_val(p):
+    def p_integer_val_1(p):
         """
         integer_val : INTEGER_VAL
          """
         p[0] = ast.IntegerValue(p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_integer_val_2(p):
+        """
+        integer_val : HEX_INTEGER_VAL
+         """
+        p[0] = ast.HexIntegerValue(p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod

@@ -305,6 +305,10 @@ class IntegerValue(Value):
     def __init__(self, value):
         super(IntegerValue, self).__init__(value)
 
+class HexIntegerValue(Value):
+
+    def __init__(self, value):
+        super(HexIntegerValue, self).__init__(value)
 
 class BooleanValue(Value):
 

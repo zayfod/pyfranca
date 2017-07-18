@@ -688,7 +688,8 @@ class TestEnumerations(BaseTestCase):
         self.assertEqual(len(e.enumerators), 2)
         ee = e.enumerators["FALSE"]
         self.assertEqual(ee.name, "FALSE")
-        self.assertEqual(ee.value, 0)
+        self.assertEqual(ee.value.value, 0)
+        self.assertEqual(ee.value.name, "IntegerValue")
         ee = e.enumerators["TRUE"]
         self.assertEqual(ee.name, "TRUE")
         self.assertIsNone(ee.value)
@@ -698,6 +699,55 @@ class TestEnumerations(BaseTestCase):
         self.assertEqual(e2.extends, "E")
         self.assertEqual(e2.flags, [])
         self.assertEqual(len(e2.enumerators), 0)
+
+    def test_hexvalue(self):
+        package = self._assertParse("""
+            package P
+            typeCollection TC {
+                enumeration E {
+                    A = 0xA
+                    B = 0xABC
+                }
+                enumeration E2 extends E {}
+            }
+        """)
+        typecollection = package.typecollections["TC"]
+        e = typecollection.enumerations["E"]
+        self.assertEqual(e.namespace, typecollection)
+        self.assertEqual(e.name, "E")
+        self.assertIsNone(e.extends)
+        self.assertEqual(e.flags, [])
+        self.assertEqual(len(e.enumerators), 2)
+        ee = e.enumerators["A"]
+        self.assertEqual(ee.name, "A")
+        self.assertEqual(ee.value.value, 10)
+        self.assertEqual(ee.value.name, "HexIntegerValue")
+        ee = e.enumerators["B"]
+        self.assertEqual(ee.name, "B")
+        self.assertEqual(ee.value.value, int("0xABC", 0))
+        self.assertEqual(ee.value.name, "HexIntegerValue")
+        e2 = typecollection.enumerations["E2"]
+        self.assertEqual(e2.namespace, typecollection)
+        self.assertEqual(e2.name, "E2")
+        self.assertEqual(e2.extends, "E")
+        self.assertEqual(e2.flags, [])
+        self.assertEqual(len(e2.enumerators), 0)
+
+    def test_badvalue(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+            package P
+            typeCollection TC {
+                enumeration E {
+                    A = 0.123f
+                    B = 0xABC
+                }
+                enumeration E2 extends E {}
+            }
+        """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 5 near '0.123f'.")
+
 
     def test_duplicate_enumerator(self):
         with self.assertRaises(ParserException) as context:
@@ -830,6 +880,7 @@ class TestConstants(BaseTestCase):
             package P
             typeCollection TC {
                 const UInt32 MAX_COUNT = 10000
+                const UInt32 MAX_COUNT_HEX = 0x10000
                 const Double pi = 3.1415d
                 const Float f1 = 1.2f
                 const Float f2 = 6.022e23f
@@ -858,12 +909,17 @@ class TestConstants(BaseTestCase):
         self.assertEqual(len(typecollection.structs), 0)
         self.assertEqual(len(typecollection.arrays), 0)
         self.assertEqual(len(typecollection.maps), 0)
-        self.assertEqual(len(typecollection.constants), 8)
+        self.assertEqual(len(typecollection.constants), 9)
 
         self.assertEqual(typecollection.constants["MAX_COUNT"].name, "MAX_COUNT")
         self.assertEqual(typecollection.constants["MAX_COUNT"].type.name, "UInt32")
         self.assertEqual(typecollection.constants["MAX_COUNT"].value.value, 10000)
         self.assertEqual(typecollection.constants["MAX_COUNT"].value.name, "IntegerValue")
+
+        self.assertEqual(typecollection.constants["MAX_COUNT_HEX"].name, "MAX_COUNT_HEX")
+        self.assertEqual(typecollection.constants["MAX_COUNT_HEX"].type.name, "UInt32")
+        self.assertEqual(typecollection.constants["MAX_COUNT_HEX"].value.value, int("0x10000", 0))
+        self.assertEqual(typecollection.constants["MAX_COUNT_HEX"].value.name, "HexIntegerValue")
 
         self.assertEqual(typecollection.constants["pi"].name, "pi")
         self.assertEqual(typecollection.constants["pi"].type.name, "Double")
@@ -1061,3 +1117,16 @@ class TestConstants(BaseTestCase):
         """)
         self.assertEqual(str(context.exception),
                          "Syntax error at line 4 near 'double'.")
+
+    def test_constants_bad_syntax_hexvalue(self):
+        """Franca 0.9.2, section 5.2.1"""
+
+        with self.assertRaises(ParserException) as context:
+            package = self._parse("""
+            package P
+            typeCollection TC {
+                const UInt32 MAX_COUNT = 0xABCDEFUInt32
+            }
+        """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 4 near 'UInt32'.")

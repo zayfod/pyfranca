@@ -26,12 +26,24 @@ class TestCheckRegularExpressions(BaseTestCase):
 
     def test_integer_valid_syntax(self):
         """test an integer """
-        tokenized_data = self._tokenize("1234\n2345")
+        tokenized_data = self._tokenize("1234\n2345\n0x1234\n0x56789\n0xabcdef\n0xABCDEF")
         self.assertEqual(tokenized_data[0].type, "INTEGER_VAL")
         self.assertEqual(tokenized_data[0].value, 1234)
 
         self.assertEqual(tokenized_data[1].type, "INTEGER_VAL")
         self.assertEqual(tokenized_data[1].value, 2345)
+
+        self.assertEqual(tokenized_data[2].type, "HEX_INTEGER_VAL")
+        self.assertEqual(tokenized_data[2].value, int("0x1234", 0))
+
+        self.assertEqual(tokenized_data[3].type, "HEX_INTEGER_VAL")
+        self.assertEqual(tokenized_data[3].value, int("0x56789", 0))
+
+        self.assertEqual(tokenized_data[4].type, "HEX_INTEGER_VAL")
+        self.assertEqual(tokenized_data[4].value, int("0xabcdef", 0))
+
+        self.assertEqual(tokenized_data[5].type, "HEX_INTEGER_VAL")
+        self.assertEqual(tokenized_data[5].value, int("0xABCDEF", 0))
 
     def test_string_valid_syntax(self):
         """test a string """
@@ -50,6 +62,12 @@ class TestCheckRegularExpressions(BaseTestCase):
         self.assertEqual(tokenized_data[0].value, True)
         self.assertEqual(tokenized_data[1].type, "BOOLEAN_VAL")
         self.assertEqual(tokenized_data[1].value, False)
+
+    def test_integerinvalid_syntax(self):
+        """test a boolean value """
+        tokenized_data = self._tokenize("0xgabcdefg")
+        for t in tokenized_data:
+            self.assertNotEqual(t.type, "HEX_INTEGER_VAL")
 
     def test_booleaninvalid_syntax(self):
         """test a boolean value """
