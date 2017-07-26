@@ -64,7 +64,7 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_package_def(p):
+    def p_package_def_1(p):
         """
         package_def : PACKAGE fqn defs
         """
@@ -72,6 +72,18 @@ class Parser(object):
         p[0] = ast.Package(name=p[2], file_name=None, imports=imports,
                            interfaces=interfaces,
                            typecollections=typecollections)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_package_def_2(p):
+        """
+        package_def : STRUCTURED_COMMENT PACKAGE fqn defs
+        """
+        imports, interfaces, typecollections = Parser._package_def(p[4])
+        p[0] = ast.Package(name=p[3], file_name=None, imports=imports,
+                           interfaces=interfaces,
+                           typecollections=typecollections,
+                           comments=Parser.split_comment(p[1]))
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -96,6 +108,25 @@ class Parser(object):
         """
         defs : empty
         """
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_defs_4(p):
+        """
+        defs : defs STRUCTURED_COMMENT def
+        """
+        p[0] = p[1]
+        p[3].comments = Parser.split_comment(p[2])
+        p[0].append(p[3])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_defs_5(p):
+        """
+        defs : STRUCTURED_COMMENT def
+        """
+        p[2].comments = Parser.split_comment(p[1])
+        p[0] = [p[2]]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -175,7 +206,26 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_typecollection_member(p):
+    def p_typecollection_members_4(p):
+        """
+        typecollection_members : STRUCTURED_COMMENT typecollection_member
+        """
+        p[2].comments = Parser.split_comment(p[1])
+        p[0] = [p[2]]
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_typecollection_members_5(p):
+        """
+        typecollection_members : typecollection_members STRUCTURED_COMMENT typecollection_member
+        """
+        p[0] = p[1]
+        p[3].comments = Parser.split_comment(p[2])
+        p[0].append(p[3])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_typecollection_member_1(p):
         """
         typecollection_member : version_def
                               | type_def
@@ -189,11 +239,19 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_version_def(p):
+    def p_version_def_1(p):
         """
         version_def : VERSION '{' MAJOR INTEGER_VAL MINOR INTEGER_VAL '}'
         """
         p[0] = ast.Version(major=p[4], minor=p[6])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_version_def_2(p):
+        """
+        version_def : STRUCTURED_COMMENT VERSION '{' MAJOR INTEGER_VAL MINOR INTEGER_VAL '}'
+        """
+        p[0] = ast.Version(major=p[5], minor=p[7], comment=p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -254,7 +312,26 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_interface_member(p):
+    def p_interface_members_4(p):
+        """
+        interface_members : STRUCTURED_COMMENT interface_member
+        """
+        p[0] = [p[2]]
+        p[0].comments = Parser.split_comment(p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_interface_members_5(p):
+        """
+        interface_members : interface_members STRUCTURED_COMMENT interface_member
+        """
+        p[0] = p[1]
+        p[3].comments = Parser.split_comment(p[2])
+        p[0].append(p[3])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_interface_member_1(p):
         """
         interface_member : version_def
                          | attribute_def
@@ -381,6 +458,25 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
+    def p_arg_group_defs_4(p):
+        """
+        arg_group_defs : arg_group_defs STRUCTURED_COMMENT arg_group_def
+        """
+        p[0] = p[1]
+        p[3].comments = Parser.split_comment(p[2])
+        p[0].append(p[3])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_arg_group_defs_5(p):
+        """
+        arg_group_defs : STRUCTURED_COMMENT arg_group_def
+        """
+        p[0] = [p[2]]
+        p[0].comments = Parser.split_comment(p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
     def p_arg_group_def_1(p):
         """
         arg_group_def : IN '{' arg_defs '}'
@@ -446,6 +542,29 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
+    def p_arg_defs_3(p):
+        """
+        arg_defs : arg_defs STRUCTURED_COMMENT arg_def
+        """
+        p[0] = p[1]
+        if p[3].name not in p[0]:
+            p[3].comments = Parser.split_comment(p[2])
+            p[0][p[3].name] = p[3]
+        else:
+            raise ParserException("Duplicate argument '{}'.".format(p[3].name))
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_arg_defs_4(p):
+        """
+        arg_defs : STRUCTURED_COMMENT arg_def
+        """
+        p[0] = OrderedDict()
+        p[2].comments = Parser.split_comment(p[1])
+        p[0][p[2].name] = p[2]
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
     def p_arg_def(p):
         """
         arg_def : type ID
@@ -497,6 +616,30 @@ class Parser(object):
         enumerators : empty
         """
         pass
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_enumerators_4(p):
+        """
+        enumerators : enumerators STRUCTURED_COMMENT enumerator
+        """
+        p[0] = p[1]
+        if p[3].name not in p[0]:
+            p[3].comments = Parser.split_comment(p[2])
+            p[0][p[3].name] = p[3]
+        else:
+            raise ParserException(
+                "Duplicate enumerator '{}'.".format(p[3].name))
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_enumerators_5(p):
+        """
+        enumerators : STRUCTURED_COMMENT enumerator
+        """
+        p[0] = OrderedDict()
+        p[2].comments = Parser.split_comment(p[1])
+        p[0][p[2].name] = p[2]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -559,6 +702,30 @@ class Parser(object):
         struct_fields : empty
         """
         pass
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_struct_fields_4(p):
+        """
+        struct_fields : struct_fields STRUCTURED_COMMENT struct_field
+        """
+        p[0] = p[1]
+        if p[3].name not in p[0]:
+            p[3].comments = Parser.split_comment(p[2])
+            p[0][p[3].name] = p[3]
+        else:
+            raise ParserException(
+                "Duplicate structure field '{}'.".format(p[3].name))
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_struct_fields_5(p):
+        """
+        struct_fields : STRUCTURED_COMMENT struct_field
+        """
+        p[0] = OrderedDict()
+        p[2].comments = Parser.split_comment(p[1])
+        p[0][p[2].name] = p[2]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
@@ -838,3 +1005,49 @@ class Parser(object):
         if package:
             package.files = [fspec]
         return package
+
+    def split_comment(comment):
+        """
+        split structured comment
+
+        :param comment: Structured comment of an Franca-IDL symbol to parse.
+        :return: Ordered DIct of all comments. Key is Franca-IDL keyword, e.g. @description, value conatins the text.
+        """
+        comment = comment.strip('<**')
+        comment = comment.strip('**>')
+        comment = comment.strip()
+
+        keys = ['@description','@author','@deprecated','@source_uri','@source_alias','@see','@experimental']
+
+        strings = \
+        re.split('(' +'|'.join(keys) + ')', comment)
+
+        # remove optional spaces, ':' and finally empty strings
+        strings = [item.strip() for item in strings]
+        strings = [item.lstrip(':') for item in strings]
+        strings = [item.strip() for item in strings]
+        for item in strings:
+            if item == "":
+                strings.remove(item)
+
+        comments = OrderedDict()
+        length = len(strings)
+        i = 0
+        while i < length:
+            key = strings[i]
+            if key in keys:
+                comments[key] = ""
+
+                if i < (length-1):
+                    item = strings[i+1]
+                    if item not in keys:
+                        comments[key] = item
+                        i += 1
+            # support or not soppurt text without tagged meta information
+            #else:
+            #    if 'Text' not in comments.keys():
+            #        comments['Text'] = ""
+            #    comments['Text'] += item
+
+            i += 1
+        return comments
