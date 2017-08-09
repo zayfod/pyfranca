@@ -9,22 +9,27 @@ def dump_namespace(namespace):
     if namespace.typedefs:
         print("\t\tTypedefs:")
         for item in namespace.typedefs.values():
+            dump_comments(item.comments, "\t\t- ")
             print("\t\t- {} is {}".format(item.name, item.type.name))
     if namespace.enumerations:
         print("\t\tEnumerations:")
         for item in namespace.enumerations.values():
+            dump_comments(item.comments, "\t\t- ")
             print("\t\t- {}".format(item.name))
     if namespace.structs:
         print("\t\tStructs:")
         for item in namespace.structs.values():
+            dump_comments(item.comments, "\t\t- ")
             print("\t\t- {}".format(item.name))
     if namespace.arrays:
         print("\t\tArrays:")
         for item in namespace.arrays.values():
+            dump_comments(item.comments, "\t\t- ")
             print("\t\t- {}".format(item.name))
     if namespace.maps:
         print("\t\tMaps:")
         for item in namespace.maps.values():
+            dump_comments(item.comments, "\t\t- ")
             print("\t\t- {}".format(item.name))
 
 
@@ -32,19 +37,23 @@ def dump_interface(interface):
     if interface.attributes:
         print("\t\tAttributes:")
         for item in interface.attributes.values():
+            dump_comments(item.comments, "\t\t- ")
             print("\t\t- {}".format(item.name))
     if interface.methods:
         print("\t\tMethods:")
         for item in interface.methods.values():
+            dump_comments(item.comments, "\t\t- ")
             print("\t\t- {}()".format(item.name))
     if interface.broadcasts:
         print("\t\tBroadcasts:")
         for item in interface.broadcasts.values():
+            dump_comments(item.comments, "\t\t- ")
             print("\t\t- {}".format(item.name))
     dump_namespace(interface)
 
 
 def dump_package(package):
+    dump_comments(package.comments, "")
     print("- {} ({})".format(package.name, str.join(", ", package.files)))
     if package.imports:
         print("\tImports:")
@@ -57,6 +66,7 @@ def dump_package(package):
                 version_str = " (v{})".format(interface.version)
             else:
                 version_str = ""
+            dump_comments(interface.comments, "\t- ")
             print("\t- {}{}".format(interface.name, version_str))
             dump_interface(interface)
     if package.typecollections:
@@ -66,6 +76,7 @@ def dump_package(package):
                 version_str = " (v{})".format(typecollection.version)
             else:
                 version_str = ""
+            dump_comments(typecollection.comments, "\t- ")
             print("\t- {}{}".format(typecollection.name, version_str))
             dump_namespace(typecollection)
 
@@ -74,6 +85,11 @@ def dump_packages(packages):
     print("Packages:")
     for package in packages.values():
         dump_package(package)
+
+
+def dump_comments(comments, präfix):
+    for key, value in comments.items():
+        print (präfix + key + " : " + value)
 
 
 def parse_command_line():

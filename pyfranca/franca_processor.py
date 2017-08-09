@@ -324,6 +324,18 @@ class Processor:
             ValueError("Expected ast.Package as input.")
         if not references:
             references = []
+
+        # Process package imports
+        fspec_path = os.path.abspath(fspec)
+        fspec_dir = os.path.dirname(fspec_path)
+        for package_import in package.imports:
+            imported_package = self.import_file(
+                package_import.file, references + [package.name], fspec_dir)
+            # Update import reference
+            package_import.package_reference = imported_package
+            # Update type references
+
+
         # Check whether package is already imported
         if package.name in self.packages:
             if fspec not in self.packages[package.name].files:
@@ -339,15 +351,7 @@ class Processor:
             self.packages[package.name] = package
             # Register the package file in the processor.
             self.files[fspec] = package
-        # Process package imports
-        fspec_path = os.path.abspath(fspec)
-        fspec_dir = os.path.dirname(fspec_path)
-        for package_import in package.imports:
-            imported_package = self.import_file(
-                package_import.file, references + [package.name], fspec_dir)
-            # Update import reference
-            package_import.package_reference = imported_package
-        # Update type references
+
         self._update_package_references(package)
 
     def import_string(self, fspec, fidl, references=None):
@@ -376,9 +380,6 @@ class Processor:
         :param package_paths: Additional model path to search for imports.
         :return: The parsed ast.Package.
         """
-        if fspec in self.files:
-            # File already loaded.
-            return self.files[fspec]
         if not os.path.exists(fspec):
             if os.path.isabs(fspec):
                 # Absolute specification
@@ -399,6 +400,10 @@ class Processor:
                     raise ProcessorException(
                         "Model '{}' not found.".format(fspec))
         # Parse the file.
+        if fspec in self.files:
+            # File already loaded.
+            return self.files[fspec]
+
         parser = franca_parser.Parser()
         package = parser.parse_file(fspec)
         # Import the package in the processor.
