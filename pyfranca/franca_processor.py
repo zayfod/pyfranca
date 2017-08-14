@@ -400,6 +400,8 @@ class Processor:
                     raise ProcessorException(
                         "Model '{}' not found.".format(fspec))
         # Parse the file.
+
+        fspec = os.path.abspath(fspec)  # normalize fpsec, remove all differences like / \
         if fspec in self.files:
             # File already loaded.
             return self.files[fspec]

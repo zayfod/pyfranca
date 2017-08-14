@@ -1,0 +1,13 @@
+package P
+
+import P.Common.* from "common.fidl"
+
+typeCollection Type2 {
+    version { major 1 minor 0 }
+
+	struct MyStructType2 {
+		UInt8 val1
+		MyEnum val2
+		String  msg
+	}
+}
