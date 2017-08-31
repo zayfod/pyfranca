@@ -72,20 +72,6 @@ class Package(object):
                                    " once '{}'.".format(item.name))
             self.typecollections[item.name] = item
             item.package = self
-
-        for package_item in package.imports:
-            # prevent self referneces
-            if self.imports:
-                found = False
-                for self_item in self.imports:
-                    if package_item.package_reference.name == self_item.package_reference.name:
-                        found = True
-
-                if not found:
-                    self.imports.append(package_item)
-            else:
-                self.imports.append(package_item)
-
         return self
 
 
@@ -115,6 +101,7 @@ class Namespace(object):
         self.maps = OrderedDict()
         self.constants = OrderedDict()
         self.comments = comments if comments else OrderedDict()
+        self.namespace_references = []
         if members:
             for member in members:
                 self._add_member(member)

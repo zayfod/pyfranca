@@ -614,7 +614,7 @@ class TestReferences(BaseTestCase):
         self.processor.package_paths.append(p3path)
         self.processor.package_paths.append(p2path)
 
-        filepath = os.path.join(ppath, "P.fidl")
+        filepath = os.path.join(ppath, "I.fidl")
         self.processor.import_file(filepath)
 
         self.assertEqual(self.processor.packages["P"].name, "P")
@@ -634,7 +634,7 @@ class TestReferences(BaseTestCase):
                          out_args["p2data"].type.reference.namespace.package.name, "P2")
 
         self.assertEqual(self.processor.packages['P'].interfaces["I"].methods["getData"].
-                         out_args["pdata"].type.reference.namespace.name, "Common")
+                         out_args["pdata"].type.reference.namespace.name, "PTypes")
         self.assertEqual(self.processor.packages['P'].interfaces["I"].methods["getData"].
                          out_args["pdata"].type.reference.namespace.package.name, "P")
 
@@ -643,9 +643,9 @@ class TestReferences(BaseTestCase):
         self.assertEqual(self.processor.packages['P'].interfaces["I"].methods["getData"].
                          out_args["outVal"].type.reference.namespace.package.name, "P")
 
-        self.assertEqual(self.processor.packages['P'].typecollections["Common"].structs["PStruct"].
+        self.assertEqual(self.processor.packages['P'].typecollections["PTypes"].structs["PStruct"].
                          fields["p2data"].type.reference.namespace.name, "P2Types")
-        self.assertEqual(self.processor.packages['P'].typecollections["Common"].structs["PStruct"].
+        self.assertEqual(self.processor.packages['P'].typecollections["PTypes"].structs["PStruct"].
                          fields["p2data"].type.reference.namespace.package.name, "P2")
 
         self.assertEqual(self.processor.packages['P2'].typecollections["P2Types"].structs["P2Struct"].

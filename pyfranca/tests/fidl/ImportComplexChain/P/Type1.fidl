@@ -1,6 +1,6 @@
 package P
 
-import P.Common.* from "common.fidl"
+import P.PTypes.* from "P.fidl"
 
 typeCollection Type1 {
     version { major 1 minor 0 }
