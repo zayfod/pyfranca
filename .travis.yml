@@ -14,4 +14,9 @@ script:
   - python tools/fidl_dump.py examples/fidl/hello.fidl
   - python tools/fidl_validator.py examples/fidl/hello.fidl
 after_success:
-  coveralls
+
+branches:
+  only:
+  - dev_jb
+  - master
+  - dev
