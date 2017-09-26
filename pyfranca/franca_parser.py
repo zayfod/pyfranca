@@ -7,6 +7,7 @@ from abc import ABCMeta
 import ply.yacc as yacc
 from pyfranca import franca_lexer
 from pyfranca import ast
+import re
 
 
 class ArgumentGroup(object):
@@ -124,7 +125,7 @@ class Parser(object):
     @staticmethod
     def p_import_def_1(p):
         """
-        def : IMPORT fqn FROM FILE_NAME
+        def : IMPORT fqn FROM STRING_VAL
         """
         p[0] = ast.Import(file_name=p[4], namespace=p[2])
 
@@ -132,7 +133,7 @@ class Parser(object):
     @staticmethod
     def p_import_def_2(p):
         """
-        def : IMPORT MODEL FILE_NAME
+        def : IMPORT MODEL STRING_VAL
         """
         p[0] = ast.Import(file_name=p[3])
 
@@ -182,6 +183,7 @@ class Parser(object):
                               | struct_def
                               | array_def
                               | map_def
+                              | constant_def
         """
         p[0] = p[1]
 
@@ -189,7 +191,7 @@ class Parser(object):
     @staticmethod
     def p_version_def(p):
         """
-        version_def : VERSION '{' MAJOR INTEGER MINOR INTEGER '}'
+        version_def : VERSION '{' MAJOR INTEGER_VAL MINOR INTEGER_VAL '}'
         """
         p[0] = ast.Version(major=p[4], minor=p[6])
 
@@ -263,6 +265,7 @@ class Parser(object):
                          | struct_def
                          | array_def
                          | map_def
+                         | constant_def
         """
         p[0] = p[1]
 
@@ -507,7 +510,7 @@ class Parser(object):
     @staticmethod
     def p_enumerator_2(p):
         """
-        enumerator : ID '=' INTEGER
+        enumerator : ID '=' INTEGER_VAL
         """
         p[0] = ast.Enumerator(name=p[1], value=p[3])
 
@@ -580,6 +583,131 @@ class Parser(object):
         map_def : MAP ID '{' type TO type '}'
         """
         p[0] = ast.Map(name=p[2], key_type=p[4], value_type=p[6])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_1(p):
+        """
+        constant_def : CONST INT8 ID '=' integer_val
+                     | CONST INT16 ID '=' integer_val
+                     | CONST INT32 ID '=' integer_val
+                     | CONST INT64 ID '=' integer_val
+                     | CONST UINT8 ID '=' integer_val
+                     | CONST UINT16 ID '=' integer_val
+                     | CONST UINT32 ID '=' integer_val
+                     | CONST UINT64 ID '=' integer_val
+                     | CONST INT8 ID '=' boolean_val
+                     | CONST INT16 ID '=' boolean_val
+                     | CONST INT32 ID '=' boolean_val
+                     | CONST INT64 ID '=' boolean_val
+                     | CONST UINT8 ID '=' boolean_val
+                     | CONST UINT16 ID '=' boolean_val
+                     | CONST UINT32 ID '=' boolean_val
+                     | CONST UINT64 ID '=' boolean_val
+                     | CONST INT8 ID '=' real_val
+                     | CONST INT16 ID '=' real_val
+                     | CONST INT32 ID '=' real_val
+                     | CONST INT64 ID '=' real_val
+                     | CONST UINT8 ID '=' real_val
+                     | CONST UINT16 ID '=' real_val
+                     | CONST UINT32 ID '=' real_val
+                     | CONST UINT64 ID '=' real_val
+        """
+        type_class = getattr(ast, p[2])
+        value = ast.IntegerValue(int(p[5].value))
+        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=value)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_2(p):
+        """
+        constant_def : CONST FLOAT ID '=' integer_val
+                     | CONST FLOAT ID '=' boolean_val
+                     | CONST FLOAT ID '=' real_val
+         """
+        type_class = getattr(ast, p[2])
+        value = ast.FloatValue(float(p[5].value))
+        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=value)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_3(p):
+        """
+        constant_def : CONST DOUBLE ID '=' integer_val
+                     | CONST DOUBLE ID '=' boolean_val
+                     | CONST DOUBLE ID '=' real_val
+         """
+        type_class = getattr(ast, p[2])
+        value = ast.DoubleValue(float(p[5].value))
+        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=value)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_4(p):
+        """
+        constant_def : CONST BOOLEAN ID '=' value
+         """
+        type_class = getattr(ast, p[2])
+        value = ast.BooleanValue(bool(p[5].value))
+        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=value)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_constant_def_5(p):
+        """
+        constant_def : CONST STRING ID '=' value
+         """
+        type_class = getattr(ast, p[2])
+        value = ast.StringValue(str(p[5].value))
+        p[0] = ast.Constant(name=p[3], element_type=type_class(), element_value=value)
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_boolean_val(p):
+        """
+        boolean_val : BOOLEAN_VAL
+         """
+        p[0] = ast.BooleanValue(p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_integer_val(p):
+        """
+        integer_val : INTEGER_VAL
+         """
+        p[0] = ast.IntegerValue(p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_real_val(p):
+        """
+        real_val : REAL_VAL
+         """
+        if re.match(r".*[dD]", p[1]):
+            p[0] = ast.DoubleValue(float(p[1][:-1]))
+        elif re.match(r".*[fF]", p[1]):
+            p[0] = ast.FloatValue(float(p[1][:-1]))
+        else:
+            p[0] = ast.DoubleValue(float(p[1]))
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_string_val(p):
+        """
+        string_val : STRING_VAL
+         """
+        p[0] = ast.StringValue(p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_value(p):
+        """
+        value : boolean_val
+              | string_val
+              | real_val
+              | integer_val
+         """
+        p[0] = p[1]
 
     # noinspection PyIncorrectDocstring
     @staticmethod
