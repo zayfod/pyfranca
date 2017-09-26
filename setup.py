@@ -38,7 +38,7 @@ setup(
     setup_requires=[
         'setuptools_pep8',
         'sphinx',
-    ],    
+    ],
     test_suite="pyfranca.tests.get_suite",
     scripts=[
         "tools/fidl_dump.py",

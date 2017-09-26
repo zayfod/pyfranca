@@ -4,7 +4,7 @@ Pyfranca lexer tests.
 
 import unittest
 
-from pyfranca import LexerException, Lexer
+from pyfranca import Lexer
 
 
 class BaseTestCase(unittest.TestCase):
@@ -13,11 +13,6 @@ class BaseTestCase(unittest.TestCase):
     def _tokenize(data):
         lexer = Lexer()
         tokenized_data = lexer.tokenize_data(data)
-        return tokenized_data
-
-    def _assert_tokenize(self, data):
-        tokenized_data = self._tokenize(data)
-        self.assertIsInstance(tokenized_data)
         return tokenized_data
 
 
@@ -182,7 +177,6 @@ class TestCheckRegularExpressions(BaseTestCase):
         self.assertEqual(tokenized_data[cnt].type, "REAL_VAL")
         self.assertEqual(tokenized_data[cnt].value, "-.000002d")
 
-
     def test_real_valid_syntax(self):
         """test a real value """
         tokenized_data = self._tokenize("1.1\n-2.2\n3.3e3\n-4.4e4\n5.5e-5"
@@ -283,4 +277,3 @@ class TestCheckRegularExpressions(BaseTestCase):
         self.assertEqual(tokenized_data[3].value, '=')
         self.assertEqual(tokenized_data[4].type, "BOOLEAN_VAL")
         self.assertEqual(tokenized_data[4].value, True)
-

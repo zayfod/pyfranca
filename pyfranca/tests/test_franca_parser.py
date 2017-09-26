@@ -822,6 +822,7 @@ class TestBroadcasts(BaseTestCase):
             """)
         self.assertEqual(str(context.exception), "Duplicate argument 'a'.")
 
+
 class TestConstants(BaseTestCase):
     """Test parsing constants."""
     def test_constants(self):
@@ -897,7 +898,8 @@ class TestConstants(BaseTestCase):
 
         self.assertEqual(typecollection.constants["s2"].name, "s2")
         self.assertEqual(typecollection.constants["s2"].type.name, "String")
-        self.assertAlmostEqual(typecollection.constants["s2"].value.value, "Hello\n                                   World")
+        self.assertAlmostEqual(typecollection.constants["s2"].value.value,
+                               "Hello\n                                   World")
         self.assertEqual(typecollection.constants["s2"].value.name, "StringValue")
 
     def test_constants_casting(self):
@@ -1013,7 +1015,7 @@ class TestConstants(BaseTestCase):
         """Franca 0.9.2, section 5.2.1"""
 
         with self.assertRaises(ParserException) as context:
-            package = self._parse("""
+            self._parse("""
             package P
             typeCollection TC {
                 const UInt32 MAX_COUNT = "Hello"
@@ -1026,7 +1028,7 @@ class TestConstants(BaseTestCase):
         """Franca 0.9.2, section 5.2.1"""
 
         with self.assertRaises(ParserException) as context:
-            package = self._parse("""
+            self._parse("""
             package P
             typeCollection TC {
                 const String s1 = 123abc
@@ -1039,7 +1041,7 @@ class TestConstants(BaseTestCase):
         """Franca 0.9.2, section 5.2.1"""
 
         with self.assertRaises(ParserException) as context:
-            package = self._parse("""
+            self._parse("""
             package P
             typeCollection TC {
                 const Boolean b1 = 123asc
@@ -1048,12 +1050,11 @@ class TestConstants(BaseTestCase):
         self.assertEqual(str(context.exception),
                          "Syntax error at line 4 near 'asc'.")
 
-
     def test_constants_bad_syntax_typename(self):
         """Franca 0.9.2, section 5.2.1"""
 
         with self.assertRaises(ParserException) as context:
-            package = self._parse("""
+            self._parse("""
             package P
             typeCollection TC {
                 const double d1 = 123.3d

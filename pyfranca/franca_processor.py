@@ -14,7 +14,7 @@ class ProcessorException(Exception):
         return self.message
 
 
-class Processor:
+class Processor(object):
     """
     Franca IDL processor.
     """
@@ -309,7 +309,7 @@ class Processor:
                         "Invalid namespace import {}.".format(
                             package_import.namespace))
                 namespace_name = \
-                    package_import.namespace[len(package_reference.name)+1:-2]
+                    package_import.namespace[len(package_reference.name) + 1:-2]
                 # Update namespace reference
                 if namespace_name in package_reference:
                     namespace = package_reference[namespace_name]
@@ -389,7 +389,7 @@ class Processor:
 
         :param fspec: File specification.
         :param references: A list of package references.
-        :param package_paths: Additional model path to search for imports.
+        :param package_path: Additional model path to search for imports.
         :return: The parsed ast.Package.
         """
         if fspec in self.files:
