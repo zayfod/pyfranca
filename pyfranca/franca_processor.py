@@ -328,10 +328,18 @@ class Processor(object):
         if package.name in self.packages:
             if fspec not in self.packages[package.name].files:
                 # Merge the new package into the already existing one.
+
+                # in the unmodified code
+                # this line copies only interfaces and typecollections, but no imports
                 self.packages[package.name] += package
                 # Register the package file in the processor.
                 self.files[fspec] = self.packages[package.name]
-                package = self.packages[package.name]
+
+                # this line overwrites the current package with the merged one.
+                # Imports of  current package get lost.
+                # removing this line result in a correct order of imports. But I am not sure
+                # if function _update_package_references ist still working correctly.
+                # package = self.packages[package.name]
             else:
                 return
         else:
@@ -343,6 +351,8 @@ class Processor(object):
         fspec_path = os.path.abspath(fspec)
         fspec_dir = os.path.dirname(fspec_path)
         for package_import in package.imports:
+            # this call result in an recursive call of function import_package
+            # result in multiple imports of the same packages
             imported_package = self.import_file(
                 package_import.file, references + [package.name], fspec_dir)
             # Update import reference
@@ -376,6 +386,9 @@ class Processor(object):
         :param package_path: Additional model path to search for imports.
         :return: The parsed ast.Package.
         """
+
+        print("Import File: " + fspec)
+
         if fspec in self.files:
             # File already loaded.
             return self.files[fspec]
