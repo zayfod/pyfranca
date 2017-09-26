@@ -1,0 +1,18 @@
+package P
+
+typeCollection T {
+    version { major 1 minor 0 }
+
+	enumeration MyEnum {
+		abc
+		def
+		ghi
+		jkm
+	}
+
+	struct MyStruct {
+		UInt8 val1
+		MyEnum val2
+		String  msg
+	}
+}

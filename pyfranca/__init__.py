@@ -7,4 +7,4 @@ from pyfranca.franca_parser import ParserException, Parser
 from pyfranca.franca_processor import ProcessorException, Processor
 
 
-__version__ = "0.3.0"
+__version__ = "0.3.1000"

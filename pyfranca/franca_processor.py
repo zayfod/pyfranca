@@ -1,6 +1,3 @@
-"""
-Franca processor.
-"""
 
 import os
 from collections import OrderedDict
@@ -27,7 +24,7 @@ class Processor:
         Constructor.
         """
         # Default package paths.
-        self.package_paths = ["."]
+        self.package_paths = []
         self.files = {}
         self.packages = {}
 
@@ -93,11 +90,10 @@ class Processor:
                 if name in typecollection:
                     return typecollection[name]
             # Look in imports
-            for package_import in namespace.package.imports:
-                if package_import.namespace_reference:
-                    # Look in namespaces imported in the type's package
-                    if name in package_import.namespace_reference:
-                        return package_import.namespace_reference[name]
+            for namespace_import in namespace.namespace_references:
+                # Look in namespaces imported in the type's package
+                if name in namespace_import:
+                    return namespace_import[name]
         else:
             # This is an FQN
             if pkg == namespace.package.name:
@@ -108,17 +104,11 @@ class Processor:
             else:
                 # Look in typecollections of packages imported in the
                 #   type's package using FQNs.
-                for package_import in namespace.package.imports:
-                    if package_import.namespace == "{}.{}.*".format(pkg, ns):
-                        for typecollection in package_import.\
-                                package_reference.typecollections.values():
-                            if typecollection.name == ns and \
-                                    name in typecollection:
-                                return typecollection[name]
-                        for interface in package_import. \
-                                package_reference.interfaces.values():
-                            if name in interface:
-                                return interface[name]
+                for namespace_import in namespace.namespace_references:
+                    if (namespace_import.package.name == pkg) and \
+                            (namespace_import.name == ns) and \
+                            (name in namespace_import):
+                            return namespace_import[name]
         # Give up
         raise ProcessorException(
             "Unresolved reference '{}'.".format(fqn))
@@ -191,6 +181,8 @@ class Processor:
         elif isinstance(name, ast.Map):
             self._update_type_references(name.namespace, name.key_type)
             self._update_type_references(name.namespace, name.value_type)
+        elif isinstance(name, ast.Constant):
+            self._update_type_references(name.namespace, name.type)
         else:
             assert False
 
@@ -254,6 +246,8 @@ class Processor:
             self._update_type_references(namespace, name)
         for name in namespace.maps.values():
             self._update_type_references(namespace, name)
+        for name in namespace.constants.values():
+            self._update_type_references(namespace, name)
 
     def _update_interface_references(self, namespace):
         """
@@ -276,40 +270,58 @@ class Processor:
                     "Invalid interface reference '{}'.".format(
                         namespace.extends))
 
-    def _update_package_references(self, package):
+    def _update_namespaces_references(self, package, imported_namespace):
+        for package_namespace in package.typecollections.values():
+            package_namespace.namespace_references.append(imported_namespace)
+        for package_namespace in package.interfaces.values():
+            package_namespace.namespace_references.append(imported_namespace)
+
+    def _update_package_references(self, package, imported_package, package_import):
         """
         Update type references in a package.
 
         :param package: ast.Package object.
         """
-        for package_import in package.imports:
-            assert package_import.package_reference is not None
-            if package_import.namespace:
-                # Namespace import
-                package_reference = package_import.package_reference
-                if not package_import.namespace.endswith(".*"):
-                    raise ProcessorException(
-                        "Invalid namespace import {}.".format(
-                            package_import.namespace))
-                namespace_name = \
-                    package_import.namespace[len(package_reference.name)+1:-2]
-                # Update namespace reference
-                if namespace_name in package_reference:
-                    namespace = package_reference[namespace_name]
-                    package_import.namespace_reference = namespace
-                else:
-                    raise ProcessorException(
-                        "Namespace '{}' not found.".format(
-                            package_import.namespace))
-            else:
-                # Model import
-                assert package_import.namespace_reference is None
-        for namespace in package.typecollections:
-            self._update_namespace_references(
-                package.typecollections[namespace])
-        for namespace in package.interfaces:
-            self._update_interface_references(
-                package.interfaces[namespace])
+
+        # Update import reference  but not for itself
+        if package.name != imported_package.name:
+            package_import.package_reference = imported_package
+
+        do_import = False
+        if package_import.namespace:
+            if not package_import.namespace.endswith(".*"):
+                raise ProcessorException(
+                    "Invalid namespace import {}.".format(
+                        package_import.namespace))
+
+            fqn = package_import.namespace[:-2]
+            ns = self.basename(fqn)
+            p = self.packagename(fqn)
+            found = False
+            for imported_namespace in imported_package.typecollections.values():
+                if (imported_namespace.name == ns) and (imported_namespace.package.name == p):
+                    found = True
+                    package_import.namespace_reference = imported_namespace
+
+                    # reference namespace fom imported package to all namespaces in this package
+                    self._update_namespaces_references(package, imported_namespace)
+
+            for imported_namespace in imported_package.interfaces.values():
+                if (imported_namespace.name == ns) and (imported_namespace.package.name == p):
+                    found = True
+                    package_import.namespace_reference = imported_namespace
+
+                    # reference namespace fom imported package to all namespaces in this package
+                    self._update_namespaces_references(package, imported_namespace)
+            if not found:
+                raise ProcessorException(
+                    "Namespace '{}' not found.".format(
+                        package_import.namespace))
+        else:
+            for imported_namespace in imported_package.typecollections.values():
+                self._update_namespaces_references(package, imported_namespace)
+            for imported_namespace in imported_package.interfaces.values():
+                self._update_namespaces_references(package, imported_namespace)
 
     def import_package(self, fspec, package, references=None):
         """
@@ -323,6 +335,22 @@ class Processor:
             ValueError("Expected ast.Package as input.")
         if not references:
             references = []
+
+        # Process package imports
+        fspec_path = os.path.abspath(fspec)
+        fspec_dir = os.path.dirname(fspec_path)
+        for package_import in package.imports:
+            imported_package = self.import_file(
+                package_import.file, references + [package.name], fspec_dir)
+            self._update_package_references(package, imported_package, package_import)
+
+        for namespace in package.typecollections:
+            self._update_namespace_references(
+                package.typecollections[namespace])
+        for namespace in package.interfaces:
+            self._update_interface_references(
+                package.interfaces[namespace])
+
         # Check whether package is already imported
         if package.name in self.packages:
             if fspec not in self.packages[package.name].files:
@@ -338,14 +366,6 @@ class Processor:
             self.packages[package.name] = package
             # Register the package file in the processor.
             self.files[fspec] = package
-        # Process package imports
-        for package_import in package.imports:
-            imported_package = self.import_file(
-                package_import.file, references + [package.name])
-            # Update import reference
-            package_import.package_reference = imported_package
-        # Update type references
-        self._update_package_references(package)
 
     def import_string(self, fspec, fidl, references=None):
         """
@@ -364,25 +384,27 @@ class Processor:
         self.import_package(fspec, package, references)
         return package
 
-    def import_file(self, fspec, references=None):
+    def import_file(self, fspec, references=None, package_path=None):
         """
         Parse an FIDL file and import it into the processor as package.
 
         :param fspec: File specification.
         :param references: A list of package references.
+        :param package_paths: Additional model path to search for imports.
         :return: The parsed ast.Package.
         """
-        if fspec in self.files:
-            # File already loaded.
-            return self.files[fspec]
         if not os.path.exists(fspec):
             if os.path.isabs(fspec):
                 # Absolute specification
                 raise ProcessorException(
                     "Model '{}' not found.".format(fspec))
             else:
-                # Relative specification - check in the package path list.
-                for path in self.package_paths:
+                # Relative specification.
+                package_paths = self.package_paths[:]
+                if package_path:
+                    package_paths.insert(0, package_path)
+                # Check in the package path list.
+                for path in package_paths:
                     temp_fspec = os.path.join(path, fspec)
                     if os.path.exists(temp_fspec):
                         fspec = temp_fspec
@@ -391,6 +413,12 @@ class Processor:
                     raise ProcessorException(
                         "Model '{}' not found.".format(fspec))
         # Parse the file.
+
+        fspec = os.path.abspath(fspec)  # normalize fpsec, remove all differences like / \
+        if fspec in self.files:
+            # File already loaded.
+            return self.files[fspec]
+
         parser = franca_parser.Parser()
         package = parser.parse_file(fspec)
         # Import the package in the processor.

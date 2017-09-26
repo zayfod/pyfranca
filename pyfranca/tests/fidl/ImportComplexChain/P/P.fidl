@@ -1,0 +1,18 @@
+package P
+
+import P2.P2Types.* from "P2.fidl"
+
+typeCollection PTypes {
+    version { major 1 minor 0 }
+
+	enumeration MyEnum {
+		abc
+		def
+		ghi
+		jkm
+	}
+
+	struct PStruct {
+		P2Struct p2data
+	}
+}

@@ -51,6 +51,8 @@ class Lexer(object):
         "of",
         "map",
         "to",
+        "const",
+
 
         # Types
         "Int8",
@@ -71,8 +73,12 @@ class Lexer(object):
     # Tokens
     tokens = [keyword.upper() for keyword in keywords] + [
         "ID",
-        "INTEGER",
-        "FILE_NAME",
+        "INTEGER_VAL",
+        "HEX_INTEGER_VAL",
+        "REAL_VAL",
+        "STRING_VAL",
+        "BOOLEAN_VAL",
+        "STRUCTURED_COMMENT"
     ]
 
     # Ignored characters
@@ -117,6 +123,50 @@ class Lexer(object):
         # noinspection PySingleQuotedDocstring
         r"<\*\*(.|\n)*?\*\*>"
         t.lexer.lineno += t.value.count("\n")
+        return t
+
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_STRING_VAL(t):
+        # noinspection PySingleQuotedDocstring
+        r"\"[^\"]*\""
+        t.value = t.value[1:-1]
+        return t
+
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_REAL_VAL(t):
+        # noinspection PySingleQuotedDocstring
+        r"[+-]?((((([0-9]*\.[0-9]+)|([0-9]+\.))([eE][-+]?[0-9]+)?)|([0-9]+([eE][-+]?[0-9]+)))[fFdD]?)"
+        return t
+
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_HEX_INTEGER_VAL(t):
+        # noinspection PySingleQuotedDocstring
+        r"0x[0-9a-fA-F]+"
+        t.value = int(t.value, 0)
+        return t
+
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_INTEGER_VAL(t):
+        # noinspection PySingleQuotedDocstring
+        r"[+-]?\d+"
+        t.value = int(t.value)
+        return t
+
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_BOOLEAN_VAL(t):
+        # noinspection PySingleQuotedDocstring
+        r"(true|false)"
+        t.value = t.value.strip()
+        if t.value == "true":
+            t.value = True
+        else:
+            t.value = False
+        return t
 
     # Identifier
     # noinspection PyPep8Naming,PyIncorrectDocstring
@@ -125,23 +175,6 @@ class Lexer(object):
         # noinspection PySingleQuotedDocstring
         r"[A-Za-z][A-Za-z0-9_]*"
         t.type = Lexer._keyword_map.get(t.value, "ID")
-        return t
-
-    # File name (quoted)
-    # noinspection PyPep8Naming,PyIncorrectDocstring
-    @staticmethod
-    def t_FILE_NAME(t):
-        # noinspection PySingleQuotedDocstring
-        r"\"([^\n]|\.)*?\""
-        t.value = t.value[1:-1]
-        return t
-
-    # noinspection PyPep8Naming,PyIncorrectDocstring
-    @staticmethod
-    def t_INTEGER(t):
-        # noinspection PySingleQuotedDocstring
-        r"[+-]?\d+"
-        t.value = int(t.value)
         return t
 
     @staticmethod
@@ -167,6 +200,21 @@ class Lexer(object):
             if not tok:
                 break
             print(tok)
+
+    def tokenize_data(self, data):
+        """
+        Tokenize input data to stdout for testing purposes.
+
+        :param data: Input text to parse.
+        """
+        self.lexer.input(data)
+        tokenized_data = []
+        while True:
+            tok = self.lexer.token()
+            if not tok:
+                break
+            tokenized_data.append(tok)
+        return tokenized_data
 
     def tokenize_file(self, fspec):
         """

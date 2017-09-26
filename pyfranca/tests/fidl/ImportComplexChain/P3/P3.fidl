@@ -1,0 +1,17 @@
+package P3
+
+typeCollection P3Types {
+    version { major 1 minor 0 }
+
+	struct P3Struct {
+		UInt32 data
+	}
+}
+
+typeCollection P3TypesToxic{
+    version { major 1 minor 0 }
+
+	struct P3StructToxic {
+		UInt32 data
+	}
+}

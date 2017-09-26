@@ -1,0 +1,11 @@
+package P2
+
+import P3.P3Types.* from "P3.fidl"
+
+typeCollection P2Types {
+    version { major 1 minor 0 }
+
+	struct P2Struct {
+		P3Struct p3data
+	}
+}

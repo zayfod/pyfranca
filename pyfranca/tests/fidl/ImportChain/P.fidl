@@ -1,0 +1,19 @@
+package P
+
+import P.Type1.* from "Type1.fidl"
+import P.Type2.* from "Type2.fidl"
+
+interface I {
+	version { major 1 minor 0 }
+
+	method getData
+	{
+		out {
+              MyStructType1 outVal
+           }
+
+		in {
+              MyStructType2 inVal
+           }
+	}
+}

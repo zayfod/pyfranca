@@ -1,0 +1,13 @@
+package P
+
+import P.PTypes.* from "P.fidl"
+
+typeCollection Type1 {
+    version { major 1 minor 0 }
+
+	struct MyStructType1 {
+		UInt8 val1
+		MyEnum val2
+		String  msg
+	}
+}
