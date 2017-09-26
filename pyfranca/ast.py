@@ -300,6 +300,7 @@ class Value(Type):
         super(Value, self).__init__(value_type if value_type else self.__class__.__name__)
         self.value = value
 
+
 class IntegerValue(Value):
 
     def __init__(self, value):
@@ -328,6 +329,7 @@ class StringValue(Value):
 
     def __init__(self, value):
         super(StringValue, self).__init__(value)
+
 
 class Enumeration(ComplexType):
 
