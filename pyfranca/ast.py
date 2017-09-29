@@ -313,8 +313,13 @@ class Value(Type):
 
 class IntegerValue(Value):
 
-    def __init__(self, value):
+    BINARY = 2
+    DECIMAL = 10
+    HEXADECIMAL = 16
+
+    def __init__(self, value, base=DECIMAL):
         super(IntegerValue, self).__init__(value)
+        self.base = base
 
 
 class BooleanValue(Value):
