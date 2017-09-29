@@ -74,6 +74,8 @@ class Lexer(object):
     tokens = [keyword.upper() for keyword in keywords] + [
         "ID",
         "INTEGER_VAL",
+        "HEXADECIMAL_VAL",
+        "BINARY_VAL",
         "REAL_VAL",
         "STRING_VAL",
         "BOOLEAN_VAL"
@@ -139,10 +141,26 @@ class Lexer(object):
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod
+    def t_HEXADECIMAL_VAL(t):
+        # noinspection PySingleQuotedDocstring
+        r"0[xX][0-9a-fA-F]+"
+        t.value = int(t.value, 16)
+        return t
+
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
+    def t_BINARY_VAL(t):
+        # noinspection PySingleQuotedDocstring
+        r"0[bB][01]+"
+        t.value = int(t.value, 2)
+        return t
+
+    # noinspection PyPep8Naming,PyIncorrectDocstring
+    @staticmethod
     def t_INTEGER_VAL(t):
         # noinspection PySingleQuotedDocstring
         r"[+-]?\d+"
-        t.value = int(t.value)
+        t.value = int(t.value, 10)
         return t
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
