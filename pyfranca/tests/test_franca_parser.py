@@ -55,11 +55,169 @@ class TestTopLevel(BaseTestCase):
         """)
 
     def test_structured_comments(self):
-        self._assertParse("""
+        package = self._assertParse("""
             <** @description: Package P
+                              multiline text
+                @author      Jens Baumann
+                @deprecated :
+                @source_uri  https://github.com/zayfod/pyfranca
+                @source_alias : a better franca idl parser
+                @see :    foobar
+                @experimental :
             **>
             package P
         """)
+        self.assertEqual(package.name, "P")
+        self.assertEqual(package.comments["@description"], "Package P\n                              multiline text")
+        self.assertEqual(package.comments["@author"], "Jens Baumann")
+        self.assertEqual(package.comments["@deprecated"], "")
+        self.assertEqual(package.comments["@source_uri"], "https://github.com/zayfod/pyfranca")
+        self.assertEqual(package.comments["@source_alias"], "a better franca idl parser")
+        self.assertEqual(package.comments["@see"], "foobar")
+        self.assertEqual(package.comments["@experimental"], "")
+        self.assertEqual(package.files, [])
+        self.assertEqual(len(package.imports), 0)
+        self.assertEqual(len(package.typecollections), 0)
+        self.assertEqual(len(package.interfaces), 0)
+
+    def test_structured_comments_complete_example(self):
+        package = self._assertParse("""
+                   package P
+
+                   <** @description : collection TC   **>
+                   typeCollection TC {
+
+                       <** @description : struct S   **>
+                       struct S {
+
+                           <** @description : member a   **>
+                           Int32 a
+
+                           <** @description : member b   **>
+                           String b
+                       }
+
+                       <** @description : enumeration E   **>
+                       enumeration E {
+                          <** @description : enum member a   **>
+                          a = 0x1
+                          <** @description : enum member b   **>
+                          b = 0x2
+                       }
+
+                       <** @description : typedef  MyInt8  **>
+                       typedef MyInt8 is Int8
+
+                       <** @description : array A  **>
+                       array A of UInt8
+
+                        <** @description : map M  **>
+                        map M {
+                            String to Int32
+                        }
+                    }
+                    <** @description : interface I **>
+                    interface I {
+                        version { major 1 minor 0 }
+
+                        <** @description : attribute A **>
+                        attribute Int32 A
+
+                        <** @description : method M **>
+                        method M {
+                            in {
+                                <** @description : in parameter a **>
+                                Float a
+
+                                <** @description : in parameter b **>
+                                Float[] b
+                            }
+                            out {
+                                <** @description : out parameter result **>
+                                Float result
+                            }
+                            error {
+                                <** @description : error FAILURE **>
+                                FAILURE = 0
+
+                                <** @description : error SUCCESS **>
+                                SUCCESS
+                            }
+                        }
+
+                        <** @description : broadcast B **>
+                        broadcast B {
+                            out {
+                                <** @description : out parameter x **>
+                                Int32 x
+                            }
+                        }
+                    }
+               """)
+        self.assertEqual(package.name, "P")
+        self.assertEqual(package.files, [])
+        self.assertEqual(len(package.imports), 0)
+        self.assertEqual(len(package.typecollections), 1)
+        self.assertEqual(len(package.interfaces), 1)
+        self.assertEqual(package.typecollections['TC'].comments["@description"], "collection TC")
+        self.assertEqual(package.typecollections['TC'].structs['S'].comments["@description"], "struct S")
+        self.assertEqual(package.typecollections['TC'].structs['S'].fields['a'].comments["@description"], "member a")
+        self.assertEqual(package.typecollections['TC'].structs['S'].fields['b'].comments["@description"], "member b")
+        self.assertEqual(package.typecollections['TC'].enumerations['E'].comments['@description'], "enumeration E")
+        self.assertEqual(package.typecollections['TC'].enumerations['E'].enumerators['a'].value.value, 1)
+        self.assertEqual(
+            package.typecollections['TC'].enumerations['E'].enumerators['a'].comments["@description"],
+            "enum member a")
+        self.assertEqual(package.typecollections['TC'].enumerations['E'].enumerators['b'].value.value, 2)
+        self.assertEqual(
+            package.typecollections['TC'].enumerations['E'].enumerators['b'].comments['@description'],
+            "enum member b")
+
+        self.assertEqual(package.interfaces['I'].comments['@description'], "interface I")
+        self.assertEqual(package.interfaces['I'].attributes['A'].comments['@description'], "attribute A")
+
+        self.assertEqual(package.interfaces['I'].methods['M'].comments['@description'], "method M")
+        self.assertEqual(package.interfaces['I'].methods['M'].in_args['a'].comments['@description'], "in parameter a")
+        self.assertEqual(package.interfaces['I'].methods['M'].in_args['b'].comments['@description'], "in parameter b")
+        self.assertEqual(package.interfaces['I'].methods['M'].out_args['result'].comments['@description'],
+                         "out parameter result")
+        self.assertEqual(package.interfaces['I'].methods['M'].errors['FAILURE'].comments['@description'],
+                         "error FAILURE")
+        self.assertEqual(package.interfaces['I'].methods['M'].errors['SUCCESS'].comments['@description'],
+                         "error SUCCESS")
+        self.assertEqual(package.interfaces['I'].broadcasts['B'].comments['@description'], "broadcast B")
+        self.assertEqual(package.interfaces['I'].broadcasts['B'].out_args['x'].comments['@description'],
+                         "out parameter x")
+
+    def test_empty_comments(self):
+        package = self._assertParse("""
+                    <**  **>
+                    package P
+                """)
+        self.assertEqual(package.name, "P")
+        self.assertEqual(len(package.comments.keys()), 0)
+
+    def test_comments_no_tag(self):
+        package = self._assertParse("""
+                    <** no tag  **>
+                    package P
+                """)
+        self.assertEqual(package.name, "P")
+        self.assertEqual(len(package.comments.keys()), 0)
+
+    def test_bad_comments(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+            package P
+
+             <** @description : bad comment**>
+
+             <** @description : typeCollection TC **>
+             typeCollection TC {}
+
+        """)
+        self.assertEqual(str(context.exception),
+                         "Syntax error at line 6 near '@description : typeCollection TC'.")
 
     def test_empty_package(self):
         package = self._assertParse("package P")
