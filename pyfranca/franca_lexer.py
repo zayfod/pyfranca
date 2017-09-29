@@ -79,7 +79,8 @@ class Lexer(object):
         "BINARY_VAL",
         "REAL_VAL",
         "STRING_VAL",
-        "BOOLEAN_VAL"
+        "BOOLEAN_VAL",
+        "STRUCTURED_COMMENT"
     ]
 
     # Ignored characters
@@ -124,6 +125,8 @@ class Lexer(object):
         # noinspection PySingleQuotedDocstring
         r"<\*\*(.|\n)*?\*\*>"
         t.lexer.lineno += t.value.count("\n")
+        t.value = t.value[3:-3].strip()
+        return t
 
     # noinspection PyPep8Naming,PyIncorrectDocstring
     @staticmethod

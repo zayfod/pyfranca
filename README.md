@@ -88,7 +88,6 @@ Limitations
 
 The following Franca features are not supported:
 
-- structured comments
 - dots in type collection and interface names
 - expressions
 - unions

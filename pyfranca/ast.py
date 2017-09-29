@@ -22,7 +22,7 @@ class Package(object):
     """
 
     def __init__(self, name, file_name=None, imports=None,
-                 interfaces=None, typecollections=None):
+                 interfaces=None, typecollections=None, comments=None):
         """
         Constructs a new Package.
         """
@@ -32,6 +32,7 @@ class Package(object):
         self.interfaces = interfaces if interfaces else OrderedDict()
         self.typecollections = typecollections if typecollections else \
             OrderedDict()
+        self.comments = comments if comments else OrderedDict()
 
         for item in self.interfaces.values():
             item.package = self
@@ -87,7 +88,7 @@ class Namespace(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, flags=None, members=None):
+    def __init__(self, name, flags=None, members=None, comments=None):
         self.package = None
         self.name = name
         self.flags = flags if flags else []         # Unused
@@ -99,6 +100,7 @@ class Namespace(object):
         self.arrays = OrderedDict()
         self.maps = OrderedDict()
         self.constants = OrderedDict()
+        self.comments = comments if comments else OrderedDict()
         if members:
             for member in members:
                 self._add_member(member)
@@ -187,24 +189,25 @@ class Namespace(object):
 
 class TypeCollection(Namespace):
 
-    def __init__(self, name, flags=None, members=None):
+    def __init__(self, name, flags=None, members=None, comments=None):
         super(TypeCollection, self).__init__(name, flags=flags,
-                                             members=members)
+                                             members=members, comments=comments)
 
 
 class Type(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, name=None):
+    def __init__(self, name=None, comments=None):
         self.namespace = None
         self.name = name if name else self.__class__.__name__
+        self.comments = comments if comments else OrderedDict()
 
 
 class Typedef(Type):
 
-    def __init__(self, name, base_type):
-        super(Typedef, self).__init__(name)
+    def __init__(self, name, base_type, comments=None):
+        super(Typedef, self).__init__(name, comments)
         self.type = base_type
 
 
@@ -298,8 +301,8 @@ class ComplexType(Type):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self):
-        super(ComplexType, self).__init__()
+    def __init__(self, comments=None):
+        super(ComplexType, self).__init__(comments=comments)
 
 
 class Value(Type):
@@ -348,8 +351,8 @@ class StringValue(Value):
 
 class Enumeration(ComplexType):
 
-    def __init__(self, name, enumerators=None, extends=None, flags=None):
-        super(Enumeration, self).__init__()
+    def __init__(self, name, enumerators=None, extends=None, flags=None, comments=None):
+        super(Enumeration, self).__init__(comments=comments)
         self.name = name
         self.enumerators = enumerators if enumerators else OrderedDict()
         self.extends = extends
@@ -359,15 +362,16 @@ class Enumeration(ComplexType):
 
 class Enumerator(object):
 
-    def __init__(self, name, value=None):
+    def __init__(self, name, value=None, comments=None):
         self.name = name
         self.value = value
+        self.comments = comments if comments else OrderedDict()
 
 
 class Struct(ComplexType):
 
-    def __init__(self, name, fields=None, extends=None, flags=None):
-        super(Struct, self).__init__()
+    def __init__(self, name, fields=None, extends=None, flags=None, comments=None):
+        super(Struct, self).__init__(comments=comments)
         self.name = name
         self.fields = fields if fields else OrderedDict()
         self.extends = extends
@@ -386,9 +390,10 @@ class Union(ComplexType):
 
 class StructField(object):
 
-    def __init__(self, name, field_type):
+    def __init__(self, name, field_type, comments=None):
         self.name = name
         self.type = field_type
+        self.comments = comments if comments else OrderedDict()
 
 class UnionField(object):
 
@@ -398,16 +403,16 @@ class UnionField(object):
 
 class Array(ComplexType):
 
-    def __init__(self, name, element_type):
-        super(Array, self).__init__()
+    def __init__(self, name, element_type, comments=None):
+        super(Array, self).__init__(comments=comments)
         self.name = name            # None for implicit arrays.
         self.type = element_type
 
 
 class Map(ComplexType):
 
-    def __init__(self, name, key_type, value_type):
-        super(Map, self).__init__()
+    def __init__(self, name, key_type, value_type, comments=None):
+        super(Map, self).__init__(comments=comments)
         self.name = name
         self.key_type = key_type
         self.value_type = value_type
@@ -415,8 +420,8 @@ class Map(ComplexType):
 
 class Constant(ComplexType):
 
-    def __init__(self, name, element_type, element_value):
-        super(Constant, self).__init__()
+    def __init__(self, name, element_type, element_value, comments=None):
+        super(Constant, self).__init__(comments=comments)
         self.name = name
         self.type = element_type
         self.value = element_value
@@ -432,8 +437,8 @@ class Reference(Type):
 
 class Interface(Namespace):
 
-    def __init__(self, name, flags=None, members=None, extends=None):
-        super(Interface, self).__init__(name=name, flags=flags, members=None)
+    def __init__(self, name, flags=None, members=None, extends=None, comments=None):
+        super(Interface, self).__init__(name=name, flags=flags, members=None, comments=comments)
         self.attributes = OrderedDict()
         self.methods = OrderedDict()
         self.broadcasts = OrderedDict()
@@ -508,8 +513,8 @@ class Version(object):
 
 class Attribute(Type):
 
-    def __init__(self, name, attr_type, flags=None):
-        super(Attribute, self).__init__(name)
+    def __init__(self, name, attr_type, flags=None, comments=None):
+        super(Attribute, self).__init__(name, comments)
         self.type = attr_type
         self.flags = flags if flags else []
 
@@ -517,8 +522,8 @@ class Attribute(Type):
 class Method(Type):
 
     def __init__(self, name, flags=None,
-                 in_args=None, out_args=None, errors=None):
-        super(Method, self).__init__(name)
+                 in_args=None, out_args=None, errors=None, comments=None):
+        super(Method, self).__init__(name, comments)
         self.flags = flags if flags else []
         self.in_args = in_args if in_args else OrderedDict()
         self.out_args = out_args if out_args else OrderedDict()
@@ -528,14 +533,15 @@ class Method(Type):
 
 class Broadcast(Type):
 
-    def __init__(self, name, flags=None, out_args=None):
-        super(Broadcast, self).__init__(name)
+    def __init__(self, name, flags=None, out_args=None, comments=None):
+        super(Broadcast, self).__init__(name, comments)
         self.flags = flags if flags else []
         self.out_args = out_args if out_args else OrderedDict()
 
 
 class Argument(object):
 
-    def __init__(self, name, arg_type):
+    def __init__(self, name, arg_type, comments=None):
         self.name = name
         self.type = arg_type
+        self.comments = comments if comments else OrderedDict()
