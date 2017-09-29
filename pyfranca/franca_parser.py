@@ -90,8 +90,8 @@ class Parser(object):
             if key in keys:
                 comments[key] = ""
 
-                if i < (length-1):
-                    item = strings[i+1]
+                if i < (length - 1):
+                    item = strings[i + 1]
                     if item not in keys:
                         comments[key] = item
                         i += 1

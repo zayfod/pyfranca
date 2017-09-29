@@ -89,6 +89,7 @@ Limitations
 The following Franca features are not supported:
 
 - dots in type collection and interface names
+- complex constants
 - expressions
 - unions
 - method overloading
