@@ -161,7 +161,7 @@ class Processor(object):
         raise ProcessorException(
             "Unresolved namespace reference '{}'.".format(fqn))
 
-    def _udpate_complextype_references(self, name):
+    def _update_complextype_references(self, name):
         """
         Update type references in a complex type.
 
@@ -205,7 +205,7 @@ class Processor(object):
         elif isinstance(name, ast.PrimitiveType):
             pass
         elif isinstance(name, ast.ComplexType):
-            self._udpate_complextype_references(name)
+            self._update_complextype_references(name)
         elif isinstance(name, ast.Reference):
             if not name.namespace:
                 name.namespace = namespace
