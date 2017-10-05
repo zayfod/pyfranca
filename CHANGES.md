@@ -2,6 +2,14 @@
 Revision History
 ================
 
+v0.4.0 (Oct 5, 2017)
+--------------------
+- Added initial support for structured comments - contributed by Jens Baumann.
+- Added support for primitive type constants - contributed by Jens Baumann.
+- Added support for hexadecimal and binary literals - contributed by Jens Baumann.
+- Fixed nested import handling
+- Fixed bug in method error literal handling.
+
 v0.3.0 (Mar 22, 2017)
 ---------------------
 - Added support for packages in multiple files.
