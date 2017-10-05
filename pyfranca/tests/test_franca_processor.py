@@ -4,6 +4,8 @@ Pyfranca processor tests.
 
 import unittest
 import os
+import errno
+import shutil
 
 from pyfranca import ProcessorException, Processor, ast
 
@@ -11,10 +13,49 @@ from pyfranca import ProcessorException, Processor, ast
 class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
+        # Create temporary file directory.
+        tmp_dir = self.get_spec()
+        try:
+            os.makedirs(tmp_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+            # Delete and try again
+            shutil.rmtree(tmp_dir)
+            os.makedirs(tmp_dir)
+        # Create FIDL processor.
         self.processor = Processor()
+        self.processor.package_paths.append(tmp_dir)
 
     def tearDown(self):
         self.processor = None
+        # Remove temporary file directory.
+        tmp_dir = self.get_spec()
+        shutil.rmtree(tmp_dir)
+
+    @staticmethod
+    def get_spec(basedir="tmp", filename=None):
+        """
+        Get absolute specification a directory or a file under pyfranca/tests/fidl/ .
+        :param basedir: Target subdirectory.
+        :param filename: File name or None to get a directory specification
+        :return: Absolute specification.
+        """
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        spec = os.path.join(script_dir, "fidl", basedir)
+        if filename:
+            spec = os.path.join(spec, filename)
+        return spec
+
+    def tmp_fidl(self, filename, content):
+        fspec = self.get_spec(filename=filename)
+        with open(fspec, "w") as f:
+            f.write(content)
+        return fspec
+
+    def import_tmp_fidl(self, filename, content):
+        fspec = self.tmp_fidl(filename, content)
+        self.processor.import_file(fspec)
 
 
 class TestFQNs(BaseTestCase):
@@ -96,18 +137,17 @@ class TestImports(BaseTestCase):
         self.assertEqual(str(context.exception),
                          "Namespace 'P.Nonexistent.*' not found.")
 
-    # TODO: Temporary file creation needed.
-    # def test_circular_dependency(self):
-    #     self.processor.import_string("test.fidl", """
-    #         package P
-    #
-    #         import P2
-    #     """)
-    #     self.processor.import_string("test2.fidl", """
-    #         package P2
-    #
-    #         import P
-    #     """)
+    def test_circular_dependency(self):
+        fspec = self.tmp_fidl("test.fidl", """
+            package P
+            import model "test2.fidl"
+        """)
+        self.tmp_fidl("test2.fidl", """
+            package P2
+            import model "test.fidl"
+        """)
+        self.processor.import_file(fspec)
+        # FIXME: What is the correct behavior?
 
 
 class TestPackagesInMultipleFiles(BaseTestCase):
@@ -570,3 +610,58 @@ class TestReferences(BaseTestCase):
             os.path.join("P.fidl"))
         self.processor.import_file(
             os.path.join("pyfranca", "tests", "fidl", "idl2", "P2.fidl"))
+
+    def test_import_file_chain(self):
+        fspec = self.tmp_fidl("P.fidl", """
+            package P
+            import P.Type1.* from "Type1.fidl"
+            import P.Type2.* from "Type2.fidl"
+            interface I {
+                version { major 1 minor 0 }
+                method getData {
+                    out {
+                          MyStructType1 outVal
+                       }
+                    in {
+                          MyStructType2 inVal
+                       }
+                }
+            }
+        """)
+        self.tmp_fidl("Type1.fidl", """
+            package P
+            import P.Common.* from "common.fidl"
+            typeCollection Type1 {
+                version { major 1 minor 0 }
+                struct MyStructType1 {
+                    UInt8 val1
+                    MyEnum val2
+                    String  msg
+                }
+            }
+        """)
+        self.tmp_fidl("Type2.fidl", """
+            package P
+            import P.Common.* from "common.fidl"
+            typeCollection Type2 {
+                version { major 1 minor 0 }
+                struct MyStructType2 {
+                    UInt8 val1
+                    MyEnum val2
+                    String  msg
+                }
+            }
+        """)
+        self.tmp_fidl("common.fidl", """
+            package P
+            typeCollection Common {
+                version { major 1 minor 0 }
+                enumeration MyEnum {
+                    abc
+                    def
+                    ghi
+                    jkm
+                }
+            }
+        """)
+        self.processor.import_file(fspec)
