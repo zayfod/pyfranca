@@ -58,8 +58,10 @@ class Package(object):
     def __iadd__(self, package):
         if not isinstance(package, Package):
             raise TypeError
-        # Ignore the name and imports
+        # Ignore the name
         self.files += package.files
+        for item in package.imports:
+            self.imports.append(item)
         for item in package.interfaces.values():
             if item.name in self:
                 raise ASTException("Interface member defined more than"
