@@ -1,6 +1,7 @@
 PyFranca
 ========
 
+[![Documentation Status](https://readthedocs.org/projects/pyfranca/badge/?version=latest)](http://pyfranca.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/zayfod/pyfranca.svg?branch=master)](https://travis-ci.org/zayfod/pyfranca)
 [![Coverage Status](https://coveralls.io/repos/github/zayfod/pyfranca/badge.svg?branch=master)](https://coveralls.io/github/zayfod/pyfranca?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/zayfod/pyfranca/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/zayfod/pyfranca/?branch=master)
@@ -121,9 +122,9 @@ From source:
 Documentation
 -------------
 
-API documentation is available on PythonHosted.org:
+API documentation is available here:
 
-http://pythonhosted.org/pyfranca/
+http://pyfranca.readthedocs.io/
 
 
 Bugs
