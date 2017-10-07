@@ -1,0 +1,22 @@
+package P
+
+typeCollection T1 {
+    version { major 1 minor 0 }
+
+	enumeration T1Enum {
+		abc
+		def
+		ghi
+		jkm
+	}
+}
+
+typeCollection T2 {
+    version { major 1 minor 0 }
+
+	enumeration T2Enum {
+		rst
+		uvw
+		xyz
+	}
+}

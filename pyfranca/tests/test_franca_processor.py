@@ -596,20 +596,20 @@ class TestReferences(BaseTestCase):
         # P.fidl references definitions.fidl but it is not in the package path.
         with self.assertRaises(ProcessorException) as context:
             self.processor.import_file(
-                os.path.join("pyfranca", "tests", "fidl", "idl", "P.fidl"))
+                os.path.join(self.get_spec("idl"), "P.fidl"))
             self.processor.import_file(
-                os.path.join("pyfranca", "tests", "fidl", "idl2", "P2.fidl"))
+                os.path.join(self.get_spec("idl2"), "P2.fidl"))
         self.assertEqual(str(context.exception),
                          "Model 'definitions.fidl' not found.")
 
     def test_import_multiple_files(self):
-        script_dir = os.path.dirname(os.path.realpath(__file__))
-        fidl_dir = os.path.join(script_dir, "fidl", "idl")
+        fidl_dir = self.get_spec("idl")
         self.processor.package_paths.append(fidl_dir)
         self.processor.import_file(
             os.path.join("P.fidl"))
         self.processor.import_file(
-            os.path.join("pyfranca", "tests", "fidl", "idl2", "P2.fidl"))
+            os.path.join(self.get_spec("idl2"), "P2.fidl"))
+
 
     def test_import_file_chain(self):
         fspec = self.tmp_fidl("P.fidl", """
@@ -665,3 +665,13 @@ class TestReferences(BaseTestCase):
             }
         """)
         self.processor.import_file(fspec)
+
+    def test_invalid_type_use(self):
+        # P.fidl references definitions.fidl but it is not in the package path.
+        with self.assertRaises(ProcessorException) as context:
+            self.processor.import_file(
+                os.path.join(self.get_spec("idl3"), "P1.fidl"))
+            self.processor.import_file(
+                os.path.join(self.get_spec("idl3"), "P2.fidl"))
+        self.assertEqual(str(context.exception),
+                         "Unresolved reference 'T1Enum")
