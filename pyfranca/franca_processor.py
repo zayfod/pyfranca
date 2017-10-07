@@ -375,9 +375,15 @@ class Processor(object):
         :param package_path: Additional model path to search for imports.
         :return: The parsed ast.Package.
         """
-        if fspec in self.files:
-            # File already loaded.
-            return self.files[fspec]
+        withError = False
+
+        if withError:
+            # fspec could be an abs path or a relative one
+            # so comparing could fail altough both path are for the same file.
+            if fspec in self.files:
+                # File already loaded.
+                return self.files[fspec]
+
         if not os.path.exists(fspec):
             if os.path.isabs(fspec):
                 # Absolute specification
@@ -397,6 +403,16 @@ class Processor(object):
                 else:
                     raise ProcessorException(
                         "Model '{}' not found.".format(fspec))
+
+            if not withError:
+                fspec = os.path.abspath(fspec)  # normalize fpsec, remove all differences like / \
+
+                # at this position there is only one possible path for fspec
+                # independent if the function parameter was a relative or abs path.
+                if fspec in self.files:
+                    # File already loaded.
+                    return self.files[fspec]
+
         # Parse the file.
         parser = franca_parser.Parser()
         package = parser.parse_file(fspec)
