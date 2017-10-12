@@ -25,8 +25,12 @@ class Processor(object):
         """
         # Default package paths.
         self.package_paths = []
+        # Maps absolute file specifications to package AST objects.
         self.files = {}
+        # Maps package names to package AST objects.
         self.packages = {}
+        # List of imported string file specifications
+        self._string_files = []
 
     @staticmethod
     def basename(namespace):
@@ -315,6 +319,8 @@ class Processor(object):
         """
         Import an ast.Package into the processor.
 
+        If the package has already been imported it will be silently ignored.
+
         :param fspec: File specification of the package.
         :param package: ast.Package object.
         :param references: A list of package references.
@@ -324,12 +330,13 @@ class Processor(object):
         if not references:
             references = []
         # Check whether package is already imported
+        abs_fspec = os.path.abspath(fspec)
         if package.name in self.packages:
-            if fspec not in self.packages[package.name].files:
+            if abs_fspec not in self.packages[package.name].files:
                 # Merge the new package into the already existing one.
                 self.packages[package.name] += package
                 # Register the package file in the processor.
-                self.files[fspec] = self.packages[package.name]
+                self.files[abs_fspec] = self.packages[package.name]
                 package = self.packages[package.name]
             else:
                 return
@@ -337,10 +344,9 @@ class Processor(object):
             # Register the package in the processor.
             self.packages[package.name] = package
             # Register the package file in the processor.
-            self.files[fspec] = package
+            self.files[abs_fspec] = package
         # Process package imports
-        fspec_path = os.path.abspath(fspec)
-        fspec_dir = os.path.dirname(fspec_path)
+        fspec_dir = os.path.dirname(abs_fspec)
         for package_import in package.imports:
             imported_package = self.import_file(
                 package_import.file, references + [package.name], fspec_dir)
@@ -351,55 +357,82 @@ class Processor(object):
 
     def import_string(self, fspec, fidl, references=None):
         """
-        Parse an FIDL string and import it into the processor as package.
+        Parse an FIDL string and import it into the processor as a package.
+
+        The file specification will be treated as part of the real file-system and can overlay existing files.
+
+        If a file has already been imported, the corresponding package will be returned.
 
         :param fspec: File specification of the package.
         :param fidl: FIDL string.
         :param references: A list of package references.
         :return: The parsed ast.Package.
         """
+        abs_fspec = os.path.abspath(fspec)
+        if abs_fspec in self._string_files:
+            # Already loaded.
+            return self.files[abs_fspec]
         # Parse the string.
         parser = franca_parser.Parser()
         package = parser.parse(fidl)
-        package.files = [fspec]
+        package.files = [abs_fspec]
+        # Add the virtual specification to the list of imported string file.
+        self._string_files.append(abs_fspec)
         # Import the package in the processor.
-        self.import_package(fspec, package, references)
+        self.import_package(abs_fspec, package, references)
         return package
+
+    def _exists(self, fspec):
+        """
+        Tests whether a file specification exists.
+            The list of imported string files is checked first, followed by the real file-system.
+
+        :param fspec: File specification.
+        :return: Boolean.
+        """
+        if fspec in self._string_files:
+            exists = True
+        else:
+            exists = os.path.exists(fspec)
+        return exists
 
     def import_file(self, fspec, references=None, package_path=None):
         """
         Parse an FIDL file and import it into the processor as package.
+
+        If a file has already been imported, the corresponding package will be returned.
 
         :param fspec: File specification.
         :param references: A list of package references.
         :param package_path: Additional model path to search for imports.
         :return: The parsed ast.Package.
         """
-        if fspec in self.files:
+        abs_fspec = os.path.abspath(fspec)
+        if abs_fspec in self.files:
             # File already loaded.
-            return self.files[fspec]
-        if not os.path.exists(fspec):
+            return self.files[abs_fspec]
+        elif not self._exists(abs_fspec):
             if os.path.isabs(fspec):
                 # Absolute specification
                 raise ProcessorException(
                     "Model '{}' not found.".format(fspec))
             else:
                 # Relative specification.
-                package_paths = self.package_paths[:]
+                package_paths = list(self.package_paths)
                 if package_path:
                     package_paths.insert(0, package_path)
                 # Check in the package path list.
                 for path in package_paths:
-                    temp_fspec = os.path.join(path, fspec)
-                    if os.path.exists(temp_fspec):
-                        fspec = temp_fspec
+                    temp_fspec = os.path.abspath(os.path.join(path, fspec))
+                    if self._exists(temp_fspec):
+                        abs_fspec = temp_fspec
                         break
                 else:
                     raise ProcessorException(
                         "Model '{}' not found.".format(fspec))
         # Parse the file.
         parser = franca_parser.Parser()
-        package = parser.parse_file(fspec)
+        package = parser.parse_file(abs_fspec)
         # Import the package in the processor.
-        self.import_package(fspec, package, references)
+        self.import_package(abs_fspec, package, references)
         return package

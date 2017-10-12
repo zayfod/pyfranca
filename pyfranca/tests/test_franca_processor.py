@@ -94,12 +94,10 @@ class TestImports(BaseTestCase):
         """)
         # Verify file access
         self.assertEqual(len(self.processor.files), 2)
-        p = self.processor.files["test.fidl"]
+        p = self.processor.files[os.path.abspath("test.fidl")]
         self.assertEqual(p.name, "P")
-        self.assertEqual(p.files, ["test.fidl"])
-        p2 = self.processor.files["test2.fidl"]
+        p2 = self.processor.files[os.path.abspath("test2.fidl")]
         self.assertEqual(p2.name, "P2")
-        self.assertEqual(p2.files, ["test2.fidl"])
         # Verify package access
         self.assertEqual(len(self.processor.packages), 2)
         p = self.processor.packages["P"]
@@ -161,7 +159,7 @@ class TestPackagesInMultipleFiles(BaseTestCase):
             package P
         """)
         p = self.processor.packages["P"]
-        self.assertEqual(p.files, ["test.fidl", "test2.fidl"])
+        self.assertEqual(p.files, [os.path.abspath("test.fidl"), os.path.abspath("test2.fidl")])
 
     def test_package_in_multiple_files_reuse(self):
         self.processor.import_string("test.fidl", """
@@ -178,7 +176,7 @@ class TestPackagesInMultipleFiles(BaseTestCase):
             }
         """)
         p = self.processor.packages["P"]
-        self.assertEqual(p.files, ["test.fidl", "test2.fidl"])
+        self.assertEqual(p.files, [os.path.abspath("test.fidl"), os.path.abspath("test2.fidl")])
         a = p.typecollections["TC"].typedefs["A"]
         self.assertEqual(a.namespace.package, p)
         self.assertTrue(isinstance(a.type, ast.Int32))
