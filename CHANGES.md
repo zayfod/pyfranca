@@ -2,6 +2,12 @@
 Revision History
 ================
 
+v0.5.0
+------
+- Added support for unions - initial proof-of-concept contributed by Gunnar Andersson.
+- Switched to using absolute paths for model file identification.
+- Bug fixes.
+
 v0.4.1 (Oct 5, 2017)
 --------------------
 - Moved API documentation to http://pyfranca.readthedocs.io/ .
