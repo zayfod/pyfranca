@@ -187,6 +187,15 @@ class Processor(object):
                     raise ProcessorException(
                         "Invalid struct reference '{}'.".format(
                             name.extends))
+        elif isinstance(name, ast.Union):
+            for field in name.fields.values():
+                self._update_type_references(name.namespace, field.type)
+            if name.extends:
+                name.reference = self.resolve(name.namespace, name.extends)
+                if not isinstance(name.reference, ast.Union):
+                    raise ProcessorException(
+                        "Invalid union reference '{}'.".format(
+                            name.extends))
         elif isinstance(name, ast.Array):
             self._update_type_references(name.namespace, name.type)
         elif isinstance(name, ast.Map):
@@ -251,6 +260,8 @@ class Processor(object):
         for name in namespace.enumerations.values():
             self._update_type_references(namespace, name)
         for name in namespace.structs.values():
+            self._update_type_references(namespace, name)
+        for name in namespace.unions.values():
             self._update_type_references(namespace, name)
         for name in namespace.arrays.values():
             self._update_type_references(namespace, name)
