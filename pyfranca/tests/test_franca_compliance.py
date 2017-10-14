@@ -8,7 +8,7 @@ import subprocess
 import shlex
 
 from pyfranca import ProcessorException
-from test_franca_processor import BaseTestCase
+from .test_franca_processor import BaseTestCase
 
 
 # TODO: Work in progress.
