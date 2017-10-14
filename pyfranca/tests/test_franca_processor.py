@@ -663,3 +663,4 @@ class TestReferences(BaseTestCase):
             }
         """)
         self.processor.import_file(fspec)
+        self.processor.import_file("./Type1.fidl")
