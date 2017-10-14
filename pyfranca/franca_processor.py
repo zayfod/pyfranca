@@ -419,10 +419,7 @@ class Processor(object):
         :return: The parsed ast.Package.
         """
         abs_fspec = os.path.abspath(fspec)
-        if abs_fspec in self.files:
-            # File already loaded.
-            return self.files[abs_fspec]
-        elif not self._exists(abs_fspec):
+        if not self._exists(abs_fspec):
             if os.path.isabs(fspec):
                 # Absolute specification
                 raise ProcessorException(
@@ -441,6 +438,11 @@ class Processor(object):
                 else:
                     raise ProcessorException(
                         "Model '{}' not found.".format(fspec))
+
+        if abs_fspec in self.files:
+            # File already loaded.
+            return self.files[abs_fspec]
+
         # Parse the file.
         parser = franca_parser.Parser()
         package = parser.parse_file(abs_fspec)
