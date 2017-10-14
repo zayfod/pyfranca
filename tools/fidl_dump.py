@@ -94,7 +94,7 @@ def dump_packages(packages):
 
 def parse_command_line():
     parser = argparse.ArgumentParser(
-        description="Behavioral cloning model trainer.")
+        description="Dumps the contents of a Franca IDL model.")
     parser.add_argument(
         "fidl", nargs="+",
         help="Input FIDL file.")
