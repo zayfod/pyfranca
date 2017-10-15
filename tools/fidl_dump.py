@@ -26,6 +26,11 @@ def dump_namespace(namespace):
         for item in namespace.structs.values():
             print("\t\t- {}".format(item.name))
             dump_comments(item, "\t\t\t")
+    if namespace.unions:
+        print("\t\tUnions:")
+        for item in namespace.unions.values():
+            print("\t\t- {}".format(item.name))
+            dump_comments(item, "\t\t\t")
     if namespace.arrays:
         print("\t\tArrays:")
         for item in namespace.arrays.values():
