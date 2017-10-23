@@ -7,7 +7,7 @@ from pyfranca import Processor, LexerException, ParserException, \
 
 def parse_command_line():
     parser = argparse.ArgumentParser(
-        description="Behavioral cloning model trainer.")
+        description="Validates a Franca IDL model.")
     parser.add_argument(
         "fidl", nargs="+",
         help="Input FIDL file.")

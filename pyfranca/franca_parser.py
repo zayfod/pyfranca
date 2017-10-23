@@ -234,6 +234,7 @@ class Parser(object):
                               | type_def
                               | enumeration_def
                               | struct_def
+                              | union_def
                               | array_def
                               | map_def
                               | constant_def
@@ -316,6 +317,7 @@ class Parser(object):
                          | type_def
                          | enumeration_def
                          | struct_def
+                         | union_def
                          | array_def
                          | map_def
                          | constant_def
@@ -620,6 +622,60 @@ class Parser(object):
         struct_field : structured_comment type ID
         """
         p[0] = ast.StructField(name=p[3], field_type=p[2], comments=p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_union_def_1(p):
+        """
+        union_def : structured_comment UNION ID '{' union_fields '}'
+        """
+        p[0] = ast.Union(name=p[3], fields=p[5], comments=p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_union_def_2(p):
+        """
+        union_def : structured_comment UNION ID EXTENDS fqn '{' union_fields '}'
+        """
+        p[0] = ast.Union(name=p[3], fields=p[7], extends=p[5], comments=p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_union_fields_1(p):
+        """
+        union_fields : union_fields union_field
+        """
+        p[0] = p[1]
+        if p[2].name not in p[0]:
+            p[0][p[2].name] = p[2]
+        else:
+            raise ParserException(
+                "Duplicate union field '{}'.".format(p[2].name))
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_union_fields_2(p):
+        """
+        union_fields : union_field
+        """
+        p[0] = OrderedDict()
+        p[0][p[1].name] = p[1]
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_union_fields_3(p):
+        """
+        union_fields : empty
+        """
+        pass
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_union_field(p):
+        """
+        union_field : structured_comment type ID
+        """
+        p[0] = ast.UnionField(name=p[3], field_type=p[2], comments=p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod

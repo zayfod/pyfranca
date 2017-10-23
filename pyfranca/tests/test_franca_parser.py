@@ -1,5 +1,5 @@
 """
-Pyfranca lexer and parser tests.
+Pyfranca parser tests.
 """
 
 import unittest
@@ -97,6 +97,16 @@ class TestTopLevel(BaseTestCase):
                            String b
                        }
 
+                       <** @description : union U   **>
+                       union U {
+
+                           <** @description : member a   **>
+                           Int32 a
+
+                           <** @description : member b   **>
+                           String b
+                       }
+
                        <** @description : enumeration E   **>
                        enumeration E {
                           <** @description : enum member a   **>
@@ -163,6 +173,9 @@ class TestTopLevel(BaseTestCase):
         self.assertEqual(package.typecollections['TC'].structs['S'].comments["@description"], "struct S")
         self.assertEqual(package.typecollections['TC'].structs['S'].fields['a'].comments["@description"], "member a")
         self.assertEqual(package.typecollections['TC'].structs['S'].fields['b'].comments["@description"], "member b")
+        self.assertEqual(package.typecollections['TC'].unions['U'].comments["@description"], "union U")
+        self.assertEqual(package.typecollections['TC'].unions['U'].fields['a'].comments["@description"], "member a")
+        self.assertEqual(package.typecollections['TC'].unions['U'].fields['b'].comments["@description"], "member b")
         self.assertEqual(package.typecollections['TC'].enumerations['E'].comments['@description'], "enumeration E")
         self.assertEqual(package.typecollections['TC'].enumerations['E'].enumerators['a'].value.value, 1)
         self.assertEqual(
@@ -292,6 +305,7 @@ class TestTopLevel(BaseTestCase):
         self.assertEqual(len(typecollection.typedefs), 0)
         self.assertEqual(len(typecollection.enumerations), 0)
         self.assertEqual(len(typecollection.structs), 0)
+        self.assertEqual(len(typecollection.unions), 0)
         self.assertEqual(len(typecollection.arrays), 0)
         self.assertEqual(len(typecollection.maps), 0)
 
@@ -315,6 +329,7 @@ class TestTopLevel(BaseTestCase):
         self.assertEqual(len(typecollection.typedefs), 0)
         self.assertEqual(len(typecollection.enumerations), 0)
         self.assertEqual(len(typecollection.structs), 0)
+        self.assertEqual(len(typecollection.unions), 0)
         self.assertEqual(len(typecollection.arrays), 0)
         self.assertEqual(len(typecollection.maps), 0)
         self.assertTrue("TC2" in package.typecollections)
@@ -326,6 +341,7 @@ class TestTopLevel(BaseTestCase):
         self.assertEqual(len(typecollection.typedefs), 0)
         self.assertEqual(len(typecollection.enumerations), 0)
         self.assertEqual(len(typecollection.structs), 0)
+        self.assertEqual(len(typecollection.unions), 0)
         self.assertEqual(len(typecollection.arrays), 0)
         self.assertEqual(len(typecollection.maps), 0)
 
@@ -345,6 +361,7 @@ class TestTopLevel(BaseTestCase):
         self.assertEqual(len(interface.typedefs), 0)
         self.assertEqual(len(interface.enumerations), 0)
         self.assertEqual(len(interface.structs), 0)
+        self.assertEqual(len(interface.unions), 0)
         self.assertEqual(len(interface.arrays), 0)
         self.assertEqual(len(interface.maps), 0)
         self.assertEqual(len(interface.attributes), 0)
@@ -371,6 +388,7 @@ class TestTopLevel(BaseTestCase):
         self.assertEqual(len(interface.typedefs), 0)
         self.assertEqual(len(interface.enumerations), 0)
         self.assertEqual(len(interface.structs), 0)
+        self.assertEqual(len(interface.unions), 0)
         self.assertEqual(len(interface.arrays), 0)
         self.assertEqual(len(interface.maps), 0)
         self.assertEqual(len(interface.attributes), 0)
@@ -385,6 +403,7 @@ class TestTopLevel(BaseTestCase):
         self.assertEqual(len(interface.typedefs), 0)
         self.assertEqual(len(interface.enumerations), 0)
         self.assertEqual(len(interface.structs), 0)
+        self.assertEqual(len(interface.unions), 0)
         self.assertEqual(len(interface.arrays), 0)
         self.assertEqual(len(interface.maps), 0)
         self.assertEqual(len(interface.attributes), 0)
@@ -453,21 +472,6 @@ class TestUnsupported(BaseTestCase):
             """)
         self.assertEqual(str(context.exception),
                          "Syntax error at line 5 near 'Array1'.")
-
-    def test_unions(self):
-        """Franca 0.9.2, section 5.1.6"""
-        with self.assertRaises(ParserException) as context:
-            self._parse("""
-                package P
-                typeCollection TC {
-                    union ExampleUnion {
-                        UInt32 element1
-                        Float element2
-                    }
-                }
-            """)
-        self.assertEqual(str(context.exception),
-                         "Syntax error at line 4 near 'union'.")
 
     def test_error_extending(self):
         """Franca 0.9.2, section 5.5.3"""
@@ -648,6 +652,12 @@ class TestMisc(BaseTestCase):
                 struct S2 extends S {}
                 struct S3 polymorphic {}
 
+                union U {
+                    Int32 a
+                    Int32[] b
+                }
+                union U2 extends U {}
+
                 array A of UInt8
 
                 map M {
@@ -699,6 +709,11 @@ class TestMisc(BaseTestCase):
                     Int32[] b
                 }
 
+                union IU {
+                    Int32 a
+                    Int32[] b
+                }
+
                 array IA of UInt8
 
                 map IM {
@@ -729,6 +744,7 @@ class TestTypeCollections(BaseTestCase):
         self.assertEqual(len(tc.typedefs), 0)
         self.assertEqual(len(tc.enumerations), 0)
         self.assertEqual(len(tc.structs), 0)
+        self.assertEqual(len(tc.unions), 0)
         self.assertEqual(len(tc.arrays), 0)
         self.assertEqual(len(tc.maps), 0)
 
@@ -786,6 +802,7 @@ class TestInterfaces(BaseTestCase):
         self.assertEqual(len(i.typedefs), 0)
         self.assertEqual(len(i.enumerations), 0)
         self.assertEqual(len(i.structs), 0)
+        self.assertEqual(len(i.unions), 0)
         self.assertEqual(len(i.arrays), 0)
         self.assertEqual(len(i.maps), 0)
         self.assertEqual(len(i.attributes), 0)
@@ -1019,6 +1036,71 @@ class TestStructs(BaseTestCase):
                          "Duplicate structure field 'a'.")
 
 
+class TestUnions(BaseTestCase):
+    """Test parsing unions."""
+
+    def test_normal(self):
+        package = self._assertParse("""
+            package P
+            typeCollection TC {
+                union U {
+                    Int32 a
+                    String b
+                }
+                union U2 extends U {}
+            }
+            interface I {
+                union U3 {
+                    Int32 a
+                    String b
+                }
+            }
+        """)
+        typecollection = package.typecollections["TC"]
+        u = typecollection.unions["U"]
+        self.assertEqual(u.name, "U")
+        self.assertIsNone(u.extends)
+        self.assertEqual(u.namespace, typecollection)
+        self.assertEqual(len(u.fields), 2)
+        self.assertEqual(u.fields["a"].name, "a")
+        self.assertIsInstance(u.fields["a"].type, ast.Int32)
+        self.assertEqual(u.fields["b"].name, "b")
+        self.assertIsInstance(u.fields["b"].type, ast.String)
+        self.assertEqual(len(u.flags), 0)
+        u2 = typecollection.unions["U2"]
+        self.assertEqual(u2.name, "U2")
+        self.assertEqual(u2.extends, "U")
+        self.assertEqual(len(u2.fields), 0)
+        self.assertEqual(u2.namespace, typecollection)
+        self.assertEqual(len(u2.flags), 0)
+        interface = package.interfaces["I"]
+        self.assertEqual(len(interface.unions), 1)
+        u3 = interface.unions["U3"]
+        self.assertEqual(u3.name, "U3")
+        self.assertIsNone(u3.extends)
+        self.assertEqual(u3.namespace, interface)
+        self.assertEqual(len(u3.fields), 2)
+        self.assertEqual(u3.fields["a"].name, "a")
+        self.assertIsInstance(u3.fields["a"].type, ast.Int32)
+        self.assertEqual(u3.fields["b"].name, "b")
+        self.assertIsInstance(u3.fields["b"].type, ast.String)
+        self.assertEqual(len(u3.flags), 0)
+
+    def test_duplicate_field(self):
+        with self.assertRaises(ParserException) as context:
+            self._parse("""
+                package P
+                typeCollection TC {
+                    union U {
+                        Int32 a
+                        String a
+                    }
+                }
+            """)
+        self.assertEqual(str(context.exception),
+                         "Duplicate union field 'a'.")
+
+
 class TestMethods(BaseTestCase):
     """Test parsing methods."""
 
@@ -1094,6 +1176,7 @@ class TestConstants(BaseTestCase):
         self.assertEqual(len(typecollection.typedefs), 0)
         self.assertEqual(len(typecollection.enumerations), 0)
         self.assertEqual(len(typecollection.structs), 0)
+        self.assertEqual(len(typecollection.unions), 0)
         self.assertEqual(len(typecollection.arrays), 0)
         self.assertEqual(len(typecollection.maps), 0)
         self.assertEqual(len(typecollection.constants), 10)
@@ -1185,6 +1268,7 @@ class TestConstants(BaseTestCase):
         self.assertEqual(len(typecollection.typedefs), 0)
         self.assertEqual(len(typecollection.enumerations), 0)
         self.assertEqual(len(typecollection.structs), 0)
+        self.assertEqual(len(typecollection.unions), 0)
         self.assertEqual(len(typecollection.arrays), 0)
         self.assertEqual(len(typecollection.maps), 0)
         self.assertEqual(len(typecollection.constants), 12)

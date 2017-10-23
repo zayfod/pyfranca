@@ -98,10 +98,12 @@ class Namespace(object):
         self.typedefs = OrderedDict()
         self.enumerations = OrderedDict()
         self.structs = OrderedDict()
+        self.unions = OrderedDict()
         self.arrays = OrderedDict()
         self.maps = OrderedDict()
         self.constants = OrderedDict()
         self.comments = comments if comments else OrderedDict()
+        self.namespace_references = []
         if members:
             for member in members:
                 self._add_member(member)
@@ -112,6 +114,7 @@ class Namespace(object):
         res = name in self.typedefs or \
             name in self.enumerations or \
             name in self.structs or \
+            name in self.unions or \
             name in self.arrays or \
             name in self.maps or \
             name in self.constants
@@ -126,6 +129,8 @@ class Namespace(object):
             return self.enumerations[name]
         elif name in self.structs:
             return self.structs[name]
+        elif name in self.unions:
+            return self.unions[name]
         elif name in self.arrays:
             return self.arrays[name]
         elif name in self.maps:
@@ -154,6 +159,12 @@ class Namespace(object):
                 self.enumerations[member.name] = member
             elif isinstance(member, Struct):
                 self.structs[member.name] = member
+                # Handle anonymous array special case.
+                for field in member.fields.values():
+                    if isinstance(field.type, Array):
+                        field.type.namespace = self
+            elif isinstance(member, Union):
+                self.unions[member.name] = member
                 # Handle anonymous array special case.
                 for field in member.fields.values():
                     if isinstance(field.type, Array):
@@ -372,6 +383,25 @@ class Struct(ComplexType):
 
 
 class StructField(object):
+
+    def __init__(self, name, field_type, comments=None):
+        self.name = name
+        self.type = field_type
+        self.comments = comments if comments else OrderedDict()
+
+
+class Union(ComplexType):
+
+    def __init__(self, name, fields=None, extends=None, flags=None, comments=None):
+        super(Union, self).__init__(comments=comments)
+        self.name = name
+        self.fields = fields if fields else OrderedDict()
+        self.extends = extends
+        self.reference = None
+        self.flags = flags if flags else []         # Unused
+
+
+class UnionField(object):
 
     def __init__(self, name, field_type, comments=None):
         self.name = name
