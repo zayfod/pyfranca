@@ -360,6 +360,8 @@ class Processor(object):
             return
 
         # Process package imports before merging the packages. Otherwise the package import are processed multiple times
+        # it is important here to use abs_fspec as reference, not the pacakge
+        # in order to determine which fspec is already processed.
         fspec_dir = os.path.dirname(abs_fspec)
         for package_import in package.imports:
             imported_package = self.import_file(
