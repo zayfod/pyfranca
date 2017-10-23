@@ -731,6 +731,7 @@ class TestReferences(BaseTestCase):
             }
         """)
         self.processor.import_file(fspec)
+        self.processor.import_file("./Type1.fidl")
 
         self.assertEqual(self.processor.packages["P"].name, "P")
         self.assertEqual(self.processor.packages['P'].interfaces["I"].methods["getData"].
