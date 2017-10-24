@@ -97,6 +97,68 @@ def dump_packages(packages):
         dump_package(package)
 
 
+def plot_namepsace_dependencie(namespace, output):
+    ns_fqn = "{}.{}".format(namespace.package.name,namespace.name)
+
+    ns_fqn_line = "\n\t\"" + ns_fqn + "\"\n"
+    if ns_fqn_line not in output:
+         output += ns_fqn_line
+    for import_ns in namespace.namespace_references:
+        import_ns_fqn = "{}.{}".format(import_ns.package.name, import_ns.name)
+        tmp_output = "\t\"" + ns_fqn + "\" -> \"" + import_ns_fqn + "\";\n"
+        if tmp_output not in output:
+            output += tmp_output
+        output = plot_namepsace_dependencie(import_ns, output)
+    return output
+
+
+def plot_namespace_dependencies(namespace, type_str):
+    output = "\n\n"
+    output += "digraph \" {} {}.{} \" \n".format(type_str, namespace.package.name, namespace.name) + "{\n"
+    output = plot_namepsace_dependencie(namespace, output)
+    output += "}"
+    print(output)
+
+
+def plot_namespaces_dependencies(packages):
+    for package in packages.values():
+        for ns in package.typecollections.values():
+            plot_namespace_dependencies(ns, "typecollection")
+        for ns in package.interfaces.values():
+            plot_namespace_dependencies(ns, "interface")
+
+
+def plot_package_dependencie(package, output):
+    pkg_fqn_line = "\t\"" + package.name + "\"\n"
+
+    if pkg_fqn_line not in output:
+        output += pkg_fqn_line
+
+    for package_import in package.imports:
+        if package.name != package_import.package_reference.name:
+            tmp_output = "\t\"" + package.name + "\" -> \"" + package_import.package_reference.name + "\";\n"
+
+            if tmp_output not in output:
+                output += tmp_output
+            output = plot_package_dependencie(package_import.package_reference, output)
+    return output
+
+
+def plot_package_dependencies(package):
+    output = "\n\n"
+
+    output += "digraph \" {} \"\n".format(package.name) + "{\n"
+    output = plot_package_dependencie(package, output)
+    output += "}"
+
+    print(output)
+
+
+def plot_packages_dependencies(packages):
+    for package in packages.values():
+        plot_package_dependencies(package)
+
+
 def parse_command_line():
     parser = argparse.ArgumentParser(
         description="Dumps the contents of a Franca IDL model.")
@@ -106,6 +168,13 @@ def parse_command_line():
     parser.add_argument(
         "-I", "--import", dest="import_dirs", metavar="import_dir",
         action="append", help="Model import directories.")
+    parser.add_argument("-pl", "--plot", choices=['p', 'n', 'f', 'c'],
+                        help='''\plot FIDL dependecies as a dot image:
+                                p    plot package dependencies
+                                n    plot namespace dependencies
+                                f    plot file dependencies
+                                c    plot type collaboration diagram
+                         ''')
     args = parser.parse_args()
     return args
 
@@ -124,8 +193,12 @@ def main():
         print("ERROR: {}".format(e))
         exit(1)
 
-    dump_packages(processor.packages)
-
+    if args.plot is None:
+        dump_packages(processor.packages)
+    elif args.plot == "p":
+        plot_packages_dependencies(processor.packages)
+    elif args.plot == "n":
+        plot_namespaces_dependencies(processor.packages)
 
 if __name__ == "__main__":
     main()
