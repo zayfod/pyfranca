@@ -86,7 +86,7 @@ class Processor(object):
         pkg, ns, name = Processor.split_fqn(fqn)
 
         resolved_namespace = None
-        count = 0 # number of matches, 0 not found, 1 ok, >1 ambigous
+        count = 0 # number of matches, 0 not found, 1 ok, >1 ambiguous
         package_fqn = ""
 
         if pkg is not None:
