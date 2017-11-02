@@ -228,6 +228,11 @@ class Processor(object):
             if not name.reference:
                 resolved_name = self.resolve(namespace, name.name)
                 name.reference = resolved_name
+
+                # remove package and namespcae from fqn.
+                # it is not necessary anymore -> information is preserved in the reference
+                pkg, ns, type_name = Processor.split_fqn(name.name)
+                name.name = type_name
         elif isinstance(name, ast.Attribute):
             self._update_type_references(name.namespace, name.type)
         elif isinstance(name, ast.Method):

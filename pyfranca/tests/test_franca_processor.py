@@ -235,7 +235,7 @@ class TestReferences(BaseTestCase):
         self.assertTrue(isinstance(a.type, ast.Int32))
         b = self.processor.packages["P"].typecollections["TC"].typedefs["B"]
         self.assertTrue(isinstance(b.type, ast.Reference))
-        self.assertEqual(b.type.name, "P.TC.A")
+        self.assertEqual(b.type.name, "A")
         self.assertEqual(b.type.reference, a)
 
     def test_reference_to_different_namespace(self):
@@ -321,11 +321,11 @@ class TestReferences(BaseTestCase):
         self.assertTrue(isinstance(a2.type, ast.UInt32))
         b = self.processor.packages["P2"].interfaces["I"].typedefs["B"]
         self.assertTrue(isinstance(b.type, ast.Reference))
-        self.assertEqual(b.type.name, "P2.TC.A")
+        self.assertEqual(b.type.name, "A")
         self.assertEqual(b.type.reference, a2)
         b2 = self.processor.packages["P2"].interfaces["I"].typedefs["B2"]
         self.assertTrue(isinstance(b2.type, ast.Reference))
-        self.assertEqual(b2.type.name, "P.TC.A")
+        self.assertEqual(b2.type.name, "A")
         self.assertEqual(b2.type.reference, a)
 
     def test_interface_visibility(self):
@@ -353,7 +353,7 @@ class TestReferences(BaseTestCase):
         self.assertTrue(isinstance(a2.type, ast.UInt32))
         b = self.processor.packages["P2"].typecollections["TC"].typedefs["B"]
         self.assertTrue(isinstance(b.type, ast.Reference))
-        self.assertEqual(b.type.name, "TC.A")
+        self.assertEqual(b.type.name, "A")
         self.assertEqual(b.type.reference, a)
 
     def test_unresolved_reference_in_typedef(self):
