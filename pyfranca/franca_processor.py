@@ -84,35 +84,45 @@ class Processor(object):
                 not isinstance(fqn, str):
             raise ValueError("Unexpected input.")
         pkg, ns, name = Processor.split_fqn(fqn)
-        if pkg is None:
-            # This is an ID
-            # Look in the type's namespace
+
+        resolved_namespace = None
+        count = 0 # number of matches, 0 not found, 1 ok, >1 ambigous
+        package_fqn = ""
+
+        if pkg is not None:
+            package_fqn += namespace.package.name + "."
+
+        if ns is not None:
+            package_fqn += namespace.name + "."
+
+        package_fqn += name
+
+        if package_fqn == fqn:
+            # fqn is with within this namespace
             if name in namespace:
-                return namespace[name]
-            # Look in other type collections in the type's package
-            for typecollection in namespace.package.typecollections.values():
-                if name in typecollection:
-                    return typecollection[name]
-            # Look in imports
-            for namespace_import in namespace.namespace_references:
-                    # Look in namespaces imported in the type's package
-                if name in namespace_import:
-                    return namespace_import[name]
-        else:
-            # This is an FQN
-            if pkg == namespace.package.name:
-                # Check in the current package
-                if ns in namespace.package.typecollections:
-                    if name in namespace.package.typecollections[ns]:
-                        return namespace.package.typecollections[ns][name]
-            else:
-                # Look in typecollections of packages imported in the
-                #   type's package using FQNs.
-                for namespace_import in namespace.namespace_references:
-                    if (namespace_import.package.name == pkg) and \
-                            (namespace_import.name == ns) and \
-                            (name in namespace_import):
-                            return namespace_import[name]
+                resolved_namespace = namespace[name]
+                count += 1
+
+        # lock into visible namespaces
+        for ns_ref in namespace.namespace_references:
+            if pkg is not None:
+                if pkg != ns_ref.package.name:
+                    continue
+            if ns is not None:
+                if ns != ns_ref.name:
+                    continue
+
+            if name in ns_ref:
+                count += 1
+                resolved_namespace = ns_ref[name]
+
+        if count > 1:
+            raise ProcessorException(
+                "Reference '{}' is ambiguous.".format(fqn))
+
+        if resolved_namespace:
+            return resolved_namespace
+
         # Give up
         raise ProcessorException(
             "Unresolved reference '{}'.".format(fqn))
@@ -284,11 +294,29 @@ class Processor(object):
                     "Invalid interface reference '{}'.".format(
                         namespace.extends))
 
-    def _update_namespaces_references(self, package, imported_namespace):
+    def _update_imported_namespaces_references(self, package, imported_namespace):
         for package_namespace in package.typecollections.values():
             package_namespace.namespace_references.append(imported_namespace)
+
         for package_namespace in package.interfaces.values():
             package_namespace.namespace_references.append(imported_namespace)
+
+    def _update_namespaces_references(self, package):
+        # add all other namespaces in this package as reference to a namespace
+        for ns1 in package.typecollections.values():
+            for ns2 in package.typecollections.values():
+                if ns1 != ns2:
+                    ns1.namespace_references.append(ns2)
+                for ns3 in package.interfaces.values():
+                    ns1.namespace_references.append(ns3)
+
+        for ns1 in package.interfaces.values():
+            for ns2 in package.interfaces.values():
+                if ns1 != ns2:
+                    ns1.namespace_references.append(ns2)
+            for ns3 in package.typecollections.values():
+                ns1.namespace_references.append(ns3)
+
 
     def _update_package_references(self, package, imported_package, package_import):
         """
@@ -318,7 +346,7 @@ class Processor(object):
                     package_import.namespace_reference = imported_namespace
 
                     # reference namespace from imported package to all namespaces in this package
-                    self._update_namespaces_references(package, imported_namespace)
+                    self._update_imported_namespaces_references(package, imported_namespace)
 
             for imported_namespace in imported_package.interfaces.values():
                 if (imported_namespace.name == ns) and (imported_namespace.package.name == p):
@@ -326,7 +354,7 @@ class Processor(object):
                     package_import.namespace_reference = imported_namespace
 
                     # reference namespace from imported package to all namespaces in this package
-                    self._update_namespaces_references(package, imported_namespace)
+                    self._update_imported_namespaces_references(package, imported_namespace)
             if not found:
                 raise ProcessorException(
                     "Namespace '{}' not found.".format(
@@ -334,9 +362,9 @@ class Processor(object):
         else:
             # model import -> import all namespaces
             for imported_namespace in imported_package.typecollections.values():
-                self._update_namespaces_references(package, imported_namespace)
+                self._update_imported_namespaces_references(package, imported_namespace)
             for imported_namespace in imported_package.interfaces.values():
-                self._update_namespaces_references(package, imported_namespace)
+                self._update_imported_namespaces_references(package, imported_namespace)
 
     def import_package(self, fspec, package, references=None):
         """
@@ -367,6 +395,8 @@ class Processor(object):
             imported_package = self.import_file(
                 package_import.file, references + [abs_fspec], fspec_dir)
             self._update_package_references(package, imported_package, package_import)
+
+        self._update_namespaces_references(package)
 
         for namespace in package.typecollections:
             self._update_namespace_references(
