@@ -841,3 +841,60 @@ class TestReferences(BaseTestCase):
         self.assertEqual(self.processor.packages['P'].interfaces["I"].methods["getData"].
                          out_args["out_t2"].type.reference.namespace.name, "T2")
 
+    def test_type_notations(self):
+            self.tmp_fidl("test.fidl", """
+                package P
+                typeCollection TC {
+                    typedef A is Int32
+                }
+            """)
+            fspec = self.tmp_fidl("test2.fidl", """
+                package P2
+                import P.TC.* from "test.fidl"
+                typeCollection TC2 {
+                    typedef A2 is UInt32
+                }
+                interface I {
+                    typedef B is P2.TC2.A2
+                    typedef B2 is P.TC.A
+
+                    typedef C is TC2.A2
+                    typedef C2 is TC.A
+
+                    typedef D is A2
+                    typedef D2 is A
+                }
+            """)
+            self.processor.import_file(fspec)
+
+            a = self.processor.packages["P"].typecollections["TC"].typedefs["A"]
+            self.assertTrue(isinstance(a.type, ast.Int32))
+            a2 = self.processor.packages["P2"].typecollections["TC2"].typedefs["A2"]
+            self.assertTrue(isinstance(a2.type, ast.UInt32))
+            b = self.processor.packages["P2"].interfaces["I"].typedefs["B"]
+            self.assertTrue(isinstance(b.type, ast.Reference))
+            self.assertEqual(b.type.name, "A2")
+            self.assertEqual(b.type.reference, a2)
+            b2 = self.processor.packages["P2"].interfaces["I"].typedefs["B2"]
+            self.assertTrue(isinstance(b2.type, ast.Reference))
+            self.assertEqual(b2.type.name, "A")
+            self.assertEqual(b2.type.reference, a)
+
+            b = self.processor.packages["P2"].interfaces["I"].typedefs["C"]
+            self.assertTrue(isinstance(b.type, ast.Reference))
+            self.assertEqual(b.type.name, "A2")
+            self.assertEqual(b.type.reference, a2)
+            b2 = self.processor.packages["P2"].interfaces["I"].typedefs["C2"]
+            self.assertTrue(isinstance(b2.type, ast.Reference))
+            self.assertEqual(b2.type.name, "A")
+            self.assertEqual(b2.type.reference, a)
+
+            b = self.processor.packages["P2"].interfaces["I"].typedefs["D"]
+            self.assertTrue(isinstance(b.type, ast.Reference))
+            self.assertEqual(b.type.name, "A2")
+            self.assertEqual(b.type.reference, a2)
+            b2 = self.processor.packages["P2"].interfaces["I"].typedefs["D2"]
+            self.assertTrue(isinstance(b2.type, ast.Reference))
+            self.assertEqual(b2.type.name, "A")
+            self.assertEqual(b2.type.reference, a)
+
