@@ -223,13 +223,12 @@ class Processor(object):
         elif isinstance(name, ast.ComplexType):
             self._update_complextype_references(name)
         elif isinstance(name, ast.Reference):
-            if not name.namespace:
-                name.namespace = namespace
             if not name.reference:
                 resolved_name = self.resolve(namespace, name.name)
                 name.reference = resolved_name
+                name.namespace = resolved_name.namespace
 
-                # remove package and namespcae from fqn.
+                # remove package and namespace from fqn.
                 # it is not necessary anymore -> information is preserved in the reference
                 pkg, ns, type_name = Processor.split_fqn(name.name)
                 name.name = type_name
