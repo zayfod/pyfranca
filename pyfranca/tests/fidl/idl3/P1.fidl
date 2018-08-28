@@ -1,0 +1,15 @@
+package P
+
+import P.T1.* from "common.fidl"
+
+
+interface I1 {
+	version { major 1 minor 0 }
+
+	method sendData
+	{
+		in {
+              T1Enum data1
+           }
+	}
+}

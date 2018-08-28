@@ -1,0 +1,7 @@
+
+            package P
+            interface I {
+                enumeration E { A B C }
+                enumeration E2 extends E { A E F }
+            }
+        

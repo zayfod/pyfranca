@@ -103,6 +103,7 @@ class Namespace(object):
         self.maps = OrderedDict()
         self.constants = OrderedDict()
         self.comments = comments if comments else OrderedDict()
+        self.namespace_references = []
         if members:
             for member in members:
                 self._add_member(member)
