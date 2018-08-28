@@ -504,6 +504,25 @@ class TestReferences(BaseTestCase):
         self.assertTrue(isinstance(me, ast.Reference))
         self.assertEqual(me.reference, e)
 
+    def test_method_nameless_error(self):
+        fspec = self.tmp_fidl("test.fidl", """
+            package P
+            interface I {
+                method M { error { A B C }  }
+            }
+        """)
+        self.processor.import_file(fspec)
+
+        m = self.processor.packages["P"].interfaces["I"].methods["M"]
+        me = m.errors
+        self.assertTrue(isinstance(me['A'], ast.Enumerator))
+        self.assertTrue(isinstance(me['B'], ast.Enumerator))
+        self.assertTrue(isinstance(me['C'], ast.Enumerator))
+
+        self.assertEqual(me['A'].name, "A")
+        self.assertEqual(me['B'].name, "B")
+        self.assertEqual(me['C'].name, "C")
+
     def test_invalid_method_error_reference(self):
         with self.assertRaises(ProcessorException) as context:
             fspec = self.tmp_fidl("test.fidl", """
@@ -545,6 +564,20 @@ class TestReferences(BaseTestCase):
 
         self.assertEqual(str(context.exception),
                          "Invalid enumeration reference 'E'.")
+
+    def test_invalid_enumeration_extension2(self):
+        fspec = self.tmp_fidl("test.fidl", """
+            package P
+            interface I {
+                enumeration E { A B C }
+                enumeration E2 extends E { A E F }
+            }
+        """)
+        self.processor.import_file(fspec)
+
+        e = self.processor.packages["P"].interfaces["I"].enumerations["E"]
+        e2 = self.processor.packages["P"].interfaces["I"].enumerations["E2"]
+        self.assertEqual(e2.reference, e)
 
     def test_struct_extension(self):
         fspec = self.tmp_fidl("test.fidl", """
