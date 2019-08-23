@@ -264,7 +264,7 @@ class Parser(object):
         """
         try:
             p[0] = ast.Interface(name=p[3], flags=None, members=p[5],
-                                 extends=None, comments=p[1])
+                                 extends=None, manages=None, comments=p[1])
         except ast.ASTException as e:
             raise ParserException(e.message)
 
@@ -276,9 +276,45 @@ class Parser(object):
         """
         try:
             p[0] = ast.Interface(name=p[3], flags=None, members=p[7],
-                                 extends=p[5], comments=p[1])
+                                 extends=p[5], manages=None, comments=p[1])
         except ast.ASTException as e:
             raise ParserException(e.message)
+
+    @staticmethod
+    def p_interface_3(p):
+        """
+        def : structured_comment INTERFACE ID MANAGES interface_ids '{' interface_members '}'
+        """
+        try:
+            p[0] = ast.Interface(name=p[3], flags=None, members=p[7], manages=p[5],
+                                 extends=None, comments=p[1])
+        except ast.ASTException as e:
+            raise ParserException(e.message)
+
+    @staticmethod
+    def p_interface_ids_1(p):
+        """
+        interface_ids : empty
+        """
+        pass
+
+    @staticmethod
+    def p_interface_ids_2(p):
+        """
+        interface_ids : fqn
+        """
+        try:
+            p[0] = [ast.Interface(name=p[1], flags=None, members=None, manages=None, extends=None, comments=None)]
+        except ast.ASTException as e:
+            raise ParserException(e.message)
+
+    @staticmethod
+    def p_interface_ids_3(p):
+        """
+        interface_ids : interface_ids ',' fqn
+        """
+        p[0] = p[1]
+        p[0].append(ast.Interface(name=p[3], flags=None, members=None, manages=None, extends=None, comments=None))
 
     # noinspection PyIncorrectDocstring
     @staticmethod
