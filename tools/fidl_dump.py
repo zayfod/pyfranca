@@ -7,7 +7,7 @@ from pyfranca import Processor, LexerException, ParserException, \
 
 def dump_comments(item, prefix):
     for key, value in item.comments.items():
-        print (prefix + key + ": " + value)
+        print(prefix + key + ": " + value)
 
 
 def dump_namespace(namespace):

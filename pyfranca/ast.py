@@ -415,13 +415,17 @@ class Reference(Type):
 
 class Interface(Namespace):
 
-    def __init__(self, name, flags=None, members=None, extends=None, comments=None):
+    def __init__(self, name, flags=None, members=None, extends=None, manages=None, comments=None):
         super(Interface, self).__init__(name=name, flags=flags, members=None, comments=comments)
         self.attributes = OrderedDict()
         self.methods = OrderedDict()
         self.broadcasts = OrderedDict()
         self.extends = extends
         self.reference = None
+        self.manages = OrderedDict()
+        if manages:
+            for interface in manages:
+                self._add_member(interface)
         if members:
             for member in members:
                 self._add_member(member)
@@ -432,7 +436,8 @@ class Interface(Namespace):
         res = super(Interface, self).__contains__(name) or \
             name in self.attributes or \
             name in self.methods or \
-            name in self.broadcasts
+            name in self.broadcasts or \
+            name in self.manages
         return res
 
     def __getitem__(self, name):
@@ -444,6 +449,8 @@ class Interface(Namespace):
             return self.methods[name]
         elif name in self.broadcasts:
             return self.broadcasts[name]
+        elif name in self.manages:
+            return self.manages[name]
         else:
             return super(Interface, self).__getitem__(name)
 
@@ -475,6 +482,8 @@ class Interface(Namespace):
             else:
                 super(Interface, self)._add_member(member)
             member.namespace = self
+        elif isinstance(member, Interface):
+            self.manages[member.name] = member
         else:
             super(Interface, self)._add_member(member)
 

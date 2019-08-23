@@ -46,6 +46,7 @@ class Lexer(object):
         "enumeration",
         "extends",
         "struct",
+        "manages",
         "polymorphic",
         "array",
         "of",
@@ -86,7 +87,7 @@ class Lexer(object):
     t_ignore = " \t"
 
     # Literals
-    literals = [".", "{", "}", "*", "=", "[", "]"]
+    literals = [".", "{", "}", "*", "=", "[", "]", ","]
 
     # Identifiers and keywords
     _keyword_map = {}

@@ -604,6 +604,16 @@ class TestFrancaUserManualExamples(BaseTestCase):
             }
         """)
 
+    def test_manages(self):
+        self._assertParse("""
+            package P
+            interface A { version {major 1 minor 0} }
+            interface B { version {major 1 minor 0} }
+            interface ExampleInterface manages A,B {
+                version {major 1 minor 0}
+            }
+        """)
+
 
 class TestMisc(BaseTestCase):
     """Test parsing various FIDL examples."""
@@ -763,7 +773,9 @@ class TestInterfaces(BaseTestCase):
     def test_normal(self):
         package = self._assertParse("""
             package P
-            interface I {
+            interface A { version { major 1 minor 0 } }
+            interface B { version { major 1 minor 0 } }
+            interface I manages A,B {
                 version { major 12 minor 34 }
                 method add {
                     in {
@@ -790,6 +802,7 @@ class TestInterfaces(BaseTestCase):
         self.assertEqual(len(i.maps), 0)
         self.assertEqual(len(i.attributes), 0)
         self.assertEqual(len(i.methods), 1)
+        self.assertEqual(len(i.manages), 2)
         self.assertEqual(len(i.broadcasts), 0)
         self.assertIsNone(i.extends)
         i2 = package.interfaces["I2"]

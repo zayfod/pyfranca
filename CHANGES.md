@@ -2,6 +2,9 @@
 Revision History
 ================
 
+v0.4.2 (Aug , 2019)
+- Add manages keyword support
+
 v0.4.1 (Oct 5, 2017)
 --------------------
 - Moved API documentation to http://pyfranca.readthedocs.io/ .
