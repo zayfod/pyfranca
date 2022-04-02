@@ -68,7 +68,7 @@ class Parser(object):
         Parse a structured comment.
 
         :param comment: Structured comment of an Franca-IDL symbol to parse.
-        :return: OrderedDict of all comments. Key is Franca-IDL keyword, e.g. @description, value conatins the text.
+        :return: OrderedDict of all comments. Key is Franca-IDL keyword, e.g. @description, value contains the text.
         """
         keys = ['@description', '@author', '@deprecated', '@source_uri', '@source_alias', '@see', '@experimental']
 
