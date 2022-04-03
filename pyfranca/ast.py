@@ -380,6 +380,7 @@ class Struct(ComplexType):
         self.reference = None
         self.flags = flags if flags else []
 
+
 class Union(ComplexType):
 
     def __init__(self, name, fields=None, extends=None, flags=None):
@@ -390,6 +391,7 @@ class Union(ComplexType):
         self.reference = None
         self.flags = flags if flags else []
 
+
 class StructField(object):
 
     def __init__(self, name, field_type, comments=None):
@@ -397,11 +399,13 @@ class StructField(object):
         self.type = field_type
         self.comments = comments if comments else OrderedDict()
 
+
 class UnionField(object):
 
     def __init__(self, name, field_type):
         self.name = name
         self.type = field_type
+
 
 class Array(ComplexType):
 
