@@ -565,6 +565,9 @@ class TestReferences(BaseTestCase):
                 array ATDA of TD[]
                 struct S { TD[] tda }
                 map M { TD[] to TD[] }
+                union U {S s}
+                union UE extends U {ATDA a}
+                const String foo = "bar"
             }
             interface I {
                 attribute TD[] A
@@ -583,6 +586,12 @@ class TestReferences(BaseTestCase):
         m = tc.maps["M"]
         self.assertEqual(m.key_type.type.reference, td)
         self.assertEqual(m.value_type.type.reference, td)
+        u = tc.unions["U"]
+        self.assertEqual(u.fields["s"].name,"s")
+        self.assertEqual(u.fields["s"].type.name,"S")
+        ue = tc.unions["UE"]
+        self.assertEqual(ue.fields["a"].name,"a")
+        self.assertEqual(ue.fields["a"].type.name,"ATDA")
         i = self.processor.packages["P"].interfaces["I"]
         a = i.attributes["A"]
         self.assertEqual(a.type.type.reference, td)

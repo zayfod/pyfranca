@@ -589,17 +589,17 @@ class Parser(object):
     @staticmethod
     def p_union_def_1(p):
         """
-        union_def : UNION ID flag_defs '{' union_fields '}'
+        union_def : structured_comment UNION ID '{' union_fields '}'
         """
-        p[0] = ast.Union(name=p[2], fields=p[5], flags=p[3])
+        p[0] = ast.Union(name=p[3], fields=p[5], comments=p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod
     def p_union_def_2(p):
         """
-        union_def : UNION ID EXTENDS fqn '{' union_fields '}'
+        union_def : structured_comment UNION ID EXTENDS fqn '{' union_fields '}'
         """
-        p[0] = ast.Union(name=p[2], fields=p[6], extends=p[4])
+        p[0] = ast.Union(name=p[3], fields=p[7], extends=p[5], comments=p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod

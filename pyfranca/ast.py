@@ -383,8 +383,8 @@ class Struct(ComplexType):
 
 class Union(ComplexType):
 
-    def __init__(self, name, fields=None, extends=None, flags=None):
-        super(Union, self).__init__()
+    def __init__(self, name, fields=None, extends=None, flags=None, comments=None):
+        super(Union, self).__init__(comments=comments)
         self.name = name
         self.fields = fields if fields else OrderedDict()
         self.extends = extends
@@ -402,9 +402,10 @@ class StructField(object):
 
 class UnionField(object):
 
-    def __init__(self, name, field_type):
+    def __init__(self, name, field_type, comments=None):
         self.name = name
         self.type = field_type
+        self.comments = comments if comments else OrderedDict()
 
 
 class Array(ComplexType):
