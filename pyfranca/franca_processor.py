@@ -234,7 +234,8 @@ class Processor(object):
                     # fails on arg.type.  Why?  Trying to workaround
                     try:
                         self._update_type_references(name.namespace, arg.type)
-                    except ProcessorException:
+                    except (ProcessorException, AttributeError) as e:
+                        print(e)
                         pass
             elif isinstance(name.errors, ast.Reference):
                 # Errors can be a reference to an enumeration
