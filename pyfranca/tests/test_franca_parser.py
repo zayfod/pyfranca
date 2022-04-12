@@ -454,21 +454,6 @@ class TestUnsupported(BaseTestCase):
         self.assertEqual(str(context.exception),
                          "Syntax error at line 5 near 'Array1'.")
 
-    def test_unions(self):
-        """Franca 0.9.2, section 5.1.6"""
-        with self.assertRaises(ParserException) as context:
-            self._parse("""
-                package P
-                typeCollection TC {
-                    union ExampleUnion {
-                        UInt32 element1
-                        Float element2
-                    }
-                }
-            """)
-        self.assertEqual(str(context.exception),
-                         "Syntax error at line 4 near 'union'.")
-
     def test_error_extending(self):
         """Franca 0.9.2, section 5.5.3"""
         with self.assertRaises(ParserException) as context:
@@ -649,6 +634,15 @@ class TestMisc(BaseTestCase):
                 struct S3 polymorphic {}
 
                 array A of UInt8
+
+                union U {
+                    MyThis m
+                }
+
+                struct SU {
+                    U u
+                    Int32[] b
+                }
 
                 map M {
                     String to Int32
@@ -1325,3 +1319,68 @@ class TestConstants(BaseTestCase):
         """)
         self.assertEqual(str(context.exception),
                          "Syntax error at line 4 near 'UInt32'.")
+
+class TestUnions(BaseTestCase):
+    """Test parsing Unions."""
+
+    def test_union_normal(self):
+        package = self._assertParse("""
+            package P
+            typeCollection TC {
+                union U {
+                    UInt32 element1
+                    Float element2
+                }
+            }
+        """)
+
+        typecollection = package.typecollections["TC"]
+        u = typecollection.unions["U"]
+        self.assertEqual(u.namespace, typecollection)
+        self.assertEqual(u.name, "U")
+        self.assertIsNone(u.extends)
+        self.assertEqual(u.flags, [])
+        self.assertEqual(len(u.fields), 2)
+        uu = u.fields["element1"]
+        self.assertEqual(uu.name, "element1")
+        self.assertEqual(uu.type.name, 'UInt32')
+        uu = u.fields["element2"]
+        self.assertEqual(uu.name, "element2")
+        self.assertEqual(uu.type.name, 'Float')
+
+    def test_union_extended(self):
+        package = self._assertParse("""
+            package P
+            typeCollection TC {
+                union U {
+                    UInt32 element1
+                    Float element2
+                }
+                union E extends U {
+                    UInt16 element3
+                }
+            }
+        """)
+        typecollection = package.typecollections["TC"]
+        u = typecollection.unions["U"]
+        self.assertEqual(u.namespace, typecollection)
+        self.assertEqual(u.name, "U")
+        self.assertIsNone(u.extends)
+        self.assertEqual(u.flags, [])
+        self.assertEqual(len(u.fields), 2)
+        uu = u.fields["element1"]
+        self.assertEqual(uu.name, "element1")
+        self.assertEqual(uu.type.name, 'UInt32')
+        uu = u.fields["element2"]
+        self.assertEqual(uu.name, "element2")
+        self.assertEqual(uu.type.name, 'Float')
+
+        ue = typecollection.unions["E"]
+        self.assertEqual(ue.namespace, typecollection)
+        self.assertEqual(ue.name, "E")
+        self.assertEqual(ue.extends, "U")
+        self.assertEqual(ue.flags, [])
+        self.assertEqual(len(ue.fields), 1)
+        uue = ue.fields["element3"]
+        self.assertEqual(uue.name, "element3")
+        self.assertEqual(uue.type.name, 'UInt16')

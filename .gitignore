@@ -12,5 +12,6 @@
 /dist/
 /MANIFEST
 /*.egg-info/
+/.eggs/
 
 .coverage

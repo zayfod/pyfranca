@@ -68,7 +68,7 @@ class Parser(object):
         Parse a structured comment.
 
         :param comment: Structured comment of an Franca-IDL symbol to parse.
-        :return: OrderedDict of all comments. Key is Franca-IDL keyword, e.g. @description, value conatins the text.
+        :return: OrderedDict of all comments. Key is Franca-IDL keyword, e.g. @description, value contains the text.
         """
         keys = ['@description', '@author', '@deprecated', '@source_uri', '@source_alias', '@see', '@experimental']
 
@@ -234,6 +234,7 @@ class Parser(object):
                               | type_def
                               | enumeration_def
                               | struct_def
+                              | union_def
                               | array_def
                               | map_def
                               | constant_def
@@ -316,6 +317,7 @@ class Parser(object):
                          | type_def
                          | enumeration_def
                          | struct_def
+                         | union_def
                          | array_def
                          | map_def
                          | constant_def
@@ -585,6 +587,22 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
+    def p_union_def_1(p):
+        """
+        union_def : structured_comment UNION ID '{' union_fields '}'
+        """
+        p[0] = ast.Union(name=p[3], fields=p[5], comments=p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_union_def_2(p):
+        """
+        union_def : structured_comment UNION ID EXTENDS fqn '{' union_fields '}'
+        """
+        p[0] = ast.Union(name=p[3], fields=p[7], extends=p[5], comments=p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
     def p_struct_fields_1(p):
         """
         struct_fields : struct_fields struct_field
@@ -615,11 +633,49 @@ class Parser(object):
 
     # noinspection PyIncorrectDocstring
     @staticmethod
-    def p_struct_field(p):
+    def p_struct_field_1(p):
         """
         struct_field : structured_comment type ID
         """
         p[0] = ast.StructField(name=p[3], field_type=p[2], comments=p[1])
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_union_fields_1(p):
+        """
+        union_fields : union_fields union_field
+        """
+        p[0] = p[1]
+        if p[2].name not in p[0]:
+            p[0][p[2].name] = p[2]
+        else:
+            raise ParserException(
+                "Duplicate union field '{}'.".format(p[2].name))
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_union_fields_2(p):
+        """
+        union_fields : union_field
+        """
+        p[0] = OrderedDict()
+        p[0][p[1].name] = p[1]
+
+    # noinspection PyUnusedLocal, PyIncorrectDocstring
+    @staticmethod
+    def p_union_fields_3(p):
+        """
+        union_fields : empty
+        """
+        pass
+
+    # noinspection PyIncorrectDocstring
+    @staticmethod
+    def p_union_field_1(p):
+        """
+        union_field : type ID
+        """
+        p[0] = ast.UnionField(name=p[2], field_type=p[1])
 
     # noinspection PyIncorrectDocstring
     @staticmethod

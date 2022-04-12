@@ -183,6 +183,15 @@ class Processor(object):
                     raise ProcessorException(
                         "Invalid struct reference '{}'.".format(
                             name.extends))
+        elif isinstance(name, ast.Union):
+            for field in name.fields.values():
+                self._update_type_references(name.namespace, field.type)
+            if name.extends:
+                name.reference = self.resolve(name.namespace, name.extends)
+                if not isinstance(name.reference, ast.Union):
+                    raise ProcessorException(
+                        "Invalid union reference '{}'.".format(
+                            name.extends))
         elif isinstance(name, ast.Array):
             self._update_type_references(name.namespace, name.type)
         elif isinstance(name, ast.Map):
@@ -220,7 +229,14 @@ class Processor(object):
             for arg in name.out_args.values():
                 self._update_type_references(name.namespace, arg.type)
             if isinstance(name.errors, OrderedDict):
-                pass
+                for arg in name.errors.values():
+                    # I end up here also when it's an Enumeration so it
+                    # fails on arg.type.  Why?  Trying to workaround
+                    try:
+                        self._update_type_references(name.namespace, arg.type)
+                    except (ProcessorException, AttributeError) as e:
+                        print(e)
+                        pass
             elif isinstance(name.errors, ast.Reference):
                 # Errors can be a reference to an enumeration
                 self._update_type_references(name.namespace, name.errors)
@@ -247,6 +263,8 @@ class Processor(object):
         for name in namespace.enumerations.values():
             self._update_type_references(namespace, name)
         for name in namespace.structs.values():
+            self._update_type_references(namespace, name)
+        for name in namespace.unions.values():
             self._update_type_references(namespace, name)
         for name in namespace.arrays.values():
             self._update_type_references(namespace, name)
